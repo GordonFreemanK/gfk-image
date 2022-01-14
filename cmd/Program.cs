@@ -28,16 +28,11 @@ try
 
     process.Start();
 
-    var standardError = await process.StandardError.ReadToEndAsync();
-
     await process.WaitForExitAsync();
 
-    if (standardError != string.Empty)
-    {
-        await logger.WriteLineAsync(standardError);
-    }
+    await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
 }
 catch (Exception e)
 {
-    await logger.WriteLineAsync($"Uncaught exception: {e.Message}");
+    await logger.WriteAsync($"Uncaught exception: {e.Message}");
 }

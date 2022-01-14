@@ -9,10 +9,14 @@ public class Logger
         _path = path;
     }
 
-    public async Task WriteLineAsync(string message)
+    public async Task WriteAsync(string message)
     {
-        await using var log = new StreamWriter(_path, true);
+        if (message != string.Empty)
+        {
+            await using var log = new StreamWriter(_path, true);
 
-        await log.WriteLineAsync($"{DateTime.UtcNow:s}\t{message}");
+            await log.WriteLineAsync($"{DateTime.UtcNow:s}");
+            await log.WriteLineAsync(message);
+        }
     }
 }
