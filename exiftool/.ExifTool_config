@@ -1,0 +1,58 @@
+#------------------------------------------------------------------------------
+# File:         .exiftool_config
+#
+# Description:  Configuration file for Image::ExifTool
+#
+# Notes:        To activate this file, rename it to ".ExifTool_config" and
+#               place it in your home directory or the exiftool application
+#               directory.  (On Mac and some Windows systems this must be done
+#               via the command line since the GUI's may not allow filenames to
+#               begin with a dot.  Use the "rename" command in Windows or "mv"
+#               on the Mac.)  This causes ExifTool to automatically load the
+#               file when run.  Your home directory is determined by the first
+#               defined of the following environment variables:
+#
+#                   1.  EXIFTOOL_HOME
+#                   2.  HOME
+#                   3.  HOMEDRIVE + HOMEPATH
+#                   4.  (the current directory)
+#
+#               Alternatively, the -config option of the exiftool application
+#               may be used to load a specific configuration file (note that
+#               this must be the first option on the command line):
+#
+#                   exiftool -config example.config ...
+#
+#               For detailed information on the definition of tag tables and
+#               tag information hashes, see lib/Image/ExifTool/README.
+#------------------------------------------------------------------------------
+
+# Shortcut tags are used when extracting information to simplify
+# commonly used commands.  They can be used to represent groups
+# of tags, or to provide an alias for a tag name.
+%Image::ExifTool::UserDefined::Shortcuts = (
+    Author => [
+        'EXIF:Artist',
+        'XMP-dc:Creator'],
+    Taken => [
+        'EXIF:ModifyDate',
+        'EXIF:OffsetTime',
+        'EXIF:DateTimeOriginal',
+        'EXIF:OffsetTimeOriginal',
+        'XMP-xmp:ModifyDate',
+        'XMP-exif:DateTimeOriginal',
+        'XMP-photoshop:DateCreated',
+        'XMP-tiff:DateTime',
+        'FileModifyDate'],
+    Digitized => [
+        'EXIF:CreateDate',
+        'EXIF:OffsetTimeDigitized',
+        'XMP-xmp:CreateDate',
+        'XMP-exif:DateTimeDigitized'],
+    Modified => [
+        'XMP-xmp:MetadataDate'
+    ],
+);
+
+#------------------------------------------------------------------------------
+1;  #end
