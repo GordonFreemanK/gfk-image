@@ -13,7 +13,4 @@ param (
     $Author
 )
 
-$ErrorActionPreference = 'Stop'
-$PSStyle.OutputRendering = [System.Management.Automation.OutputRendering]::PlainText
-
 exiftool -overwrite_original $FilePath -Modified<now '-Author<$AuthorParam' -userParam AuthorParam="$Author"

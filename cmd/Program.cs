@@ -31,8 +31,14 @@ try
     await process.WaitForExitAsync();
 
     await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
+
+    // By default PowerShell returns 0 for success and 1 for failure (can be overriden in code)
+    // digiKam interprets -1 as a failure and anything else a success
+    // This ensures that digiKam knows when the script fails
+    return process.ExitCode == 0 ? 0 : -1;
 }
 catch (Exception e)
 {
     await logger.WriteAsync($"Uncaught exception: {e.Message}");
+    return -1;
 }
