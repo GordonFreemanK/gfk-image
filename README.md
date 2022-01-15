@@ -51,7 +51,7 @@ C:\repos\digikam-scripts\scripts\Adjust-author.ps1 $destinationPath -Author $Env
 
 # External tools
 
-- [digiKam](https://www.digikam.org/) is a photo manager (C++, [source](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing collections of pictures using file operations, image transformations and metadata editing. One of its features is called BQM (Batch Queue Manager) and allows defining and batch-processing groups of pictures using a number of configurable plugins.
+- [digiKam](https://www.digikam.org/) is a photo manager (C++, [source](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing collections of pictures using file operations, image transformations and metadata editing. One of its features is called [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) and allows defining and batch-processing groups of pictures using a number of configurable plugins.
 
 One of these plugins is called **User Shell Script**: it enables the user to use a free text field to define a shell script to be run against the picture files. The script is transformed to an extent by digiKam and passed to the shell (`sh` on Linux and `cmd` on Windows).    
 
