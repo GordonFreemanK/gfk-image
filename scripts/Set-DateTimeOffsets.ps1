@@ -1,12 +1,19 @@
-# Script for digiKam with fake cmd
-# Run the following command in an admin console before running this script
-# Install-Package -Name GeoTimeZone -ProviderName NuGet -SkipDependencies -Confirm
-
-[CmdletBinding(PositionalBinding = $true)]
+<#
+.SYNOPSIS
+    Sets UTC offset tags on a photo file
+.DESCRIPTION
+    Uses GeoTimeZone and TimeZoneInfo to find the UTC offset at the location and time of the file
+    Sets the values in the Taken and Digitized ExifTool shortcut tags
+.EXAMPLE
+    PS C:\> Set-DateTimeOffsets.p1 C:\photos\photo1.jpg
+.NOTES
+    Run the following command in an admin console before running this script
+    Install-Package -Name GeoTimeZone -ProviderName NuGet -SkipDependencies -Confirm
+#>
+[CmdletBinding()]
 param (
-    [Parameter(Mandatory, Position=0)]
-    [string]
-    $FilePath
+    [Parameter(Mandatory, Position = 0)]
+    [string]$FilePath
 )
 
 $geoTimeZonePackage = Get-Package -Name GeoTimeZone
@@ -14,7 +21,19 @@ $geoTimeZonePackagePath = Split-Path $geoTimeZonePackage.Source -Parent
 $geoTimeZoneDllPath = Join-Path -Path $geoTimeZonePackagePath lib netstandard2.0 GeoTimeZone.dll
 Add-Type -Path $geoTimeZoneDllPath
 
-function Get-LocalDate([string]$Date, [string]$Latitude, [string]$Longitude) {
+function Get-LocalDate() {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory, Position = 0)]
+        [string]$Date,
+
+        [Parameter(Mandatory)]
+        [string]$Latitude,
+
+        [Parameter(Mandatory)]
+        [string]$Longitude
+    )
     # Assume the date is local
     $dateTime = [datetime]::Parse($Date)
 
@@ -33,7 +52,7 @@ $latitude, $longitude, $taken, $digitized = exiftool $FilePath -XMP-exif:GPSLati
 
 $takenLocal = Get-LocalDate -Date $taken -Latitude $latitude -Longitude $longitude
 # Note: If you do film photography the location where the pictures are digitized might be different from the location they are taken.
-# If you digitize all your pictures in the same time zone you might want to replace these variables by constant coordinates situated in that time zone.
+# If you digitize all your pictures in the same time zone you might want to replace these parameters by constant coordinates situated in that time zone.
 $digitizedLocal = Get-LocalDate -Date $digitized -Latitude $latitude -Longitude $longitude
 
 exiftool -overwrite_original $FilePath -Modified<now '-Taken<$TakenParam' '-Digitized<$DigitizedParam' -userParam TakenParam="$takenLocal" -userParam DigitizedParam="$digitizedLocal"

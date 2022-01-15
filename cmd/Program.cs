@@ -6,8 +6,7 @@ var logger = new Logger(logPath);
 
 try
 {
-    var scriptBuilder = new ScriptBuilder();
-    var script = scriptBuilder.GetScript(args);
+    var script = ScriptBuilder.GetScript(args);
 
     var processStartInfo = new ProcessStartInfo
     {

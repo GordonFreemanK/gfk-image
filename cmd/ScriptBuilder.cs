@@ -2,9 +2,9 @@ using System.Text;
 
 namespace cmd;
 
-public class ScriptBuilder
+public static class ScriptBuilder
 {
-    public string GetScript(IEnumerable<string> commandArguments)
+    public static string GetScript(IEnumerable<string> commandArguments)
     {
         var script = new StringBuilder();
 
