@@ -35,20 +35,20 @@
         'EXIF:Artist',
         'XMP-dc:Creator'],
     Taken => [
-        'EXIF:ModifyDate',
-        'EXIF:OffsetTime',
-        'EXIF:DateTimeOriginal',
-        'EXIF:OffsetTimeOriginal',
+        'EXIF:ModifyDate', # used as the sort key by many applications
+        'EXIF:OffsetTime', # offset for ModifyDate
+        'EXIF:DateTimeOriginal', # date taken proper        
+        'EXIF:OffsetTimeOriginal', # offset for DateTimeOriginal
         'XMP-xmp:ModifyDate',
         'XMP-exif:DateTimeOriginal',
         'XMP-photoshop:DateCreated',
         'XMP-tiff:DateTime',
         'FileModifyDate'],
     Digitized => [
-        'EXIF:CreateDate',
-        'EXIF:OffsetTimeDigitized',
+        'EXIF:CreateDate', # aka DateTimeDigitized in the EXIF spec
+        'EXIF:OffsetTimeDigitized', # offset for CreateDate
         'XMP-xmp:CreateDate',
-        'XMP-exif:DateTimeDigitized'],
+        'XMP-exif:DateTimeDigitized'], # replaced by CreateDate in the spec but still used by digiKam
     Modified => [
         'XMP-xmp:MetadataDate'
     ],
