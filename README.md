@@ -53,21 +53,21 @@ C:\repos\digikam-scripts\scripts\Adjust-author.ps1 $destinationPath -Author $Env
 
 - [digiKam](https://www.digikam.org/) is a photo manager (C++, [source](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing collections of pictures using file operations, image transformations and metadata editing. One of its features is called BQM (Batch Queue Manager) and allows defining and batch-processing groups of pictures using a number of configurable plugins.
 
-One of these plugins is called **User Shell Script**: it enables the user to use a free text field to define a shell script to be run against the picture files. The script is transformed to an extent by digiKam and passed to the shell (sh on Linux and cmd on Windows).
+One of these plugins is called **User Shell Script**: it enables the user to use a free text field to define a shell script to be run against the picture files. The script is transformed to an extent by digiKam and passed to the shell (`sh` on Linux and `cmd` on Windows).    
 
 - [ExifTool](https://exiftool.org/) is a command-line utility (Perl, [source](https://github.com/exiftool/exiftool)) to losslessly (without modifying the image itself) edit photo metadata (aka **EXIF/IPTC/XMP tags**), and is actually used by digiKam as well as many other photo management applications for all their metadata management needs.
 
 - [GeoTimeZone](https://www.nuget.org/packages/GeoTimeZone) is a [NuGet](https://www.nuget.org/) package (C#, [source](https://github.com/mattjohnsonpint/GeoTimeZone)) to get the timezone for a location. This is based on the offline data constructed from [OpenStreetMap](https://www.openstreetmap.org) data by the [Timezone Boundary Builder](https://github.com/evansiroky/timezone-boundary-builder) project.
 
-# Implementation explanations
+# Implementation
 
 ## Injecting `pwsh.exe`
 
-On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serialising it using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing it to the [Windows command prompt](https://en.wikipedia.org/wiki/Cmd.exe).
+On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serialising it using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to the [Windows command prompt](https://en.wikipedia.org/wiki/Cmd.exe).
 
-The `cmd.exe` rules about [argument passing](http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/) and [character escaping](https://fabianlee.org/2018/10/10/saltstack-escaping-dollar-signs-in-cmd-run-parameters-to-avoid-interpolation/) make it difficult to work with, in particular with the [high usage of special characters by the exiftool CLI](https://www.exiftool.org/exiftool_pod.html#WRITING-EXAMPLES), particularly double quotes.
+The `cmd.exe` rules about [argument passing](http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/) and [character escaping](https://fabianlee.org/2018/10/10/saltstack-escaping-dollar-signs-in-cmd-run-parameters-to-avoid-interpolation/) make it difficult to work with, in particular with the [high usage of special characters by the exiftool CLI](https://www.exiftool.org/exiftool_pod.html#WRITING-EXAMPLES), including double quotes.
 
-To circumvent this issue we create a standalone executable called `cmd.exe` which is really an application that takes all the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core). This executable is then copied to the digiKam application folder where it will take precedence over the actual Windows command prompt executable.
+To circumvent this issue we create a standalone executable called `cmd.exe` which is really a .net application that takes all the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core). This executable is then copied to the digiKam application folder where it will take precedence over the actual Windows command prompt executable.
 
 We are now able to use PowerShell in the User Shell Script plugin. To avoid the user-defined code in the plugin being too complex, we create a skeleton PowerShell boostrapper which calls external PowerShell scripts.
 
@@ -86,7 +86,7 @@ Provided in this repository are two such external scripts:
 
 - **digiKam metadata writing needs to be disabled for the fields you modify with these scripts** (unselect the relevant sections in `Settings > Configure digiKam... > Metadata > Behaviour > Write This Information to the Metadata`), or they will be overwritten after the batch script runs.
 
-- before sending it to the shell, the plugin respectively replaces the terms `$INPUT` and `$OUTPUT` with the path of the file currently in the library, and the path of a temporary file created in the same directory, and if either term is surrounded by double quotes, those get replaced as well. This is why there are *double double* quotes in the script. Double quoted strings in PowerShell *do* perform interpolation so **in the event that the original file path includes `$` or a ` ` ` the process will fail** for that particular file.
+- before sending it to the shell, the plugin respectively replaces the terms `$INPUT` and `$OUTPUT` with the path of the file currently in the library, and the path of a temporary file created in the same directory, and if either term is surrounded by double quotes, those get replaced as well. This is why there are *double double* quotes in the bootstrapper script. Double quoted strings in PowerShell *do* perform interpolation so **in the event that the original file path includes `$` or a backtick (`) the process will fail** for that particular file.
 
 - the output file is created empty by digiKam before the User Shell script is called. This is why having a simple command such as `exiftool '$INPUT' -o '$OUTPUT' -All=` fails with *file already exists*. In our user shell script we overwrite the empty output file by calling `Copy-Item` before running other scripts.
 
@@ -104,12 +104,12 @@ In the absence of an equivalent PowerShell module on the official repository, Ge
 
 ### 3. Calculate the offset for the timezone at a specific date/time
 
-We use the .net framework [TimeZoneInfo](https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo) class to get the offset for a specific timezone and date.
+We use the .net class [TimeZoneInfo](https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo) to get the offset for a specific timezone and date.
 The date in the EXIF tag is assumed to be local.
 
 ### 4. Store the date/time and offset in the relevant fields.
 
-From a local date and an offset, a full date is constructed in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`).
+From a local date/time and an offset, a full date is constructed in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`).
 
 There are multiple types of date/time tags in the metadata:
 - XMP stores the date+time+offset in a single tag (e.g. `XMP-exif:DateTimeOriginal`)
@@ -129,11 +129,11 @@ In this configuration file, we create custom [shortcuts tags](https://www.exifto
 The following shortcut tags are created by this repository, change them as needed:
 - `Author`: author of the picture
 - `Taken`: date the picture was taken
-- `Digitized`: date the picture was digitized (expected to be different for film photography, expected to be same for digital photography)
+- `Digitized`: date the picture was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
 - `Modified`: date the picture was modified
 
 **Note:** shortcut tags cannot be set with the `=` operator and need to be set with the `<` operator. In turn, the `<` operator does not play well with constant values when they contain special characters such as `$`. It is easier to use the [`-userParam` option](https://exiftool.org/exiftool_pod.html#Advanced-options) for assigning constant values to shortcut tags.
 
 ## Unicode with ExifTool on Windows
 
-The only way I found to make the combination of PowerShell and exiftool fully compatible (read and write) with UTF-8 characters is by setting the system locale to UTF-8. This comes with a lot of fine print, how-to and caveats [here](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797).
+The only way I found to make the combination of PowerShell and exiftool fully compatible (read and write) with UTF-8 characters is by setting the system locale to UTF-8. This comes with a lot of fine print. How-to and caveats can be found [here](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797).

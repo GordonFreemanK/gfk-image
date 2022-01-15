@@ -14,7 +14,7 @@ public class ScriptBuilder
             if (string.Equals(commandArgument, "/C", StringComparison.OrdinalIgnoreCase) && script.Length == 0)
                 continue;
 
-            if (commandArgument == "&")
+            if (string.Equals(commandArgument, "&", StringComparison.OrdinalIgnoreCase))
             {
                 script.AppendLine();
                 newLine = true;
