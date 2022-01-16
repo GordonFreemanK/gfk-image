@@ -30,12 +30,18 @@ Copy-Item exiftool\.Exiftool_config ~
 
 ## Create a fake cmd.exe and copy it to digiKam's folder
 ```
-dotnet publish -p:PublishSingleFile=true -p:DebugType=none -r win-x64 -c Release --sc -o 'C:\Program Files\digiKam\'
+dotnet publish cmd -p:PublishSingleFile=true -p:DebugType=none -r win-x64 -c Release --sc -o 'C:\Program Files\digiKam\'
 ```
 
 ## Install GeoTimeZone in PowerShell
 ```
 Install-Package -Name GeoTimeZone -ProviderName NuGet -SkipDependencies -Confirm
+```
+
+## Install the Tag PSProvider
+```
+dotnet publish GFK.PowerShell -p:DebugType=none -r win-x64 -c Release --sc -o GFK.PowerShell/pub
+Import-Module GFK.PowerShell/pub/GFK.PowerShell.dll
 ```
 
 ## Add the following in the User Shell Script window in digiKam
@@ -44,9 +50,14 @@ Replace paths to the git repository accordingly.
 $ErrorActionPreference = 'Stop'
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
+
+New-TagDrive $Env:TAGSPATH
+
 Copy-Item $sourcePath $destinationPath
 C:\repos\digikam-scripts\scripts\Set-DateTimeOffsets.ps1 $destinationPath
-C:\repos\digikam-scripts\scripts\Set-Author.ps1 $destinationPath -Author $Env:TAGSPATH
+
+$Author = @(Get-ChildItem Tags:/Author) -join ','
+C:\repos\digikam-scripts\scripts\Set-Author.ps1 $destinationPath -Author $Author
 ```
 
 # External tools
