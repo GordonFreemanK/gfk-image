@@ -2,9 +2,9 @@ using System.Text;
 
 namespace cmd;
 
-public class ScriptBuilder
+public static class ScriptBuilder
 {
-    public string GetScript(IEnumerable<string> commandArguments)
+    public static string GetScript(IEnumerable<string> commandArguments)
     {
         var script = new StringBuilder();
 
@@ -14,7 +14,7 @@ public class ScriptBuilder
             if (string.Equals(commandArgument, "/C", StringComparison.OrdinalIgnoreCase) && script.Length == 0)
                 continue;
 
-            if (commandArgument == "&")
+            if (string.Equals(commandArgument, "&", StringComparison.OrdinalIgnoreCase))
             {
                 script.AppendLine();
                 newLine = true;
