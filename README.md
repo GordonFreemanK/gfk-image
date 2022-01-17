@@ -50,13 +50,12 @@ Replace paths to the git repository accordingly.
 $ErrorActionPreference = 'Stop'
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
+C:\repos\digikam-scripts\scripts\New-TagDrive $Env:TAGSPATH
 
-New-TagDrive $Env:TAGSPATH
-
-Copy-Item $sourcePath $destinationPath
+cp $sourcePath $destinationPath
 C:\repos\digikam-scripts\scripts\Set-DateTimeOffsets.ps1 $destinationPath
 
-$Author = @(Get-ChildItem Tags:/Author | Select-Object -ExpandProperty Name) -join ','
+$Author = (ls Tag:/Author).Name -join ';'
 C:\repos\digikam-scripts\scripts\Set-Author.ps1 $destinationPath -Author $Author
 ```
 
