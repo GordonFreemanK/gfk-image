@@ -133,7 +133,7 @@ public class TagProvider : NavigationCmdletProvider
         var cleanPath = GetCleanPath(path);
         var tag = TagDrive.NewTag(cleanPath);
         
-        WriteItemObject(tag, path, true);
+        WriteItemObject(tag.Name, path, true);
     }
 
     protected override void RemoveItem(string path, bool recurse)
@@ -172,7 +172,7 @@ public class TagProvider : NavigationCmdletProvider
 
         foreach (var (tag, tagPath) in tags)
         {
-            WriteItemObject(tag, tagPath, true);
+            WriteItemObject(tag.Name, tagPath, true);
         }
     }
 
@@ -186,7 +186,7 @@ public class TagProvider : NavigationCmdletProvider
 
         foreach (var (tag, tagPath) in tags)
         {
-            WriteItemObject(tag, tagPath, true);
+            WriteItemObject(tag.Name, tagPath, true);
         }
     }
 
