@@ -19,6 +19,6 @@ param (
     [string]$Tags
 )
 
-New-PSDrive -Name Tag -PSProvider Tag -Root 'Tag:' -Scope Global
+New-PSDrive -Name Tags -PSProvider Tags -Root 'Tags:' -Scope Global
 
-$Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tag:\$_" }
+$Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" }

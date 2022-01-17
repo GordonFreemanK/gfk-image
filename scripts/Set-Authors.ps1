@@ -12,7 +12,7 @@ param (
     [string]$FilePath,
 
     [Parameter(Mandatory)]
-    [string]$Author
+    [string[]]$Authors
 )
 
-exiftool -overwrite_original $FilePath -Modified<now '-Author<$AuthorParam' -userParam AuthorParam="$Author"
+exiftool -overwrite_original $FilePath -Modified<now '-Authors<$AuthorsParam' -userParam AuthorsParam="${$Authors -join ';'}"

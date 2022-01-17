@@ -4,18 +4,18 @@ using System.Management.Automation.Provider;
 
 namespace GFK.PowerShell;
 
-[CmdletProvider("Tag", ProviderCapabilities.None)]
-public class TagProvider : NavigationCmdletProvider
+[CmdletProvider("Tags", ProviderCapabilities.None)]
+public class TagsProvider : NavigationCmdletProvider
 {
     public override char ItemSeparator => '\\';
 
-    private TagDrive TagDrive => (TagDrive)PSDriveInfo;
+    private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
 
     protected override bool IsValidPath(string path)
     {
         var cleanPath = GetCleanPath(path);
 
-        var isValidPath = TagDrive.IsValidPath(cleanPath);
+        var isValidPath = TagsDrive.IsValidPath(cleanPath);
 
         WriteWarning($"{nameof(IsValidPath)}(\"{path}\") => {isValidPath}");
 
@@ -24,12 +24,12 @@ public class TagProvider : NavigationCmdletProvider
 
     protected override PSDriveInfo NewDrive(PSDriveInfo drive)
     {
-        var tagDrive = new TagDrive(drive);
+        var tagsDrive = new TagsDrive(drive);
 
         WriteWarning(
-            $"{nameof(NewDrive)}(Root={drive.Root}) => TagDrive(Root={tagDrive.Root}, CurrentLocation={tagDrive.CurrentLocation})");
+            $"{nameof(NewDrive)}(Root={drive.Root}) => TagDrive(Root={tagsDrive.Root}, CurrentLocation={tagsDrive.CurrentLocation})");
 
-        return tagDrive;
+        return tagsDrive;
     }
 
     protected override PSDriveInfo RemoveDrive(PSDriveInfo drive)
@@ -43,7 +43,7 @@ public class TagProvider : NavigationCmdletProvider
     {
         var cleanPath = GetCleanPath(path);
 
-        var isValidPath = TagDrive.IsValidPath(cleanPath);
+        var isValidPath = TagsDrive.IsValidPath(cleanPath);
 
         WriteWarning($"{nameof(ItemExists)}(\"{path}\") => {isValidPath}");
 
@@ -54,7 +54,7 @@ public class TagProvider : NavigationCmdletProvider
     {
         var cleanPath = GetCleanPath(path);
 
-        var isValidPath = TagDrive.IsValidPath(cleanPath);
+        var isValidPath = TagsDrive.IsValidPath(cleanPath);
 
         WriteWarning($"{nameof(IsItemContainer)}(\"{path}\") => {isValidPath}");
 
@@ -131,7 +131,7 @@ public class TagProvider : NavigationCmdletProvider
         WriteWarning($"{nameof(NewItem)}(\"{path}\",\"{itemTypeName}\",\"{newItemValue}\")");
 
         var cleanPath = GetCleanPath(path);
-        var tag = TagDrive.NewTag(cleanPath);
+        var tag = TagsDrive.NewTag(cleanPath);
         
         WriteItemObject(tag.Name, path, true);
     }
@@ -166,7 +166,7 @@ public class TagProvider : NavigationCmdletProvider
 
     protected override void GetChildItems(string path, bool recurse, uint depth)
     {
-        var tags = TagDrive.GetChildTags(path, recurse ? depth : 0);
+        var tags = TagsDrive.GetChildTags(path, recurse ? depth : 0);
         
         WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse},{depth}) => {tags.Count}");
 
@@ -178,7 +178,7 @@ public class TagProvider : NavigationCmdletProvider
 
     protected override void GetChildItems(string path, bool recurse)
     {
-        var tags = TagDrive.GetChildTags(path, recurse ? default(uint?) : 0);
+        var tags = TagsDrive.GetChildTags(path, recurse ? default(uint?) : 0);
         
         WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse}) => {tags.Count}");
 
@@ -368,7 +368,7 @@ public class TagProvider : NavigationCmdletProvider
     private void NewItem(string path)
     {
         var cleanPath = GetCleanPath(path);
-        TagDrive.NewTag(cleanPath);
+        TagsDrive.NewTag(cleanPath);
     }
 
     private string GetCleanPath(string path)

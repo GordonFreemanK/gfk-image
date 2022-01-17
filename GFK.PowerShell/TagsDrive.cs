@@ -2,12 +2,12 @@
 
 namespace GFK.PowerShell;
 
-public class TagDrive : PSDriveInfo
+public class TagsDrive : PSDriveInfo
 {
     private readonly Tag _rootTag;
     private readonly Tag _currentTag;
 
-    public TagDrive(PSDriveInfo driveInfo) : base(driveInfo)
+    public TagsDrive(PSDriveInfo driveInfo) : base(driveInfo)
     {
         _rootTag = new Tag(driveInfo.Root);
         _currentTag = _rootTag;

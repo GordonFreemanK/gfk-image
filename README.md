@@ -19,13 +19,13 @@ Execute the following commands **just once**. Most need to be executed in an **e
 ## Clone the repository
 ```
 git clone https://github.com/GordonFreemanK/digikam-scripts.git
-Set-Location digikam-scripts
+cd digikam-scripts
 ```
 
 ## Set ExifTool configuration
 ```
-Move-Item ~\.Exiftool_config ~\.Exiftool_config.bak -SilentlyContinue
-Copy-Item exiftool\.Exiftool_config ~
+mv ~\.Exiftool_config ~\.Exiftool_config.bak -Force
+cp exiftool\.Exiftool_config ~
 ```
 
 ## Create a fake cmd.exe and copy it to digiKam's folder
@@ -40,8 +40,8 @@ Install-Package -Name GeoTimeZone -ProviderName NuGet -SkipDependencies -Confirm
 
 ## Install the Tag PSProvider
 ```
-dotnet publish GFK.PowerShell -p:DebugType=none -r win-x64 -c Release --sc -o GFK.PowerShell/pub
-Import-Module GFK.PowerShell/pub/GFK.PowerShell.dll
+dotnet publish GFK.PowerShell -p:DebugType=none -r win-x64 -c Release --sc -o GFK.PowerShell\pub
+Import-Module .\GFK.PowerShell\pub\GFK.PowerShell.dll
 ```
 
 ## Add the following in the User Shell Script window in digiKam
@@ -50,13 +50,11 @@ Replace paths to the git repository accordingly.
 $ErrorActionPreference = 'Stop'
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
-C:\repos\digikam-scripts\scripts\New-TagDrive $Env:TAGSPATH
+C:\repos\digikam-scripts\scripts\New-TagsDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
 C:\repos\digikam-scripts\scripts\Set-DateTimeOffsets.ps1 $destinationPath
-
-$Author = (ls Tag:/Author).Name -join ';'
-C:\repos\digikam-scripts\scripts\Set-Author.ps1 $destinationPath -Author $Author
+C:\repos\digikam-scripts\scripts\Set-Author.ps1 $destinationPath -Authors (ls Tags:/Author)
 ```
 
 # External tools
