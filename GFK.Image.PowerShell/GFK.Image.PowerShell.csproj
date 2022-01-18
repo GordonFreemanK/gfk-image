@@ -4,8 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>GFK.Image.PowerShell</AssemblyName>
     <LangVersion>default</LangVersion>
-    <!-- <ProduceReferenceAssembly>true</ProduceReferenceAssembly> -->
-    <!-- <ProduceOnlyReferenceAssembly>false</ProduceOnlyReferenceAssembly> -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +11,15 @@
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Scripts\GFK.Image.PowerShell.digiKam.psm1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Scripts\GFK.Image.PowerShell.ExifTool.psm1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

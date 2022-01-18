@@ -8,8 +8,11 @@
     This will load these tags in a new PowerShell drive called Tag:/ to enable exploring them
 #>
 [CmdletBinding]
-param ([Parameter(Mandatory)][string]$Tags)
+function New-TagsDrive
+{
+    param ([Parameter(Mandatory)][string]$Tags)
 
-New-PSDrive -Name Tags -PSProvider Tags -Root 'Tags:' -Scope Global
+    New-PSDrive -Name Tags -PSProvider Tags -Root 'Tags:' -Scope Global
 
-$Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" }
+    $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" }
+}
