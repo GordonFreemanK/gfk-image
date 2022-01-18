@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmd", "cmd\cmd.csproj", "{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GFK.PowerShell", "GFK.PowerShell\GFK.PowerShell.csproj", "{BA5AE1BE-FE3A-498D-8985-BAAD4DA640D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GFK.Image.PowerShell", "GFK.Image.PowerShell\GFK.Image.PowerShell.csproj", "{1CE5263B-8536-4FAA-8345-0785D9FDC811}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +20,9 @@ Global
 		{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA5AE1BE-FE3A-498D-8985-BAAD4DA640D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA5AE1BE-FE3A-498D-8985-BAAD4DA640D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA5AE1BE-FE3A-498D-8985-BAAD4DA640D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA5AE1BE-FE3A-498D-8985-BAAD4DA640D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CE5263B-8536-4FAA-8345-0785D9FDC811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CE5263B-8536-4FAA-8345-0785D9FDC811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CE5263B-8536-4FAA-8345-0785D9FDC811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CE5263B-8536-4FAA-8345-0785D9FDC811}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
