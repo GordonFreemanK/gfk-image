@@ -51,7 +51,7 @@ New-TagsDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
 Set-DateTimeOffsets $destinationPath
-Set-Authors $destinationPath -Authors (ls Tags:/Author)
+Set-Authors $destinationPath -Authors (ls Tags:/Author | select -expand PSChildName)
 ```
 
 ### Notes
