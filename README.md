@@ -1,6 +1,8 @@
 # What is this?
 
-**This repository is aimed at integrating PowerShell scripts in a visual workflow for batch-processing photos, initially with the goal of automatically setting [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) based on the photo location and time.**
+This repository is aimed at integrating PowerShell scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
+- setting metadata [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on the photo location and time
+- setting metadata tags based on digiKam tags (requires digiKam)
 
 Written mostly in C# / PowerShell, and tested on Windows. All the tools and technologies used are open-source and available on both Linux and Windows.
 
