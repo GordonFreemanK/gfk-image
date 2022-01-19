@@ -51,7 +51,7 @@ New-TagsDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
 Set-DateTimeOffsets $destinationPath
-Set-Authors $destinationPath -Authors (ls Tags:/Author)
+Set-Authors $destinationPath -Authors (ls Tags:/Author | select -expand PSChildName)
 ```
 
 ### Notes
@@ -110,7 +110,9 @@ Adrian Shephard
 The G-Man
 ```
 
-**Note:** PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.    
+**Notes:**
+- PowerShell uses `\ `  as a path separator. `\ `  in tag values will be replaced by `-`.
+- This PSProvider does not support renaming, moving or deleting tags
 
 ### Example ExifTool wrapper functions
 
