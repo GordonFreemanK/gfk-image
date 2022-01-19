@@ -111,7 +111,7 @@ The G-Man
 ```
 
 **Notes:**
-- PowerShell uses `\ `  as a path separator. `\ `  in tag values will be replaced by `-`.
+- PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
 - This PSProvider does not support renaming, moving or deleting tags
 
 ### Example ExifTool wrapper functions
