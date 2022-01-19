@@ -3,8 +3,6 @@
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -22,7 +20,7 @@ jobs:
       - name: Publish GFK.Image locally
         run: dotnet publish GFK.Image -c Release -o pub/GFK.Image
       - name: Publish cmd locally
-        run: dotnet public cmd -c Release -o pub/GFK.Image/cmd
+        run: dotnet publish cmd -c Release -o pub/GFK.Image/cmd
       - name: Publish to PowerShell Gallery
         run: Publish-Module GFK.Image -NuGetApiKey {{secrets.PS_GALLERY}} -FormatVersion 1.0.0
         shell: pwsh
