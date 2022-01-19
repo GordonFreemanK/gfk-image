@@ -8,11 +8,12 @@ namespace GFK.Image.PowerShell.Provider
         void Add(string path);
         bool Exists(string path);
         IReadOnlyCollection<string> Get(string path, uint? depth);
-        IReadOnlyCollection<string> GetStartingWith(string path);
     }
 
     public class TagsRepository : ITagsRepository
     {
+        private const char Separator = '\\';
+
         private readonly List<string> _tags;
 
         public TagsRepository()
@@ -22,17 +23,19 @@ namespace GFK.Image.PowerShell.Provider
 
         public void Add(string path)
         {
+            path = path.TrimEnd(Separator);
             _tags.Add(path);
         }
 
         public bool Exists(string path)
         {
-            return _tags.Any(tag => tag == path || tag.StartsWith($"{path}{TagsProvider.ItemSeparator}"));
+            path = path.TrimEnd(Separator);
+            return _tags.Any(tag => tag == path || tag.StartsWith($"{path}{Separator}"));
         }
 
         public IReadOnlyCollection<string> Get(string path, uint? depth)
         {
-            path += TagsProvider.ItemSeparator;
+            path = path.TrimEnd(Separator) + Separator;
             return _tags
                 .Where(tag => tag.StartsWith(path))
                 .Select(tag => depth == null ? tag : GetPartialPath(tag, path.Length, depth.Value))
@@ -40,23 +43,9 @@ namespace GFK.Image.PowerShell.Provider
                 .ToArray();
         }
 
-        public IReadOnlyCollection<string> GetStartingWith(string path)
-        {
-            return _tags
-                .Where(tag => tag.StartsWith(path))
-                .Select(
-                    tag =>
-                    {
-                        var position = tag.IndexOf(TagsProvider.ItemSeparator, path.Length);
-                        return position >= 0 ? tag.Substring(0, position) : tag;
-                    })
-                .Distinct()
-                .ToArray();
-        }
-
         private static string GetPartialPath(string tag, int position, uint depth)
         {
-            do position = tag.IndexOf(TagsProvider.ItemSeparator, position+1);
+            do position = tag.IndexOf(Separator, position + 1);
             while (position >= 0 && depth-- > 0);
             return position >= 0 ? tag.Substring(0, position) : tag;
         }
