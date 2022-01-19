@@ -104,10 +104,12 @@ This function reads a string containing the tags for a picture (using a `;` as a
 *Usage:*
 ```
 PS C:\> New-TagsDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
-PS C:\> ls Tags:/People
+PS C:\> ls Tags:\People
 Adrian Shephard
 The G-Man
 ```
+
+**Note:** PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.    
 
 ### Example ExifTool wrapper functions
 
