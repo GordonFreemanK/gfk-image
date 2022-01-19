@@ -16,8 +16,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override bool IsValidPath(string path)
         {
-            WriteWarning($"{nameof(IsValidPath)}(\"{path}\")");
-            
             var cleanPath = GetCleanPath(path);
 
             var isValidPath = TagsDrive.Repository.Exists(cleanPath);
@@ -29,9 +27,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
-            WriteWarning($"{nameof(NewDrive)}(Root={drive.Root})");
-
-            
             var tagsDrive = new TagsDrive(drive);
 
             WriteWarning(
@@ -49,8 +44,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override bool ItemExists(string path)
         {
-            WriteWarning($"{nameof(ItemExists)}(\"{path}\")");
-
             var cleanPath = GetCleanPath(path);
 
             var isValidPath = TagsDrive.Repository.Exists(cleanPath);
@@ -62,8 +55,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override bool IsItemContainer(string path)
         {
-            WriteWarning($"{nameof(IsItemContainer)}(\"{path}\")");
-
             var cleanPath = GetCleanPath(path);
 
             var isValidPath = TagsDrive.Repository.Exists(cleanPath);
@@ -128,9 +119,7 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override string MakePath(string parent, string child)
         {
-            WriteWarning($"{nameof(MakePath)}(\"{parent}\",\"{child}\")");
-
-            var cleanPath = base.MakePath(parent, child.TrimEnd(ItemSeparator));
+            var cleanPath = GetCleanPath($"{parent}{ItemSeparator}{child}");
 
             WriteWarning($"{nameof(MakePath)}(\"{parent}\",\"{child}\") => \"{cleanPath}\"");
 
@@ -148,10 +137,10 @@ namespace GFK.Image.PowerShell.Provider
         {
             WriteWarning($"{nameof(NewItem)}(\"{path}\",\"{itemTypeName}\",\"{newItemValue}\")");
 
-            var tag = GetCleanPath(path);
-            TagsDrive.Repository.Add(tag);
+            var cleanPath = GetCleanPath(path);
+            TagsDrive.Repository.Add(cleanPath);
 
-            WriteItemObject(PSObject.AsPSObject(tag), tag, true);
+            WriteItemObject(cleanPath, cleanPath, true);
         }
 
         protected override void RemoveItem(string path, bool recurse)
@@ -184,8 +173,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override void GetChildItems(string path, bool recurse, uint depth)
         {
-            WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse},{depth})");
-
             var tags = TagsDrive.Repository.Get(path, recurse ? depth : 0);
 
             WriteWarning(
@@ -193,14 +180,12 @@ namespace GFK.Image.PowerShell.Provider
 
             foreach (var tag in tags)
             {
-                WriteItemObject(PSObject.AsPSObject(tag), tag, true);
+                WriteItemObject(tag, tag, true);
             }
         }
 
         protected override void GetChildItems(string path, bool recurse)
         {
-            WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse})");
-
             var tags = TagsDrive.Repository.Get(path, recurse ? default : (uint)0);
 
             WriteWarning(
@@ -210,14 +195,12 @@ namespace GFK.Image.PowerShell.Provider
 
             foreach (var tag in tags)
             {
-                WriteItemObject(PSObject.AsPSObject(tag), tag, true);
+                WriteItemObject(tag, tag, true);
             }
         }
 
         protected override string GetChildName(string path)
         {
-            WriteWarning($"{nameof(GetChildName)}(\"{path}\")");
-
             var cleanPath = GetCleanPath(path);
             var childName = cleanPath.Split(ItemSeparator).Last();
 
@@ -235,8 +218,6 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override string GetParentPath(string path, string root)
         {
-            WriteWarning($"{nameof(GetParentPath)}(\"{path}\",\"{root}\")");
-
             var cleanPath = GetCleanPath(path);
             var lastSeparatorIndex = cleanPath.LastIndexOf(ItemSeparator);
 
