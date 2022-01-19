@@ -19,6 +19,46 @@ public class TagsRepositoryTests
     }
 
     [Test]
+    public void Gets_existing_tag()
+    {
+        // Act
+        var result = _tagsRepository.GetTag(@"Tags:\Author\Gordon Freeman");
+        
+        // Assert
+        Assert.That(result, Is.EqualTo(@"Tags:\Author\Gordon Freeman"));
+    }
+
+    [Test]
+    public void Does_not_get_parent_tag()
+    {
+        // Act
+        var result = _tagsRepository.GetTag(@"Tags:\Author");
+        
+        // Assert
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Does_not_get_non_existent_tag()
+    {
+        // Act
+        var result = _tagsRepository.GetTag(@"Tags:\People\Gordon Freeman");
+        
+        // Assert
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void Does_not_get_partial_tag()
+    {
+        // Act
+        var result = _tagsRepository.GetTag(@"Tags:\Author\Gordon");
+        
+        // Assert
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
     public void Tag_path_is_valid()
     {
         // Act
