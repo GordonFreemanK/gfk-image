@@ -18,7 +18,7 @@ namespace GFK.Image.PowerShell.Provider
         {
             var cleanPath = GetCleanPath(path);
 
-            var isValidPath = TagsDrive.IsValidPath(cleanPath);
+            var isValidPath = TagsDrive.Repository.Exists(cleanPath);
 
             WriteWarning($"{nameof(IsValidPath)}(\"{path}\") => {isValidPath}");
 
@@ -46,7 +46,7 @@ namespace GFK.Image.PowerShell.Provider
         {
             var cleanPath = GetCleanPath(path);
 
-            var isValidPath = TagsDrive.IsValidPath(cleanPath);
+            var isValidPath = TagsDrive.Repository.Exists(cleanPath);
 
             WriteWarning($"{nameof(ItemExists)}(\"{path}\") => {isValidPath}");
 
@@ -57,7 +57,7 @@ namespace GFK.Image.PowerShell.Provider
         {
             var cleanPath = GetCleanPath(path);
 
-            var isValidPath = TagsDrive.IsValidPath(cleanPath);
+            var isValidPath = TagsDrive.Repository.Exists(cleanPath);
 
             WriteWarning($"{nameof(IsItemContainer)}(\"{path}\") => {isValidPath}");
 
@@ -92,7 +92,11 @@ namespace GFK.Image.PowerShell.Provider
             base.CopyItem(path, copyPath, recurse);
         }
 
-        protected override bool ConvertPath(string path, string filter, ref string updatedPath, ref string updatedFilter)
+        protected override bool ConvertPath(
+            string path,
+            string filter,
+            ref string updatedPath,
+            ref string updatedFilter)
         {
             WriteWarning($"{nameof(ConvertPath)}(\"{path}\",\"{filter}\")");
 
@@ -134,9 +138,9 @@ namespace GFK.Image.PowerShell.Provider
             WriteWarning($"{nameof(NewItem)}(\"{path}\",\"{itemTypeName}\",\"{newItemValue}\")");
 
             var cleanPath = GetCleanPath(path);
-            var tag = TagsDrive.NewTag(cleanPath);
+            TagsDrive.Repository.Add(cleanPath);
 
-            WriteItemObject(tag.Name, path, true);
+            WriteItemObject(cleanPath, cleanPath, true);
         }
 
         protected override void RemoveItem(string path, bool recurse)
@@ -169,27 +173,29 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override void GetChildItems(string path, bool recurse, uint depth)
         {
-            var tags = TagsDrive.GetChildTags(path, recurse ? depth : 0);
+            var tags = TagsDrive.Repository.Get(path, recurse ? depth : 0);
 
-            WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse},{depth}) => {tags.Count}");
+            WriteWarning(
+                $"{nameof(GetChildItems)}(\"{path}\",{recurse},{depth}) => {string.Join(",", tags.Select(tag => $"\"{tag}\""))}");
 
-            foreach (var (tag, tagPath) in tags)
+            foreach (var tag in tags)
             {
-                WriteItemObject(tag.Name, tagPath, true);
+                WriteItemObject(tag, tag, true);
             }
         }
 
         protected override void GetChildItems(string path, bool recurse)
         {
-            var tags = TagsDrive.GetChildTags(path, recurse ? default(uint?) : 0);
+            var tags = TagsDrive.Repository.Get(path, recurse ? default : (uint)0);
 
-            WriteWarning($"{nameof(GetChildItems)}(\"{path}\",{recurse}) => {tags.Count}");
+            WriteWarning(
+                $"{nameof(GetChildItems)}(\"{path}\",{recurse}) => {string.Join(",", tags.Select(tag => $"\"{tag}\""))}");
 
             base.GetChildItems(path, recurse);
 
-            foreach (var (tag, tagPath) in tags)
+            foreach (var tag in tags)
             {
-                WriteItemObject(tag.Name, tagPath, true);
+                WriteItemObject(tag, tag, true);
             }
         }
 
@@ -215,7 +221,7 @@ namespace GFK.Image.PowerShell.Provider
             var cleanPath = GetCleanPath(path);
             var lastSeparatorIndex = cleanPath.LastIndexOf(ItemSeparator);
 
-            var result = lastSeparatorIndex == -1 ? string.Empty : cleanPath.Substring(0,lastSeparatorIndex);
+            var result = lastSeparatorIndex == -1 ? string.Empty : cleanPath.Substring(0, lastSeparatorIndex);
 
             WriteWarning($"{nameof(GetParentPath)}(\"{path}\",\"{root}\") => \"{result}\"");
 
@@ -371,7 +377,7 @@ namespace GFK.Image.PowerShell.Provider
         private void NewItem(string path)
         {
             var cleanPath = GetCleanPath(path);
-            TagsDrive.NewTag(cleanPath);
+            TagsDrive.Repository.Add(cleanPath);
         }
 
         private string GetCleanPath(string path)
