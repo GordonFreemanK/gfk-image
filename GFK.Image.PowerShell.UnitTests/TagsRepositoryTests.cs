@@ -12,17 +12,17 @@ public class TagsRepositoryTests
     {
         _tagsRepository = new TagsRepository();
         
-        _tagsRepository.Add(@"Tags:\Author\Gordon Freeman");
-        _tagsRepository.Add(@"Tags:\Author\Adrian Shephard");
-        _tagsRepository.Add(@"Tags:\Author\Adrian Shephard\Other");
-        _tagsRepository.Add(@"Tags:\People\The G-Man");
+        _tagsRepository.AddTag(@"Tags:\Author\Gordon Freeman");
+        _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard");
+        _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard\Other");
+        _tagsRepository.AddTag(@"Tags:\People\The G-Man");
     }
 
     [Test]
     public void Finds_existing_tag()
     {
         // Act
-        var result = _tagsRepository.Exists(@"Tags:\Author\Gordon Freeman");
+        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\Gordon Freeman");
 
         // Assert
         Assert.That(result, Is.True);
@@ -32,7 +32,7 @@ public class TagsRepositoryTests
     public void Finds_containing_tag()
     {
         // Act
-        var result = _tagsRepository.Exists(@"Tags:\Author");
+        var result = _tagsRepository.DoesTagExist(@"Tags:\Author");
 
         // Assert
         Assert.That(result, Is.True);
@@ -42,7 +42,7 @@ public class TagsRepositoryTests
     public void Finds_root()
     {
         // Act
-        var result = _tagsRepository.Exists("Tags:");
+        var result = _tagsRepository.DoesTagExist("Tags:");
 
         // Assert
         Assert.That(result, Is.True);
@@ -52,7 +52,7 @@ public class TagsRepositoryTests
     public void Does_not_find_non_existent_tag_that_does_not_exists()
     {
         // Act
-        var result = _tagsRepository.Exists(@"Tags:\Author\The G-Man");
+        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\The G-Man");
 
         // Assert
         Assert.That(result, Is.False);
@@ -62,7 +62,7 @@ public class TagsRepositoryTests
     public void Does_not_find_non_existent_tag_that_starts_with_existing_tag()
     {
         // Act
-        var result = _tagsRepository.Exists(@"Tags:\Author\Gordon");
+        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\Gordon");
 
         // Assert
         Assert.That(result, Is.False);
@@ -72,7 +72,7 @@ public class TagsRepositoryTests
     public void Finds_all_tags_recursively()
     {
         // Act
-        var result = _tagsRepository.Get(@"Tags:", null);
+        var result = _tagsRepository.GetChildTags(@"Tags:", null);
 
         // Assert
         Assert.That(
@@ -91,7 +91,7 @@ public class TagsRepositoryTests
     public void Finds_all_tags_non_recursively()
     {
         // Act
-        var result = _tagsRepository.Get(@"Tags:", 0);
+        var result = _tagsRepository.GetChildTags(@"Tags:", 0);
 
         // Assert
         Assert.That(
@@ -108,7 +108,7 @@ public class TagsRepositoryTests
     public void Finds_tags_with_limited_recursion()
     {
         // Act
-        var result = _tagsRepository.Get(@"Tags:", 1);
+        var result = _tagsRepository.GetChildTags(@"Tags:", 1);
 
         // Assert
         Assert.That(
@@ -126,7 +126,7 @@ public class TagsRepositoryTests
     public void Finds_tags_in_subfolder()
     {
         // Act
-        var result = _tagsRepository.Get(@"Tags:\Author", 0);
+        var result = _tagsRepository.GetChildTags(@"Tags:\Author", 0);
 
         // Assert
         Assert.That(

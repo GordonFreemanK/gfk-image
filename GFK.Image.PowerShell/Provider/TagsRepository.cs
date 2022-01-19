@@ -5,9 +5,9 @@ namespace GFK.Image.PowerShell.Provider
 {
     public interface ITagsRepository
     {
-        void Add(string path);
-        bool Exists(string path);
-        IReadOnlyCollection<string> Get(string path, uint? depth);
+        void AddTag(string path);
+        bool DoesTagExist(string path);
+        IReadOnlyCollection<string> GetChildTags(string path, uint? depth);
     }
 
     public class TagsRepository : ITagsRepository
@@ -21,19 +21,19 @@ namespace GFK.Image.PowerShell.Provider
             _tags = new List<string>();
         }
 
-        public void Add(string path)
+        public void AddTag(string path)
         {
             path = path.TrimEnd(Separator);
             _tags.Add(path);
         }
 
-        public bool Exists(string path)
+        public bool DoesTagExist(string path)
         {
             path = path.TrimEnd(Separator);
             return _tags.Any(tag => tag == path || tag.StartsWith($"{path}{Separator}"));
         }
-
-        public IReadOnlyCollection<string> Get(string path, uint? depth)
+        
+        public IReadOnlyCollection<string> GetChildTags(string path, uint? depth)
         {
             path = path.TrimEnd(Separator) + Separator;
             return _tags

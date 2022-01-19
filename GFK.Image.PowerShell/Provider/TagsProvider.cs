@@ -12,15 +12,23 @@ namespace GFK.Image.PowerShell.Provider
 
         protected override bool IsValidPath(string path) => true;
 
-        protected override bool ItemExists(string path) => TagsDrive.Repository.Exists(path);
+        protected override bool ItemExists(string path) => TagsDrive.Repository.DoesTagExist(path);
 
-        protected override bool IsItemContainer(string path) => TagsDrive.Repository.Exists(path);
-
+        protected override bool IsItemContainer(string path) => TagsDrive.Repository.DoesTagExist(path);
+        
         protected override void NewItem(string path, string itemTypeName, object newItemValue)
         {
-            TagsDrive.Repository.Add(path);
+            TagsDrive.Repository.AddTag(path);
 
             WriteItemObject(new PSObject(path), path, true);
+        }
+
+        protected override void GetItem(string path)
+        {
+            if (TagsDrive.Repository.DoesTagExist(path))
+            {
+                WriteItemObject(new PSObject(path), path, true);
+            }
         }
 
         protected override void GetChildItems(string path, bool recurse, uint depth)
@@ -35,7 +43,7 @@ namespace GFK.Image.PowerShell.Provider
 
         private void GetChildItems(string path, uint? depth)
         {
-            foreach (var tag in TagsDrive.Repository.Get(path, depth))
+            foreach (var tag in TagsDrive.Repository.GetChildTags(path, depth))
             {
                 WriteItemObject(new PSObject(tag), tag, true);
             }
