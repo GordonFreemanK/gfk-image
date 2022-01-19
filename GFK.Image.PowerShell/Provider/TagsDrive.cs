@@ -84,14 +84,19 @@ namespace GFK.Image.PowerShell.Provider
             return CurrentLocation;
         }
 
-        private IEnumerable<(Tag tag, string tagPath)> GetChildTags(Tag tag, string tagPath, uint? depth)
+        private static IEnumerable<(Tag tag, string tagPath)> GetChildTags(Tag tag, string tagPath, uint? depth)
         {
             var childTags = tag.ChildTags
                 .Select(t => (tag: t, tagPath: $"{tagPath}{TagsProvider.ItemSeparator}{t.Name}"))
                 .ToArray();
             return depth == 0
                 ? childTags
-                : childTags.Union(childTags.SelectMany(x => GetChildTags(x.tag, x.tagPath, depth - 1)));
+                : childTags.Union(
+                    childTags.SelectMany(
+                        x => GetChildTags(
+                            x.tag,
+                            $"{x.tagPath}{TagsProvider.ItemSeparator}{x.tag.Name}",
+                            depth - 1)));
         }
     }
 }
