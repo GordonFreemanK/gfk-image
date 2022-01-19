@@ -19,50 +19,50 @@ public class TagsRepositoryTests
     }
 
     [Test]
-    public void Finds_existing_tag()
+    public void Tag_path_is_valid()
     {
         // Act
-        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\Gordon Freeman");
+        var result = _tagsRepository.IsPathValid(@"Tags:\Author\Gordon Freeman");
 
         // Assert
         Assert.That(result, Is.True);
     }
 
     [Test]
-    public void Finds_containing_tag()
+    public void Tag_parent_path_is_valid()
     {
         // Act
-        var result = _tagsRepository.DoesTagExist(@"Tags:\Author");
+        var result = _tagsRepository.IsPathValid(@"Tags:\Author");
 
         // Assert
         Assert.That(result, Is.True);
     }
 
     [Test]
-    public void Finds_root()
+    public void Root_path_is_valid()
     {
         // Act
-        var result = _tagsRepository.DoesTagExist("Tags:");
+        var result = _tagsRepository.IsPathValid("Tags:");
 
         // Assert
         Assert.That(result, Is.True);
     }
 
     [Test]
-    public void Does_not_find_non_existent_tag_that_does_not_exists()
+    public void Non_existent_path_is_invalid()
     {
         // Act
-        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\The G-Man");
+        var result = _tagsRepository.IsPathValid(@"Tags:\Author\The G-Man");
 
         // Assert
         Assert.That(result, Is.False);
     }
 
     [Test]
-    public void Does_not_find_non_existent_tag_that_starts_with_existing_tag()
+    public void Partial_tag_path_is_invalid()
     {
         // Act
-        var result = _tagsRepository.DoesTagExist(@"Tags:\Author\Gordon");
+        var result = _tagsRepository.IsPathValid(@"Tags:\Author\Gordon");
 
         // Assert
         Assert.That(result, Is.False);
