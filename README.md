@@ -41,7 +41,7 @@ cp exiftool\.Exiftool_config ~
 dotnet publish cmd -p:PublishSingleFile=true -p:DebugType=none -r win-x64 -c Release --sc -o 'C:\Program Files\digiKam\'
 ```
 
-## Add this bootstrapper code in the User Shell Script window in digiKam
+## Add this code in the User Shell Script window in digiKam
 ```powershell
 $ErrorActionPreference = 'Stop'
 
@@ -145,7 +145,7 @@ On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/d
 
 `cmd.exe` rules about [argument passing](http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/) and [character escaping](https://fabianlee.org/2018/10/10/saltstack-escaping-dollar-signs-in-cmd-run-parameters-to-avoid-interpolation/) make it difficult to work with spaces and special characters. To circumvent this issue we create a standalone executable called `cmd.exe` which is really a .net application that we copy to the digiKam application folder where it will take precedence over the actual Windows command prompt executable. This application takes the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core).
 
-We are now able to use PowerShell in the User Shell Script plugin. To avoid the user-defined code in the plugin being too complex, we create a skeleton PowerShell bootstrapper to call external PowerShell code. It can be saved as part of a Batch Queue Manager workflow.
+We are now able to use PowerShell code in the User Shell Script plugin, which can be saved as part of a Batch Queue Manager workflow.
 
 ### Notes
 
