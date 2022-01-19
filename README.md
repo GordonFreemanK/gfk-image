@@ -8,7 +8,7 @@ Written mostly in C# / PowerShell, and tested on Windows. All the tools and tech
 
 - [git](https://git-scm.com/)
 - [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) version 6.0 and above
-- [.NET SDK](https://dotnet.microsoft.com/en-us/download) version 6.0 and above
+- [.NET Core SDK](https://dotnet.microsoft.com/en-us/download) 3.1
 - [digiKam](https://www.digikam.org/download/)
 - [ExifTool](https://exiftool.org/) should come installed with digiKam but the latest version can be downloaded directly and [added to the path](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.2#saving-changes-to-environment-variables) or installed using a [third-party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
 
