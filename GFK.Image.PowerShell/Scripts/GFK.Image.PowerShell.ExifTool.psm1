@@ -16,7 +16,7 @@ function Set-Authors
         [Parameter(Mandatory)][string[]]$Authors
     )
 
-    exiftool -overwrite_original $FilePath -Modified<now '-Authors<$AuthorsParam' -userParam AuthorsParam = "${$Authors -join ';'}"
+    exiftool -overwrite_original $FilePath -Modified<now '-Authors<$AuthorsParam' -userParam AuthorsParam="`"$($Authors -join ';')`""
 }
 
 <#
@@ -41,5 +41,5 @@ function Set-DateTimeOffsets
     # If you digitize all your pictures in the same time zone you might want to replace these parameters by constant coordinates situated in that time zone.
     $digitizedLocal = '{0:yyyy-MM-ddTHH:mm:sszzz}' -f  (Get-DateTimeOffset $digitized $latitude $longitude)
 
-    exiftool -overwrite_original $FilePath -Modified<now '-Taken<$TakenParam' '-Digitized<$DigitizedParam' -userParam TakenParam = "$takenLocal" -userParam DigitizedParam = "$digitizedLocal"
+    exiftool -overwrite_original $FilePath -Modified<now '-Taken<$TakenParam' '-Digitized<$DigitizedParam' -userParam TakenParam="$takenLocal" -userParam DigitizedParam="$digitizedLocal"
 }

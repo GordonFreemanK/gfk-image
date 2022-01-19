@@ -9,13 +9,13 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-# RootModule = ''
+RootModule = 'GFK.Image.PowerShell.dll'
 
 # Version number of this module.
 ModuleVersion = '0.0.1'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Core')
 
 # ID used to uniquely identify this module
 GUID = '37e0816e-094f-476c-bb61-cecc18cbb424'
@@ -51,10 +51,10 @@ Copyright = '(c) GFK. All rights reserved.'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-RequiredModules = @('Scripts/GFK.Image.PowerShell.digiKam.psm1','Scripts/GFK.Image.PowerShell.ExifTool.psm1')
+# RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @('GFK.Image.PowerShell.dll')
+# RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
@@ -66,13 +66,13 @@ RequiredAssemblies = @('GFK.Image.PowerShell.dll')
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-# NestedModules = @()
+NestedModules = @('GFK.Image.PowerShell.dll','Scripts/GFK.Image.PowerShell.digiKam.psm1','Scripts/GFK.Image.PowerShell.ExifTool.psm1')
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @('New-TagsDrive', 'Set-Authors', 'Set-DateTimeOffsets')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @()
+CmdletsToExport = @('Get-DateTimeOffset')
 
 # Variables to export from this module
 VariablesToExport = '*'
