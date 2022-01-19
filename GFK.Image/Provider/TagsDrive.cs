@@ -1,6 +1,6 @@
 ﻿using System.Management.Automation;
 
-namespace GFK.Image.PowerShell.Provider
+namespace GFK.Image.Provider
 {
     public class TagsDrive : PSDriveInfo
     {

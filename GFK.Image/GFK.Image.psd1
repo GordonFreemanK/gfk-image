@@ -9,7 +9,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'GFK.Image.PowerShell.dll'
+RootModule = 'GFK.Image.dll'
 
 # Version number of this module.
 ModuleVersion = '1.0.0'
@@ -21,13 +21,13 @@ CompatiblePSEditions = @('Core')
 GUID = '37e0816e-094f-476c-bb61-cecc18cbb424'
 
 # Author of this module
-Author = 'GFK'
+Author = 'GordonFreemanK'
 
 # Company or vendor of this module
-CompanyName = 'GFK'
+CompanyName = 'GordonFreemanK'
 
 # Copyright statement for this module
-Copyright = '(c) GFK. All rights reserved.'
+Copyright = '(c) GordonFreemanK. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'PowerShell scripts to manipulate photo metadata using ExifTool and an application to enable PowerShell in digiKam'
