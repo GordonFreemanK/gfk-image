@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
@@ -14,33 +13,9 @@ namespace GFK.Image.PowerShell.Provider
 
         private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
 
-        protected override bool IsValidPath(string path)
-        {
-            var cleanPath = GetCleanPath(path);
+        protected override PSDriveInfo NewDrive(PSDriveInfo drive) => new TagsDrive(drive);
 
-            var isValidPath = TagsDrive.Repository.Exists(cleanPath);
-
-            WriteWarning($"{nameof(IsValidPath)}(\"{path}\") => {isValidPath}");
-
-            return isValidPath;
-        }
-
-        protected override PSDriveInfo NewDrive(PSDriveInfo drive)
-        {
-            var tagsDrive = new TagsDrive(drive);
-
-            WriteWarning(
-                $"{nameof(NewDrive)}(Root={drive.Root}) => TagDrive(Root={tagsDrive.Root}, CurrentLocation={tagsDrive.CurrentLocation})");
-
-            return tagsDrive;
-        }
-
-        protected override PSDriveInfo RemoveDrive(PSDriveInfo drive)
-        {
-            WriteWarning(nameof(RemoveDrive));
-
-            return drive;
-        }
+        protected override bool IsValidPath(string path) => true;
 
         protected override bool ItemExists(string path)
         {
@@ -62,20 +37,6 @@ namespace GFK.Image.PowerShell.Provider
             WriteWarning($"{nameof(IsItemContainer)}(\"{path}\") => {isValidPath}");
 
             return isValidPath;
-        }
-
-        protected override ProviderInfo Start(ProviderInfo providerInfo)
-        {
-            WriteWarning(nameof(Start));
-
-            return base.Start(providerInfo);
-        }
-
-        protected override void Stop()
-        {
-            WriteWarning(nameof(Stop));
-
-            base.Stop();
         }
 
         protected override void ClearItem(string path)
@@ -103,20 +64,6 @@ namespace GFK.Image.PowerShell.Provider
             return base.ConvertPath(path, filter, ref updatedPath, ref updatedFilter);
         }
 
-        protected override string[] ExpandPath(string path)
-        {
-            WriteWarning(nameof(ExpandPath));
-
-            return base.ExpandPath(path);
-        }
-
-        protected override void GetItem(string path)
-        {
-            WriteWarning(nameof(GetItem));
-
-            base.GetItem(path);
-        }
-
         protected override string MakePath(string parent, string child)
         {
             var cleanPath = GetCleanPath($"{parent}{ItemSeparator}{child}");
@@ -137,10 +84,10 @@ namespace GFK.Image.PowerShell.Provider
         {
             WriteWarning($"{nameof(NewItem)}(\"{path}\",\"{itemTypeName}\",\"{newItemValue}\")");
 
-            var cleanPath = GetCleanPath(path);
-            TagsDrive.Repository.Add(cleanPath);
+            var tag = GetCleanPath(path);
+            TagsDrive.Repository.Add(tag);
 
-            WriteItemObject(cleanPath, cleanPath, true);
+            WriteItemObject(new PSObject(tag), tag, true);
         }
 
         protected override void RemoveItem(string path, bool recurse)
@@ -180,7 +127,7 @@ namespace GFK.Image.PowerShell.Provider
 
             foreach (var tag in tags)
             {
-                WriteItemObject(tag, tag, true);
+                WriteItemObject(new PSObject(tag), tag, true);
             }
         }
 
@@ -195,7 +142,7 @@ namespace GFK.Image.PowerShell.Provider
 
             foreach (var tag in tags)
             {
-                WriteItemObject(tag, tag, true);
+                WriteItemObject(new PSObject(tag), tag, true);
             }
         }
 
@@ -242,20 +189,6 @@ namespace GFK.Image.PowerShell.Provider
             return base.HasChildItems(path);
         }
 
-        protected override Collection<PSDriveInfo> InitializeDefaultDrives()
-        {
-            WriteWarning(nameof(InitializeDefaultDrives));
-
-            return base.InitializeDefaultDrives();
-        }
-
-        protected override void InvokeDefaultAction(string path)
-        {
-            WriteWarning(nameof(InvokeDefaultAction));
-
-            base.InvokeDefaultAction(path);
-        }
-
         protected override string NormalizeRelativePath(string path, string basePath)
         {
             var cleanPath = GetCleanPath(path);
@@ -276,111 +209,7 @@ namespace GFK.Image.PowerShell.Provider
             return result;
         }
 
-        protected override object StartDynamicParameters()
-        {
-            WriteWarning(nameof(StartDynamicParameters));
-
-            return base.StartDynamicParameters();
-        }
-
-        protected override object ClearItemDynamicParameters(string path)
-        {
-            WriteWarning(nameof(ClearItemDynamicParameters));
-
-            return base.ClearItemDynamicParameters(path);
-        }
-
-        protected override object CopyItemDynamicParameters(string path, string destination, bool recurse)
-        {
-            WriteWarning(nameof(CopyItemDynamicParameters));
-
-            return base.CopyItemDynamicParameters(path, destination, recurse);
-        }
-
-        protected override object GetItemDynamicParameters(string path)
-        {
-            WriteWarning(nameof(GetItemDynamicParameters));
-
-            return base.GetItemDynamicParameters(path);
-        }
-
-        protected override object ItemExistsDynamicParameters(string path)
-        {
-            WriteWarning(nameof(ItemExistsDynamicParameters));
-
-            return base.ItemExistsDynamicParameters(path);
-        }
-
-        protected override object MoveItemDynamicParameters(string path, string destination)
-        {
-            WriteWarning(nameof(MoveItemDynamicParameters));
-
-            return base.MoveItemDynamicParameters(path, destination);
-        }
-
-        protected override object NewDriveDynamicParameters()
-        {
-            WriteWarning(nameof(NewDriveDynamicParameters));
-
-            return base.NewDriveDynamicParameters();
-        }
-
-        protected override object NewItemDynamicParameters(string path, string itemTypeName, object newItemValue)
-        {
-            WriteWarning($"{nameof(NewItemDynamicParameters)}(\"{path}\",\"{itemTypeName}\",\"{newItemValue}\")");
-
-            return base.NewItemDynamicParameters(path, itemTypeName, newItemValue);
-        }
-
-        protected override object RemoveItemDynamicParameters(string path, bool recurse)
-        {
-            WriteWarning(nameof(RemoveItemDynamicParameters));
-
-            return base.RemoveItemDynamicParameters(path, recurse);
-        }
-
-        protected override object RenameItemDynamicParameters(string path, string newName)
-        {
-            WriteWarning(nameof(RenameItemDynamicParameters));
-
-            return base.RenameItemDynamicParameters(path, newName);
-        }
-
-        protected override object SetItemDynamicParameters(string path, object value)
-        {
-            WriteWarning(nameof(SetItemDynamicParameters));
-
-            return base.SetItemDynamicParameters(path, value);
-        }
-
-        protected override object GetChildItemsDynamicParameters(string path, bool recurse)
-        {
-            WriteWarning($"{nameof(GetChildItemsDynamicParameters)}(\"{path}\",{recurse})");
-
-            return base.GetChildItemsDynamicParameters(path, recurse);
-        }
-
-        protected override object GetChildNamesDynamicParameters(string path)
-        {
-            WriteWarning(nameof(GetChildNamesDynamicParameters));
-
-            return base.GetChildNamesDynamicParameters(path);
-        }
-
-        protected override object InvokeDefaultActionDynamicParameters(string path)
-        {
-            WriteWarning(nameof(InvokeDefaultActionDynamicParameters));
-
-            return base.InvokeDefaultActionDynamicParameters(path);
-        }
-
-        private void NewItem(string path)
-        {
-            var cleanPath = GetCleanPath(path);
-            TagsDrive.Repository.Add(cleanPath);
-        }
-
-        private string GetCleanPath(string path)
+        private static string GetCleanPath(string path)
         {
             var pathChunks = path.Split(ItemSeparator);
 
