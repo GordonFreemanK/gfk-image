@@ -28,7 +28,7 @@ namespace GFK.Image.PowerShell.Provider
             var tag = TagsDrive.Repository.GetTag(path);
             if (tag != null)
             {
-                WriteItemObject(new PSObject(tag), tag, true);
+                WriteItemObject(tag, tag, true);
             }
         }
 
