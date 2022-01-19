@@ -19,31 +19,32 @@ Written mostly in C# / PowerShell, and tested on Windows. All the tools and tech
 Execute the following commands **just once**. Most need to be executed in an **elevated** PowerShell prompt.
 
 ## Clone the repository
-```
+```powershell
 git clone https://github.com/GordonFreemanK/digikam-scripts.git
 cd digikam-scripts
 ```
 
 ## Set the ExifTool configuration
-```
+```powershell
 mv ~\.Exiftool_config ~\.Exiftool_config.bak -Force
 cp exiftool\.Exiftool_config ~
 ```
 
 ## Install the PowerShell module
-```
- dotnet publish GFK.Image.PowerShell -p:DebugType=none -c Release -o GFK.Image.PowerShell/pub
- Install-Module .\GFK.Image.PowerShell\pub\GFK.Image.PowerShell.psd1
+```powershell
+ $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image.PowerShell'
+ dotnet publish GFK.Image.PowerShell -c Release -p:DebugType=none -o $publishPath
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
-```
+```powershell
 dotnet publish cmd -p:PublishSingleFile=true -p:DebugType=none -r win-x64 -c Release --sc -o 'C:\Program Files\digiKam\'
 ```
 
 ## Add this bootstrapper code in the User Shell Script window in digiKam
-```
+```powershell
 $ErrorActionPreference = 'Stop'
+
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
 New-TagsDrive $Env:TAGSPATH
@@ -92,7 +93,7 @@ The following shortcut tags are created by this repository, change them as neede
 This helper cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) (local or not), latitude and longitude (in signed [decimal degree](https://en.wikipedia.org/wiki/Decimal_degrees) format) and returns a [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset).
 
 *Usage (this example uses automatic DateTime conversion from a string for the input):*
-```
+```powershell
 PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString()
 19/01/2022 15:16:17 +03:00
 ```
@@ -102,7 +103,7 @@ PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString(
 This function reads a string containing the tags for a picture (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
 
 *Usage:*
-```
+```powershell
 PS C:\> New-TagsDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
 PS C:\> ls Tags:\People
 Adrian Shephard
@@ -122,7 +123,7 @@ This function writes the given authors to the `Authors` shortcut tag on the give
 This function reads the dates (`EXIF:DateTimeOriginal` for the date taken and `EXIF:CreateDate` for the date digitized) and GPS locations (`XMP-exif:GPSLatitude` and `XMP-exif:GPSLongitude`) from the given file (or folder) using ExifTool, calculates the offsets then writes back the dates and offsets to the the `Taken` and `Digitized` shortcut tags on the given file.
 
 *Usage:*
-```
+```powershell
 C:\> Set-Authors 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' 'Gordon Freeman','Adrian Shephard'
     1 image files updated
 C:\> Set-DateTimeOffsets 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg'
