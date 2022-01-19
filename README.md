@@ -33,12 +33,12 @@ cp exiftool\.Exiftool_config ~
 ## Install the PowerShell module
 ```powershell
  $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image.PowerShell'
- dotnet publish GFK.Image.PowerShell -c Release -p:DebugType=none -o $publishPath
+ dotnet publish GFK.Image.PowerShell -c Release -o $publishPath
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
 ```powershell
-dotnet publish cmd -p:PublishSingleFile=true -p:DebugType=none -r win-x64 -c Release --sc -o 'C:\Program Files\digiKam\'
+dotnet publish cmd -c Release -o 'C:\Program Files\digiKam\'
 ```
 
 ## Add this bootstrapper code in the User Shell Script window in digiKam
