@@ -24,16 +24,16 @@ git clone https://github.com/GordonFreemanK/digikam-scripts.git
 cd digikam-scripts
 ```
 
-## Install the PowerShell module
-```
- dotnet publish GFK.Image.PowerShell -p:DebugType=none -c Release -o GFK.Image.PowerShell/pub
- Install-Module .\GFK.Image.PowerShell\pub\GFK.Image.PowerShell.psd1
-```
-
 ## Set the ExifTool configuration
 ```
 mv ~\.Exiftool_config ~\.Exiftool_config.bak -Force
 cp exiftool\.Exiftool_config ~
+```
+
+## Install the PowerShell module
+```
+ dotnet publish GFK.Image.PowerShell -p:DebugType=none -c Release -o GFK.Image.PowerShell/pub
+ Install-Module .\GFK.Image.PowerShell\pub\GFK.Image.PowerShell.psd1
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
@@ -71,7 +71,7 @@ Set-Authors $destinationPath -Authors (ls Tags:/Author)
 
 # Implementation
 
-## 1. Configuring ExifTool
+## 1. ExifTool configuration
 
 To help with the manual and automated workflows, we use a custom ExifTool configuration file (see documentation in the official [example file](https://www.exiftool.org/config.html)) to create custom [shortcuts tags](https://www.exiftool.org/TagNames/Shortcuts.html), which are ways to read or write multiple tags at once. This configuration file is then copied to the root of the user home folder, where it will be picked up by ExifTool.
 
