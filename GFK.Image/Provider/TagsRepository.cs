@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace GFK.Image.PowerShell.Provider
+namespace GFK.Image.Provider
 {
     public interface ITagsRepository
     {

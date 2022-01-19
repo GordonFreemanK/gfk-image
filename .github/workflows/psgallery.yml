@@ -1,0 +1,28 @@
+﻿name: PSGallery
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Publish GFK.Image locally
+        run: dotnet publish GFK.Image -c Release -o pub/GFK.Image
+      - name: Publish cmd locally
+        run: dotnet public cmd -c Release -o pub/GFK.Image/cmd
+      - name: Publish to PowerShell Gallery
+        run: Publish-Module GFK.Image -NuGetApiKey {{secrets.PS_GALLERY}} -FormatVersion 1.0.0
+        shell: pwsh

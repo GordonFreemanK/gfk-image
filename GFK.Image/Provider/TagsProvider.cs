@@ -1,7 +1,7 @@
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 
-namespace GFK.Image.PowerShell.Provider
+namespace GFK.Image.Provider
 {
     [CmdletProvider("Tags", ProviderCapabilities.None)]
     public class TagsProvider : NavigationCmdletProvider

@@ -2,7 +2,7 @@
 using System.Management.Automation;
 using GeoTimeZone;
 
-namespace GFK.Image.PowerShell.Cmdlets
+namespace GFK.Image.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "DateTimeOffset")]
     [OutputType(typeof(DateTimeOffset))]

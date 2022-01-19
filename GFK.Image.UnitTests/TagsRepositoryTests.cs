@@ -1,7 +1,7 @@
-using GFK.Image.PowerShell.Provider;
+using GFK.Image.Provider;
 using NUnit.Framework;
 
-namespace GFK.Image.PowerShell.UnitTests;
+namespace GFK.Image.UnitTests;
 
 public class TagsRepositoryTests
 {
