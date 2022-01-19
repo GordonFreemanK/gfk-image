@@ -1,2 +1,10 @@
+# Build outputs
 bin/
 obj/
+pub/
+
+# IDE-specific files
+.idea/
+.vs/
+.vscode/
+*.user

@@ -18,8 +18,10 @@ try
     };
 
     var environmentVariables = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
-    foreach (string key in environmentVariables.Keys)
+    foreach (string? key in environmentVariables.Keys)
     {
+        if (key == null)
+            continue;
         processStartInfo.EnvironmentVariables[key] = (string?)environmentVariables[key];
     }
 
@@ -27,7 +29,7 @@ try
 
     process.Start();
 
-    await process.WaitForExitAsync();
+    process.WaitForExit();
 
     await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
 
