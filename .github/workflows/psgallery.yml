@@ -22,5 +22,5 @@ jobs:
       - name: Publish cmd locally
         run: dotnet publish cmd -c Release -o pub/GFK.Image/cmd
       - name: Publish to PowerShell Gallery
-        run: Publish-Module GFK.Image -NuGetApiKey {{secrets.PS_GALLERY}} -FormatVersion 1.0.0
+        run: Publish-Module GFK.Image -NuGetApiKey {{secrets.PS_GALLERY}}
         shell: pwsh
