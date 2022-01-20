@@ -1,35 +1,32 @@
+#Requires -PSEdition Core
 #Requires -Module GFK.Image
 
 <#
 .SYNOPSIS
-    Injects PowerShell into digiKam
-.DESCRIPTION
-.NOTE
-    digiKam is expected to be installed for this function to work
+    Add the PowerShell injection into digiKam
+.NOTES
+    digiKam is expected to be installed for this command to work
 #>
-
 [CmdletBinding]
 function Install-PSDigiKam {
-    Write-Output $PSScriptRoot
-    Write-Output (Get-Location).Path
-    
-    if ($env:OS -ne 'Windows_NT' -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
-        throw 'This function is only compatible with win64 systems'
-    }
+    Test-IsAdministrator
 
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal $identity
-    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
-        throw 'This function must run in an elevated shell'
-    }
+    $sourcePath = Join-Path (Split-Path $PSScriptRoot) cmd cmd.exe
+    Copy-Item $sourcePath (Get-DigiKamPath) -Force
+}
 
-    $digiKamRegistryKey = Get-Item HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\digiKam -ErrorAction SilentlyContinue
-    if (-not $digiKamRegistryKey) {
-        throw 'digiKam does not appear to be installed'
-    }
+<#
+.SYNOPSIS
+    Removes the PowerShell injection from digiKam
+.NOTES
+    digiKam is expected to be installed for this command to work
+#>
+[CmdletBinding]
+function Uninstall-PSDigiKam {
+    Test-IsAdministrator
 
-    $digiKamInstallLocation = $digiKamRegistryKey.GetValue('InstallLocation')
-    Copy-Item 'cmd/cmd.exe' $digiKamInstallLocation
+    $path = Join-Path (Get-DigiKamPath) cmd.exe
+    Remove-Item $path -Force
 }
 
 <#
@@ -47,3 +44,28 @@ function New-TagsDrive {
 
     $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" | Out-Null }
 }
+
+#region Private functions
+
+function Test-IsAdministrator {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal $identity
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
+        throw 'This command must run in an elevated shell'
+    }
+}
+
+function Get-DigiKamPath {
+    if ($env:OS -ne 'Windows_NT' -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
+        throw 'This command is only compatible with win64 systems'
+    }
+
+    $digiKamRegistryKey = Get-Item HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\digiKam -ErrorAction SilentlyContinue
+    if (-not$digiKamRegistryKey) {
+        throw 'digiKam does not appear to be installed'
+    }
+
+    return $digiKamRegistryKey.GetValue('InstallLocation')
+}
+
+#endregion
