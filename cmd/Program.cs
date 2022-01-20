@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
-using cmd;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace GFK.Image.cmd
 {
