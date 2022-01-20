@@ -1,6 +1,6 @@
 # What is this?
 
-This repository is aimed at integrating PowerShell scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
+This PowerShell is aimed at integrating scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
 - setting metadata [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on the photo location and time
 - setting metadata tags based on digiKam tags (requires digiKam)
 
@@ -8,39 +8,24 @@ Written mostly in C# / PowerShell, and tested on Windows. All the tools and tech
 
 # Pre-requisites
 
-- [git](https://git-scm.com/)
 - [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) version 6.0 and above
-- [.NET Core SDK](https://dotnet.microsoft.com/en-us/download) 3.1
 - [digiKam](https://www.digikam.org/download/)
 - [ExifTool](https://exiftool.org/) should come installed with digiKam but the latest version can be downloaded directly and [added to the path](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.2#saving-changes-to-environment-variables) or installed using a [third-party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
 
-# tl;dr / Quick start
+# Quick start
 
 **Important! This tool *modifies your files*! You should back them up before using it.**
 
-Execute the following commands **just once**. Most need to be executed in an **elevated** PowerShell prompt.
-
-## Clone the repository
-```powershell
-git clone https://github.com/GordonFreemanK/digikam-scripts.git
-cd digikam-scripts
-```
-
-## Set the ExifTool configuration
-```powershell
-mv ~\.Exiftool_config ~\.Exiftool_config.bak -Force
-cp exiftool\.Exiftool_config ~
-```
+Execute the following commands **just once** in an **elevated** PowerShell prompt.
 
 ## Install the PowerShell module
 ```powershell
- $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image.PowerShell'
- dotnet publish GFK.Image.PowerShell -c Release -o $publishPath
+ Install-Module GFK.Image
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
 ```powershell
-dotnet publish cmd -c Release -o 'C:\Program Files\digiKam\'
+Install-PSDigiKam
 ```
 
 ## Add this code in the User Shell Script window in digiKam
