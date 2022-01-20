@@ -79,7 +79,7 @@ function Get-TagName
     )
 
     if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
-        throw "Expected '-TagName' but got '$Name'"
+        throw "Expected '-TagName' or '-Namespace:TagName' but found '$Name'"
     }
     return $Matches.TagName
 }
