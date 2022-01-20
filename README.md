@@ -38,8 +38,20 @@ $destinationPath = ""$OUTPUT""
 New-PSDigiKamDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
-Set-ImageTag $destinationPath -Author (ls Tags:/Author | select -expand PSChildName)
-Set-DateTimeOffsets $destinationPath
+
+# Example metadata read/write operations
+
+$latitude, $longitude, $taken, $digitized = Get-ImageMetadata $FilePath `
+    '-XMP-exif:GPSLatitude' `
+    '-XMP-exif:GPSLongitude' `
+    '-EXIF:DateTimeOriginal' `
+    '-EXIF:CreateDate'
+
+Set-ImageMetadata $destinationPath `
+    -Author (ls Tags:/Author).PSChildName `
+    -Modified (Get-Date) `
+    -Taken (Get-DateTimeOffset $taken $latitude $longitude) `
+    -Digitized (Get-DateTimeOffset $digitized $latitude $longitude)
 ```
 
 ### Notes
