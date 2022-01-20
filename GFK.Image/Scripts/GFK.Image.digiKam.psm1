@@ -12,7 +12,7 @@ function Install-PSDigiKam {
     Test-IsAdministrator
 
     $sourcePath = Join-Path (Split-Path $PSScriptRoot) cmd cmd.exe
-    Copy-Item $sourcePath (Get-DigiKamPath) -Force
+    Copy-Item $sourcePath (Get-DigiKamPath)
 }
 
 <#
@@ -26,7 +26,9 @@ function Uninstall-PSDigiKam {
     Test-IsAdministrator
 
     $path = Join-Path (Get-DigiKamPath) cmd.exe
-    Remove-Item $path -Force
+    if (Test-Path $path) {
+        Remove-Item $path
+    }
 }
 
 <#

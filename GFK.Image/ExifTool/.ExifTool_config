@@ -31,7 +31,7 @@
 # commonly used commands.  They can be used to represent groups
 # of tags, or to provide an alias for a tag name.
 %Image::ExifTool::UserDefined::Shortcuts = (
-    Authors => [
+    Author => [
         'EXIF:Artist',
         'XMP-dc:Creator'],
     Taken => [

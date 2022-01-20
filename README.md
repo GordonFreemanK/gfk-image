@@ -1,6 +1,6 @@
 # What is this?
 
-This PowerShell is aimed at integrating scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
+This PowerShell module is aimed at integrating scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
 - setting metadata [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on the photo location and time
 - setting metadata tags based on digiKam tags (requires digiKam)
 
@@ -8,7 +8,7 @@ Written mostly in C# / PowerShell, and tested on Windows. All the tools and tech
 
 # Pre-requisites
 
-- [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) version 6.0 and above
+- [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) version 5.1 and above
 - [digiKam](https://www.digikam.org/download/)
 - [ExifTool](https://exiftool.org/) should come installed with digiKam but the latest version can be downloaded directly and [added to the path](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.2#saving-changes-to-environment-variables) or installed using a [third-party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
 
@@ -16,7 +16,7 @@ Written mostly in C# / PowerShell, and tested on Windows. All the tools and tech
 
 **Important! This tool *modifies your files*! You should back them up before using it.**
 
-Execute the following commands **just once** in an **elevated** PowerShell prompt.
+Execute the following commands in an **elevated** PowerShell prompt.
 
 ## Install the PowerShell module
 ```powershell
@@ -24,6 +24,7 @@ Execute the following commands **just once** in an **elevated** PowerShell promp
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
+Run this again after upgrading digiKam or GFK.Image
 ```powershell
 Install-PSDigiKam
 ```
@@ -37,8 +38,8 @@ $destinationPath = ""$OUTPUT""
 New-TagsDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
+Set-ImageTag $destinationPath -Author (ls Tags:/Author | select -expand PSChildName)
 Set-DateTimeOffsets $destinationPath
-Set-Authors $destinationPath -Authors (ls Tags:/Author | select -expand PSChildName)
 ```
 
 ### Notes
@@ -101,11 +102,11 @@ The G-Man
 - PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
 - This PSProvider does not support renaming, moving or deleting tags
 
-### Example ExifTool wrapper functions
+### ExifTool wrapper functions
 
-**Set-Authors**
+**Set-ImageTag**
 
-This function writes the given authors to the `Authors` shortcut tag on the given file (or folder) using ExifTool. If more than one authors is given, they are joined with `;`.
+This function writes tags or shortcut tags to the given file (or folder) using ExifTool. Array values are concatenated with ';'.
 
 **Set-DateTimeOffsets**
 
@@ -113,7 +114,7 @@ This function reads the dates (`EXIF:DateTimeOriginal` for the date taken and `E
 
 *Usage:*
 ```powershell
-C:\> Set-Authors 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' 'Gordon Freeman','Adrian Shephard'
+C:\> Set-ImageTag 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Author 'Gordon Freeman','Adrian Shephard'
     1 image files updated
 C:\> Set-DateTimeOffsets 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg'
     1 image files updated

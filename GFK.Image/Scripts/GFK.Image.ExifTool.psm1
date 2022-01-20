@@ -3,21 +3,71 @@
 
 <#
 .SYNOPSIS
-    Sets Authors tags on a photo file
+    Sets tags on an image file
 .DESCRIPTION
-    Concatenates the values and stores it in the Authors ExifTool shortcut tag for the file
+    Uses ExifTool for setting tags or shortcut tags. Tags and their values are dynamically parsed.
+    Arrays will be concatenated with ';'.
 .EXAMPLE
-    PS C:\> Set-Author.p1 C:\photos\photo1.jpg -Authors 'Alan Turing','Charlie Chaplin'
+    Set-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Artist 'Gordon Freeman','Adrian Shephard' '-XMP-xmp:MetadataDate' (Get-Date)
+.NOTES
+    Use the -WhatIf switch to display the exiftool command instead of running it
 #>
 [CmdletBinding]
-function Set-Authors
+function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
+{
+    $arguments = @('-overwrite_original')
+    $tagNameArg = $null
+    $tagName
+    foreach ($arg in $Args)
+    {
+        if ($tagNameArg) {
+            $arguments += "$tagNameArg<`$${tagName}Param",'-userParam',"$($tagName)Param=`"$(Get-TagValue $arg)`""
+            $tagNameArg = $null
+            $tagName = $null
+        } else {
+            $tagNameArg = $arg
+            $tagName = Get-TagName $arg
+        }
+    }
+    if ($tagNameArg) {
+        throw "Missing value for tag $tagNameArg"
+    }
+    $arguments += '--',$FilePath
+    
+    if ($WhatIf) {
+        Write-Host "What if: exiftool $($arguments -join ' ')" 
+    } else {
+        &exiftool $arguments
+    }
+}
+
+function Get-TagName
 {
     param (
-        [Parameter(Mandatory)][string]$FilePath,
-        [Parameter(Mandatory)][string[]]$Authors
+        [Parameter(Mandatory)][string]$Name
     )
 
-    exiftool -overwrite_original $FilePath -Modified<now '-Authors<$AuthorsParam' -userParam AuthorsParam="`"$($Authors -join ';')`""
+    if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
+        throw "Expected '-TagName' but got '$Name'"
+    }
+    return $Matches.TagName
+}
+
+function Get-TagValue
+{
+    param (
+        [Parameter(Mandatory)][object]$Value
+    )
+    
+    if ($Value -is [datetime] -or $Value -is [System.DateTimeOffset]) {
+        return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $Value
+    }
+
+    if ($Value -is [array]) {
+        return $Value -join ';'
+    }
+
+    return [string] $Value
 }
 
 <#
