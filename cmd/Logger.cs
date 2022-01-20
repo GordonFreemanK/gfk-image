@@ -1,22 +1,27 @@
-namespace cmd;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
-public class Logger
+namespace GFK.Image.cmd
 {
-    private readonly string _path;
-
-    public Logger(string path)
+    public class Logger
     {
-        _path = path;
-    }
+        private readonly string _path;
 
-    public async Task WriteAsync(string message)
-    {
-        if (message != string.Empty)
+        public Logger(string path)
         {
-            await using var log = new StreamWriter(_path, true);
+            _path = path;
+        }
 
-            await log.WriteLineAsync($"{DateTime.UtcNow:s}");
-            await log.WriteLineAsync(message);
+        public async Task WriteAsync(string message)
+        {
+            if (message != string.Empty)
+            {
+                await using var log = new StreamWriter(_path, true);
+
+                await log.WriteLineAsync($"{DateTime.UtcNow:s}");
+                await log.WriteLineAsync(message);
+            }
         }
     }
 }
