@@ -8,7 +8,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <RootNamespace>GFK.Image.cmd</RootNamespace>
+    <AssemblyName>cmd</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

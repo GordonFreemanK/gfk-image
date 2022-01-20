@@ -3,7 +3,7 @@
 
 <#
 .SYNOPSIS
-    Add the PowerShell injection into digiKam
+    Add the PowerShell injection to digiKam
 .NOTES
     digiKam is expected to be installed for this command to work
 #>

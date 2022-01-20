@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmd", "cmd\cmd.csproj", "{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GFK.Image.cmd", "GFK.Image.cmd\GFK.Image.cmd.csproj", "{7C0A8BE3-28A1-4B21-8814-ED3624FC3ABC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GFK.Image", "GFK.Image\GFK.Image.csproj", "{1CE5263B-8536-4FAA-8345-0785D9FDC811}"
 EndProject
