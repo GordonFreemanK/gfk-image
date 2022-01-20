@@ -33,7 +33,7 @@ Copyright = '(c) GordonFreemanK. All rights reserved.'
 Description = 'PowerShell scripts to manipulate photo metadata using ExifTool and an application to enable PowerShell in digiKam'
 
 # Minimum version of the PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '5.1'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -66,7 +66,7 @@ Description = 'PowerShell scripts to manipulate photo metadata using ExifTool an
 # FormatsToProcess = @()
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-NestedModules = @('GFK.Image.PowerShell.dll','Scripts/GFK.Image.PowerShell.digiKam.psm1','Scripts/GFK.Image.PowerShell.ExifTool.psm1')
+NestedModules = @('GFK.Image.dll','Scripts/GFK.Image.digiKam.psm1','Scripts/GFK.Image.ExifTool.psm1')
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @('New-TagsDrive', 'Set-Authors', 'Set-DateTimeOffsets')
