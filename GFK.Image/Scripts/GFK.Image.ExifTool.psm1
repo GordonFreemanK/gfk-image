@@ -15,6 +15,10 @@
 [CmdletBinding]
 function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
 {
+    if (-not (Get-Command exiftool)) {
+        throw 'ExifTool not found in the Path'
+    }
+    
     $arguments = @('-overwrite_original')
     $tagNameArg = $null
     $tagName
@@ -41,35 +45,6 @@ function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
     }
 }
 
-function Get-TagName
-{
-    param (
-        [Parameter(Mandatory)][string]$Name
-    )
-
-    if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
-        throw "Expected '-TagName' but got '$Name'"
-    }
-    return $Matches.TagName
-}
-
-function Get-TagValue
-{
-    param (
-        [Parameter(Mandatory)][object]$Value
-    )
-    
-    if ($Value -is [datetime] -or $Value -is [System.DateTimeOffset]) {
-        return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $Value
-    }
-
-    if ($Value -is [array]) {
-        return $Value -join ';'
-    }
-
-    return [string] $Value
-}
-
 <#
 .SYNOPSIS
     Sets UTC offset tags on a photo file
@@ -94,3 +69,36 @@ function Set-DateTimeOffsets
 
     exiftool -overwrite_original $FilePath -Modified<now '-Taken<$TakenParam' '-Digitized<$DigitizedParam' -userParam TakenParam="$takenLocal" -userParam DigitizedParam="$digitizedLocal"
 }
+
+# region Private functions
+
+function Get-TagName
+{
+    param (
+        [Parameter(Mandatory)][string]$Name
+    )
+
+    if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
+        throw "Expected '-TagName' but got '$Name'"
+    }
+    return $Matches.TagName
+}
+
+function Get-TagValue
+{
+    param (
+        [Parameter(Mandatory)][object]$Value
+    )
+
+    if ($Value -is [datetime] -or $Value -is [System.DateTimeOffset]) {
+        return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $Value
+    }
+
+    if ($Value -is [array]) {
+        return $Value -join ';'
+    }
+
+    return [string] $Value
+}
+
+#endregion
