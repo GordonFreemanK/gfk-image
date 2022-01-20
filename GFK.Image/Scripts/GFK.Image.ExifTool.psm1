@@ -20,8 +20,8 @@ function Get-ImageMetadata {
         throw 'ExifTool not found in the Path'
     }
     
-    $Args | Get-TagName # test tag name regex
-    $arguments = $Args + '-s', '-s', '-s', '-c', '%+.6f', '-d', '%Y-%m-%dT%H:%M:%S', '--', $FilePath
+    $Args | Get-TagName | Out-Null # test tag name regex
+    $arguments = $Args + '-s', '-s', '-s', '-c', '%+.6f', '--', $FilePath
     
     return &exiftool $arguments
 }
@@ -70,11 +70,38 @@ function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf) {
     }
 }
 
+<#
+.SYNOPSIS
+    Converts a metadata date/time or date+time into a [datetime] object
+.DESCRIPTION
+    Relies on ExifTool's default formats for such fields. Supports EXIF (naive full date), IPTC (date + naive or local time), XMP (naive or local full date)
+.EXAMPLE
+    Convert-ImageDateTime -Date '2022:01:19' -Time '15:16:17'
+    Convert-ImageDateTime -DateTime '2022:01:19 15:16:17+03:00'
+    Convert-ImageDateTime -DateTime (exiftool $filePath -XMP:CreateDate -s -s -s)
+#>
+[CmdletBinding]
+function Convert-ImageDateTime {
+    [OutputType([datetime])]
+    param (
+        [Parameter(Mandatory, ParameterSetName = 'OneField')][string]$DateTime,
+        [Parameter(Mandatory, ParameterSetName = 'TwoFields')][string]$Date,
+        [Parameter(Mandatory, ParameterSetName = 'TwoFields')][string]$Time
+    )
+
+    if ($PsCmdlet.ParameterSetName -EQ 'TwoFields') {
+        $DateTime = "$Date $Time"
+    }
+    $formats = 'yyyy:MM:dd HH:mm:ss','yyyy:MM:dd HH:mm:sszzz'
+    return [datetime]::ParseExact($DateTime, [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)
+}
+
 #region Private functions
 
+[CmdletBinding]
 function Get-TagName {
     param (
-        [Parameter(Mandatory)][string]$Name
+        [Parameter(Mandatory, ValueFromPipeline)][string]$Name
     )
 
     if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
@@ -85,7 +112,7 @@ function Get-TagName {
 
 function Get-TagValue {
     param (
-        [Parameter(Mandatory)][object]$Value
+        [Parameter(Mandatory, ValueFromPipeline)][object]$Value
     )
 
     if ($Value -is [datetime] -or $Value -is [System.DateTimeOffset]) {

@@ -50,8 +50,8 @@ $latitude, $longitude, $taken, $digitized = Get-ImageMetadata $FilePath `
 Set-ImageMetadata $destinationPath `
     -Author (ls Tags:/Author).PSChildName `
     -Modified (Get-Date) `
-    -Taken (Get-DateTimeOffset $taken $latitude $longitude) `
-    -Digitized (Get-DateTimeOffset $digitized $latitude $longitude)
+    -Taken (Get-DateTimeOffset (Convert-ImageDateTime -DateTime $taken) $latitude $longitude) `
+    -Digitized (Get-DateTimeOffset (Convert-ImageDateTime -DateTime $digitized) $latitude $longitude)
 ```
 
 ### Notes
@@ -90,37 +90,24 @@ The following shortcut tags are created by this repository, change them as neede
 
 ### Get-DateTimeOffset
 
-This helper cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) (local or not), latitude and longitude (in signed [decimal degree](https://en.wikipedia.org/wiki/Decimal_degrees) format) and returns a [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset).
+This cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) (local or not), latitude and longitude (in signed [decimal degree](https://en.wikipedia.org/wiki/Decimal_degrees) format) and returns a [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset).
 
 *Usage (this example uses automatic DateTime conversion from a string for the input):*
 ```powershell
 PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString()
 19/01/2022 15:16:17 +03:00
 ```
+### ExifTool wrapper commands
 
-### New-PSDigiKamDrive
+These two commands rely on `exiftool` being an existing command in the current session. You can ensure so on linux by installing it using the package manager or on Windows by following the [official installation steps](https://exiftool.org/install.html#Windows) or using a [third party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows).
 
-This function reads a string containing the tags for a picture (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
+**Get-ImageMetadata**
 
-*Usage:*
-```powershell
-PS C:\> New-PSDigiKamDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
-PS C:\> ls Tags:\People
-Adrian Shephard
-The G-Man
-```
+This cmdlet 
 
-**Notes:**
-- PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
-- This PSProvider does not support renaming, moving or deleting items
-
-### ExifTool wrapper functions
-
-**Set-ImageTag**
+**Set-ImageMetadata**
 
 This function writes tags or shortcut tags to the given file (or folder) using ExifTool. Array values are concatenated with ';'.
-
-**Set-DateTimeOffsets**
 
 This function reads the dates (`EXIF:DateTimeOriginal` for the date taken and `EXIF:CreateDate` for the date digitized) and GPS locations (`XMP-exif:GPSLatitude` and `XMP-exif:GPSLongitude`) from the given file (or folder) using ExifTool, calculates the offsets then writes back the dates and offsets to the the `Taken` and `Digitized` shortcut tags on the given file.
 
@@ -138,6 +125,30 @@ Note on setting dates with offsets with ExifTool. There are multiple types of da
 - XMP stores the date+time+offset in a single tag (e.g. `XMP-exif:DateTimeOriginal`)
 
 Luckily, we can construct a fully qualified date/time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`) and ExifTool automatically stores the relevant part in any of these fields.
+
+### Install-PSDigiKam
+
+This Windows-only cmdlet changes the shell for the User Shell Script plugin in digiKam to `pwsh` by copying a PowerShell bootstrapper named `cmd.exe` in the digiKam install location.
+
+### Uninstall-PSDigiKam
+
+This Windows-only cmdlet resets the shell for the User Shell Script plugin in digiKam to the default `cmd.exe`.
+
+### New-PSDigiKamDrive
+
+This cmdlet reads a string containing an image tags as formatted by digiKam (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
+
+*Usage:*
+```powershell
+PS C:\> New-PSDigiKamDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
+PS C:\> ls Tags:\People
+Adrian Shephard
+The G-Man
+```
+
+**Notes:**
+- PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
+- This PSProvider does not support renaming, moving or deleting items
 
 ## 3. Injecting `pwsh.exe` into digiKam
 
