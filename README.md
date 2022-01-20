@@ -24,10 +24,10 @@ Execute the following commands in an **elevated** PowerShell prompt.
 ```
 
 ## Install a fake cmd.exe into digiKam's folder
-Run this again after upgrading digiKam or GFK.Image
 ```powershell
 Install-PSDigiKam
 ```
+**Note:** Run this again after upgrading digiKam or GFK.Image
 
 ## Add this code in the User Shell Script window in digiKam
 ```powershell
@@ -35,7 +35,7 @@ $ErrorActionPreference = 'Stop'
 
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
-New-TagsDrive $Env:TAGSPATH
+New-PSDigiKamDrive $Env:TAGSPATH
 
 cp $sourcePath $destinationPath
 Set-ImageTag $destinationPath -Author (ls Tags:/Author | select -expand PSChildName)
@@ -86,13 +86,13 @@ PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString(
 19/01/2022 15:16:17 +03:00
 ```
 
-### New-TagsDrive
+### New-PSDigiKamDrive
 
 This function reads a string containing the tags for a picture (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
 
 *Usage:*
 ```powershell
-PS C:\> New-TagsDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
+PS C:\> New-PSDigiKamDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
 PS C:\> ls Tags:\People
 Adrian Shephard
 The G-Man
@@ -100,7 +100,7 @@ The G-Man
 
 **Notes:**
 - PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
-- This PSProvider does not support renaming, moving or deleting tags
+- This PSProvider does not support renaming, moving or deleting items
 
 ### ExifTool wrapper functions
 

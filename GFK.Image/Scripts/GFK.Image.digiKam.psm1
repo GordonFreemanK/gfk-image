@@ -39,7 +39,7 @@ function Uninstall-PSDigiKam {
     This will load these tags in a new PowerShell drive called Tag:/ to enable exploring them
 #>
 [CmdletBinding]
-function New-TagsDrive {
+function New-PSDigiKamDrive {
     param ([Parameter(Mandatory)][string]$Tags)
 
     New-PSDrive -Name Tags -PSProvider Tags -Root 'Tags:' -Scope Global | Out-Null
