@@ -12,7 +12,7 @@
 RootModule = 'GFK.Image.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '1.0.0'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
@@ -21,16 +21,16 @@ CompatiblePSEditions = @('Core')
 GUID = '37e0816e-094f-476c-bb61-cecc18cbb424'
 
 # Author of this module
-Author = 'GFK'
+Author = 'GordonFreemanK'
 
 # Company or vendor of this module
-CompanyName = 'GFK'
+CompanyName = 'GordonFreemanK'
 
 # Copyright statement for this module
-Copyright = '(c) GFK. All rights reserved.'
+Copyright = '(c) GordonFreemanK. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'PowerShell scripts to manipulate photo metadata using ExifTool and an application to enable PowerShell in digiKam'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -95,13 +95,13 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = @('digiKam','ExifTool','EXIF','Image','Photo','jpg')
 
         # A URL to the license for this module.
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/GordonFreemanK/digikam-scripts'
 
         # A URL to an icon representing this module.
         # IconUri = ''
