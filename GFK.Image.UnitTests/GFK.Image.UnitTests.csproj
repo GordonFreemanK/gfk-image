@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GFK.Image.PowerShell\GFK.Image.PowerShell.csproj" />
+      <ProjectReference Include="..\GFK.Image\GFK.Image.csproj" />
     </ItemGroup>
 
 </Project>

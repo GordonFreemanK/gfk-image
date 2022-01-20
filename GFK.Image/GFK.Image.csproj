@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>GFK.Image.PowerShell</AssemblyName>
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
+    <PackageId>GFK.Image</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -19,13 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\GFK.Image.PowerShell.digiKam.psm1">
+    <None Update="Scripts\GFK.Image.digiKam.psm1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\GFK.Image.PowerShell.ExifTool.psm1">
+    <None Update="Scripts\GFK.Image.ExifTool.psm1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="GFK.Image.PowerShell.psd1">
+    <None Update="GFK.Image.psd1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

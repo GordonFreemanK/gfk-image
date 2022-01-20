@@ -1,4 +1,4 @@
-#Requires -Module GFK.Image.PowerShell
+#Requires -Module GFK.Image
 
 <#
 .SYNOPSIS
