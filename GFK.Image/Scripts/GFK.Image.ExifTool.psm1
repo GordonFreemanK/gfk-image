@@ -10,8 +10,7 @@
     Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Artist '-XMP-xmp:MetadataDate'
 #>
 [CmdletBinding]
-function Get-ImageMetadata
-{
+function Get-ImageMetadata {
     [OutputType([string[]])]
     param(
         [string]$FilePath
@@ -22,7 +21,7 @@ function Get-ImageMetadata
     }
     
     $Args | Get-TagName # test tag name regex
-    $Args += '-s','-s','-s','-c','%+.6f','-d','%Y-%m-%dT%H:%M:%S','--',$FilePath
+    $arguments = $Args + '-s', '-s', '-s', '-c', '%+.6f', '-d', '%Y-%m-%dT%H:%M:%S', '--', $FilePath
     
     return &exiftool $arguments
 }
@@ -39,8 +38,7 @@ function Get-ImageMetadata
     Use the -WhatIf switch to display the exiftool command instead of running it
 #>
 [CmdletBinding]
-function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
-{
+function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf) {
     if (-not (Get-Command exiftool)) {
         throw 'ExifTool not found in the Path'
     }
@@ -48,13 +46,13 @@ function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
     $arguments = @('-overwrite_original')
     $tagNameArg = $null
     $tagName
-    foreach ($arg in $Args)
-    {
+    foreach ($arg in $Args) {
         if ($tagNameArg) {
-            $arguments += "$tagNameArg<`$${tagName}Param",'-userParam',"$($tagName)Param=`"$(Get-TagValue $arg)`""
+            $arguments += "$tagNameArg<`$${tagName}Param", '-userParam', "$($tagName)Param=`"$(Get-TagValue $arg)`""
             $tagNameArg = $null
             $tagName = $null
-        } else {
+        }
+        else {
             $tagNameArg = $arg
             $tagName = Get-TagName $arg
         }
@@ -62,19 +60,19 @@ function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf)
     if ($tagNameArg) {
         throw "Missing value for tag $tagNameArg"
     }
-    $arguments += '--',$FilePath
+    $arguments += '--', $FilePath
 
     if ($WhatIf) {
         Write-Host "What if: exiftool $($arguments -join ' ')"
-    } else {
+    }
+    else {
         &exiftool $arguments
     }
 }
 
-# region Private functions
+#region Private functions
 
-function Get-TagName
-{
+function Get-TagName {
     param (
         [Parameter(Mandatory)][string]$Name
     )
@@ -85,8 +83,7 @@ function Get-TagName
     return $Matches.TagName
 }
 
-function Get-TagValue
-{
+function Get-TagValue {
     param (
         [Parameter(Mandatory)][object]$Value
     )
