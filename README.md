@@ -154,12 +154,12 @@ PS C:\> (Get-DateTimeOffset -DateTime '2022-01-19 15:16:17' -Latitude -3.075833 
 PS C:\> $filePath = 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg'
 PS C:\> Set-ImageMetadata -FilePath $filePath -Tags @{'XMP:CreatedDate'='2022-01-19 15:16:17+03:00';Artist='Gordon Freeman','Adrian Shephard'}
     1 image files updated
-PS C:\> $artist,$createdDate = Get-ImageMetatada -FilePath $filePath -TagNames Artist,XMP:CreatedDate
+PS C:\> $artist,$createdDate = Get-ImageMetadata -FilePath $filePath -TagNames Artist,XMP:CreatedDate
     1 image files read
 PS C:\> $artist,$createdDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> $allMetadata = Get-ImageMetatada -FilePath $filePath -TagNames All -Full -Grouped
+PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full -Grouped
     1 image files read
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard
