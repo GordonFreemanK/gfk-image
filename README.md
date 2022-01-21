@@ -57,19 +57,19 @@ Install-PSDigiKam
   - Run the Batch Queue Manager
 
 ```powershell
-# Important! Do not use isolated "&" characters anywhere in this script as they will break the digiKam PowerShell integration
+# Important! Do not use isolated ampersand characters anywhere in this script as they will break the digiKam PowerShell integration
 
 # This will ensure that the script stops on error
-# Errors are reported in digiKam as "User Script: Script process crashed"
+# Errors are reported in digiKam as 'User Script: Script process crashed'
 $ErrorActionPreference = 'Stop'
 
 # Double double quotes here are intentional (one of the set gets replaced by digiKam)
-# File paths containing "$" or "`" characters will fail
+# File paths containing '$' or '`' characters will fail
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
 
 # Create a Tags: drive to navigate digiKam tags
-New-PSDigiKamDrive Tags $Env:TAGSPATH
+New-PSDigiKamDrive -Tags $Env:TAGSPATH
 $author = (ls Tags:/Author).Value
 
 # Temporarily set the ExifTool configuration file path to the one included in the module
@@ -87,7 +87,7 @@ $takenDateTimeOffset = Get-DateTimeOffset `
 
 # $sourcePath is the original file and $destinationPath is the file to be modified
 # This command must be invoked before starting modifications on $destinationPath
-# After this line whatever happens digiKam considers the script a success and logs "Item processed successfully (overwritten)"
+# After this line whatever happens digiKam considers the script a success and logs 'Item processed successfully (overwritten)'
 # This means any failure after this line will interrupt the process and be logged, but not be considered a failure by digiKam
 cp $sourcePath $destinationPath
 
