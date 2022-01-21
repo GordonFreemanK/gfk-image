@@ -25,14 +25,6 @@ namespace GFK.Image.cmd
                     UseShellExecute = false
                 };
 
-                var environmentVariables = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
-                foreach (string? key in environmentVariables.Keys)
-                {
-                    if (key == null)
-                        continue;
-                    processStartInfo.EnvironmentVariables[key] = (string?)environmentVariables[key];
-                }
-
                 using var process = new Process { StartInfo = processStartInfo };
 
                 process.Start();
