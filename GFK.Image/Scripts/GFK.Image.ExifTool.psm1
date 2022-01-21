@@ -1,9 +1,6 @@
 #Requires -PSEdition Core
 #Requires -Module GFK.Image
 
-using namespace System
-using namespace System.Globalization
-
 Set-StrictMode -Version Latest
 
 class ImageMetadata {
@@ -50,7 +47,7 @@ function Get-ImageMetadata {
     [OutputType([string[]], ParameterSetName = 'ValuesOnly')]
     [OutputType([ImageMetadata[]], ParameterSetName = 'Full')]
     Param(
-        [SupportsWildcards]
+        [SupportsWildcards()]
         [Parameter(Mandatory, ValueFromPipeline)]
         [string] $FilePath,
 
@@ -81,7 +78,7 @@ function Get-ImageMetadata {
         }
 
         if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
-            $arguments += '-s3', 'f'
+            $arguments += '-s3', '-f'
         }
         elseif ($Grouped) {
             $arguments += '-j', '-G', '-a'
@@ -129,7 +126,7 @@ function Set-ImageMetadata() {
     #>
     [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
     Param(
-        [SupportsWildcards]
+        [SupportsWildcards()]
         [Parameter(Mandatory, ValueFromPipeline)]
         [string]$FilePath,
 
@@ -199,7 +196,7 @@ function ConvertFrom-ImageDateTime {
             $DateTime = "$Date $Time"
         }
         $formats = 'yyyy:MM:dd HH:mm:ss', 'yyyy:MM:dd HH:mm:sszzz'
-        return [datetime]::ParseExact($DateTime, [string[]] $formats, [CultureInfo]::InvariantCulture)    
+        return [datetime]::ParseExact($DateTime, [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)    
     }
 }
 
@@ -250,7 +247,7 @@ function ConvertTo-ImageValue {
     )
 
     Process {
-        if ($TagValue -is [datetime] -or $TagValue -is [DateTimeOffset]) {
+        if ($TagValue -is [datetime] -or $TagValue -is [System.DateTimeOffset]) {
             return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $TagValue
         }
     

@@ -1,8 +1,6 @@
 #Requires -PSEdition Core
 #Requires -Module GFK.Image
 
-using namespace Security.Principal
-
 Set-StrictMode -Version Latest
 
 function Install-PSDigiKam {
@@ -68,9 +66,9 @@ function New-PSDigiKamDrive {
 #region Private functions
 
 function Test-IsAdministrator {
-    $identity = [WindowsIdentity]::GetCurrent()
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal $identity
-    if (-not $principal.IsInRole([WindowsBuiltinRole]::Administrator)) {
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
         throw 'This command must run in an elevated shell'
     }
 }

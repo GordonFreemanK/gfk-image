@@ -238,3 +238,31 @@ Fortunately, we can construct a fully qualified date/time in [ISO 8601 format](h
 ## Unicode with ExifTool on Windows
 
 The only way I found to make the combination of PowerShell and exiftool fully compatible (read and write) with UTF-8 characters is by setting the system locale to UTF-8. This comes with a lot of fine print. How-to and caveats can be found [here](https://stackoverflow.com/questions/49476326/displaying-unicode-in-powershell/49481797#49481797).
+
+## Modifying and running the code locally (Windows)
+
+Get the repository:
+```powershell
+git clone https://github.com/GordonFreemanK/gfk-image.git
+cd gfk-image
+```
+
+Uninstall any version of the module you may have installed:
+```powershell
+Get-Module GFK.Image | Uninstall-Module
+```
+
+At this point you may change the code as you see fit locally. When you are ready to test it, deploy it to your user folder:
+```powershell
+$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
+dotnet publish GFK.Image -c Release -o $publishPath
+dotnet publish GFK.Image.cmd -c Release -o (Join-Path $publishPath cmd)
+```
+
+The module should now be available in any terminal. You may remove it with:
+```powershell
+$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
+rm -R $publishPath
+```
+
+Note that both publishing and removing will fail if the module is loaded in any powershell environment. If you are not sure which one it is, you can kill all pwsh.exe processes.
