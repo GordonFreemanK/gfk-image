@@ -1,129 +1,339 @@
 #Requires -PSEdition Core
 #Requires -Module GFK.Image
 
-<#
-.SYNOPSIS
-    Gets tags from an image file
-.DESCRIPTION
-    Uses ExifTool for getting tags or shortcut tags.
-.EXAMPLE
-    Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Artist '-XMP-xmp:MetadataDate'
-#>
-[CmdletBinding]
-function Get-ImageMetadata {
-    [OutputType([string[]])]
-    param(
-        [string]$FilePath
-    )
-    
-    if (-not (Get-Command exiftool)) {
-        throw 'ExifTool not found in the Path'
-    }
-    
-    $Args | Get-TagName | Out-Null # test tag name regex
-    $arguments = $Args + '-s', '-s', '-s', '-c', '%+.6f', '--', $FilePath
-    
-    return &exiftool $arguments
+using namespace System
+using namespace System.Globalization
+
+Set-StrictMode -Version Latest
+
+class ImageMetadata {
+    [string] $FilePath
+    [PSObject] $Tags
 }
 
-<#
-.SYNOPSIS
-    Sets tags on an image file
-.DESCRIPTION
-    Uses ExifTool for setting tags or shortcut tags. Tags and their values are dynamically parsed.
-    Arrays will be concatenated with ';'.
-.EXAMPLE
-    Set-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Artist 'Gordon Freeman','Adrian Shephard' '-XMP-xmp:MetadataDate' (Get-Date)
-.NOTES
-    Use the -WhatIf switch to display the exiftool command instead of running it
-#>
-[CmdletBinding]
-function Set-ImageMetadata([string]$FilePath, [switch]$WhatIf) {
-    if (-not (Get-Command exiftool)) {
-        throw 'ExifTool not found in the Path'
+function Get-ImageMetadata {
+    <#
+    .SYNOPSIS
+        Uses ExifTool for getting tags or shortcut tags by tag names
+    .DESCRIPTION
+        This command outputs metadata tags for one or multiple files
+        The input path can be a folder and can contain wildcards    
+    .EXAMPLE
+        There are two modes (parameter sets) in which this command can run:
+
+        PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist,CreateDate
+        The command returns one string per tag (including those not found in the file, as empty strings) as an array, except if:
+        - the path resolves to more than one file
+        - one of the tags used is a shortcut tag
+        Additionnally, tag values that are just a single caret '-' will be returned as empty strings
+        Choose this if you want the fastest mode to use with fully defined single files and without shortcut tags
+        (You could actually work with more than one file is you splice the resulting array. This would theoretically be faster than running the command multiple times)
+
+        PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist,CreateDate -Full
+        PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist,CreateDate -Full -Grouped
+        In full mode, the command returns one ImageMetadata object per file found (each contains the file path and a Tags property)
+        Tags not found on the file will not be  in the output at all (even as empty strings)
+        
+        Without the -Grouped switch specified, the Tags property of each ImageMetadata object is a flat list of properties for the tags found, without group information (EXIF/IPTC/XMP)
+        Collisions therefore in case of tag duplication across groups ExifTool chooses which tag value to output.
+        Choose this if you want to handle multiple files and are not concerned with group the tags are stored in, or if you fully specify the groups on the TagNames parameter (e.g. 'EXIF:CreateDate').
+
+        With the -Grouped switch specified, the Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags found.
+        There will be no collisions in this mode.
+        Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file.
+    .NOTES
+        Recursion is available as a switch. The option will have no effect if the path is not a directory.
+        An optional ExifTool configuration can be specified as a parameter.
+
+    #>
+    [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'ValuesOnly')]
+    [OutputType([string[]], ParameterSetName = 'ValuesOnly')]
+    [OutputType([ImageMetadata[]], ParameterSetName = 'Full')]
+    Param(
+        [SupportsWildcards]
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string] $FilePath,
+
+        [Parameter(Mandatory)]
+        [string[]] $TagNames,
+
+        [Parameter(ParameterSetName = 'Full')]
+        [switch] $Full,
+
+        [Parameter(ParameterSetName = 'Full')]
+        [switch] $Grouped,
+
+        [switch] $Recurse,
+
+        [string] $ConfigurationPath
+    )
+
+    Begin {
+        Test-ExifTool
     }
 
-    $arguments = @('-overwrite_original')
-    $tagNameArg = $null
-    $tagName
-    foreach ($arg in $Args) {
-        if ($tagNameArg) {
-            $arguments += "$tagNameArg<`$${tagName}Param", '-userParam', "$($tagName)Param=`"$(Get-TagValue $arg)`""
-            $tagNameArg = $null
-            $tagName = $null
+    Process {
+        if ($ConfigurationPath) {
+            $arguments = @('-config', $ConfigurationPath)
         }
         else {
-            $tagNameArg = $arg
-            $tagName = Get-TagName $arg
+            $arguments = @()
         }
-    }
-    if ($tagNameArg) {
-        throw "Missing value for tag $tagNameArg"
-    }
-    $arguments += '--', $FilePath
 
-    if ($WhatIf) {
-        Write-Host "What if: exiftool $($arguments -join ' ')"
-    }
-    else {
-        &exiftool $arguments
+        if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
+            $arguments += '-s3', 'f'
+        }
+        elseif ($Grouped) {
+            $arguments += '-j', '-G', '-a'
+        }
+        else {
+            $arguments += '-j'
+        }
+
+        if ($Recurse) {
+            $arguments += '-r'
+        }
+        
+        $arguments = @($arguments; $TagNames | Get-TagNameArgument; '-c', '%+.6f', '--', $FilePath)
+    
+        Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
+        $toolResults = &exiftool $arguments
+        if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
+            return $toolResults | ConvertFrom-ExifToolValue
+        }
+        else {
+            return ConvertFrom-Json ($toolResults -join "`n") | New-ImageMetadata -Grouped $Grouped
+        }
     }
 }
 
-<#
-.SYNOPSIS
-    Converts a metadata date/time or date+time into a [datetime] object
-.DESCRIPTION
-    Relies on ExifTool's default formats for such fields. Supports EXIF (naive full date), IPTC (date + naive or local time), XMP (naive or local full date)
-.EXAMPLE
-    Convert-ImageDateTime -Date '2022:01:19' -Time '15:16:17'
-    Convert-ImageDateTime -DateTime '2022:01:19 15:16:17+03:00'
-    Convert-ImageDateTime -DateTime (exiftool $filePath -XMP:CreateDate -s -s -s)
-#>
-[CmdletBinding]
-function Convert-ImageDateTime {
-    [OutputType([datetime])]
-    param (
-        [Parameter(Mandatory, ParameterSetName = 'OneField')][string]$DateTime,
-        [Parameter(Mandatory, ParameterSetName = 'TwoFields')][string]$Date,
-        [Parameter(Mandatory, ParameterSetName = 'TwoFields')][string]$Time
+function Set-ImageMetadata() {
+    <#
+    .SYNOPSIS
+        Uses ExifTool for setting tags or shortcut tags
+    .DESCRIPTION
+        This command writes metadata tags to one or multiple files
+        The input path can be a folder and can contain wildcards    
+        Arrays will be concatenated with ';'
+    .EXAMPLE
+        Set-ImageMetadata `
+            -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' `
+            -Tags @{
+                Artist = 'Gordon Freeman','Adrian Shephard';
+                '-XMP-xmp:MetadataDate' = Get-Date
+            }
+    .NOTES
+        Shortcut tag values cannot be set with the `=` operator and need to be set with the `<` operator.
+        In turn, the `<` operator does not play well with constant values when they contain special characters such as `$`.
+        Therefore to support both constant and non-constant values on tags and on shortcut tags, we use the '-userParam' option.
+    #>
+    [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
+    Param(
+        [SupportsWildcards]
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$FilePath,
+
+        [Parameter(Mandatory)]
+        [hashtable] $Tags,
+
+        [switch] $Recurse,
+
+        [string] $ConfigurationPath
     )
 
-    if ($PsCmdlet.ParameterSetName -EQ 'TwoFields') {
-        $DateTime = "$Date $Time"
+    Begin {
+        Test-ExifTool
     }
-    $formats = 'yyyy:MM:dd HH:mm:ss','yyyy:MM:dd HH:mm:sszzz'
-    return [datetime]::ParseExact($DateTime, [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)
+
+    Process {
+        if ($ConfigurationPath) {
+            $arguments = @('-config', $ConfigurationPath)
+        }
+        else {
+            $arguments = @()
+        }
+        $arguments += '-overwrite_original'
+    
+        $index = 0
+        foreach ($tagName in $Tags.Keys) {
+            $tagNameArgument = Get-TagNameArgument -TagName $tagName
+            $paramName = "Param$(($index++))"
+            $tagValue = ConvertTo-ExifToolValue -TagValue $Tags[$tagName]
+            $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=`"$tagValue`""
+        }
+        $arguments += '--', $FilePath
+    
+        Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
+        if ($PSCmdlet.ShouldProcess($FilePath)) {
+            &exiftool $arguments
+        }    
+    }
+}
+
+function Convert-ImageDateTime {
+    <#
+    .SYNOPSIS
+        Converts a metadata date/time or date+time into a [datetime] object
+    .DESCRIPTION
+        Relies on ExifTool's default formats for such fields. Supports EXIF (naive full date), IPTC (date + naive or local time), XMP (naive or local full date)
+    .EXAMPLE
+        Convert-ImageDateTime -Date '2022:01:19' -Time '15:16:17'
+        Convert-ImageDateTime -DateTime '2022:01:19 15:16:17+03:00'
+        Convert-ImageDateTime -DateTime (Get-ImageMetadata $filePath XMP:CreateDate)
+    #>
+    [CmdletBinding(PositionalBinding = $false)]
+    [OutputType([datetime])]
+    Param (
+        [Parameter(Mandatory, ParameterSetName = 'OneField', ValueFromPipelineByPropertyName)]
+        [string]$DateTime,
+
+        [Parameter(Mandatory, ParameterSetName = 'TwoFields', ValueFromPipelineByPropertyName)]
+        [string]$Date,
+
+        [Parameter(Mandatory, ParameterSetName = 'TwoFields', ValueFromPipelineByPropertyName)]
+        [string]$Time
+    )
+
+    Process {
+        if ($PsCmdlet.ParameterSetName -EQ 'TwoFields') {
+            $DateTime = "$Date $Time"
+        }
+        $formats = 'yyyy:MM:dd HH:mm:ss', 'yyyy:MM:dd HH:mm:sszzz'
+        return [datetime]::ParseExact($DateTime, [string[]] $formats, [CultureInfo]::InvariantCulture)    
+    }
 }
 
 #region Private functions
 
-[CmdletBinding]
-function Get-TagName {
-    param (
-        [Parameter(Mandatory, ValueFromPipeline)][string]$Name
-    )
-
-    if (-not ($Name -match '^-(?:[\w-]+:)?(?<TagName>\w+)$')) {
-        throw "Expected '-TagName' or '-Namespace:TagName' but found '$Name'"
+function Test-ExifTool {
+    if (-not (Get-Command exiftool)) {
+        throw 'ExifTool not found in the environment Path'
     }
-    return $Matches.TagName
 }
 
-function Get-TagValue {
-    param (
-        [Parameter(Mandatory, ValueFromPipeline)][object]$Value
+function Get-TagNameArgument {
+    [CmdletBinding(PositionalBinding = $false)]
+    [OutputType([string])]
+    Param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$TagName
     )
 
-    if ($Value -is [datetime] -or $Value -is [System.DateTimeOffset]) {
-        return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $Value
+    Process {
+        if (-not ($TagName -match '^(?:[\w-]+:)?\w+$')) {
+            throw "Expected 'TagName' or 'Namespace:TagName' but found '$TagName'"
+        }
+        return "-$TagName"    
+    }
+}
+
+function ConvertFrom-ExifToolValue {
+    [CmdletBinding(PositionalBinding = $false)]
+    Param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$TagValue
+    )
+
+    Process {
+        if ($TagValue -eq '-') {
+            return ''
+        }
+        return $TagValue
+    }
+}
+
+function ConvertTo-ExifToolValue {
+    [CmdletBinding(PositionalBinding = $false)]
+    Param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [object]$TagValue
+    )
+
+    Process {
+        if ($TagValue -is [datetime] -or $TagValue -is [DateTimeOffset]) {
+            return '{0:yyyy-MM-ddTHH:mm:sszzz}' -f $TagValue
+        }
+    
+        if ($TagValue -is [array]) {
+            return $TagValue -join ';'
+        }
+    
+        return [string] $TagValue    
+    }
+}
+
+function New-ImageMetadata {
+    [CmdletBinding(PositionalBinding = $false)]
+    Param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [PSObject] $ExifToolResult,
+
+        [Parameter(Mandatory)]
+        [bool] $Grouped
+    )
+
+    Process {
+        if ($Grouped) {
+            $tags = Get-TagsGrouped -ExifToolResult $ExifToolResult
+        }
+        else {
+            $tags = Get-Tags -ExifToolResult $ExifToolResult
+        }
+
+        return [ImageMetadata] @{
+            FilePath = Convert-Path $ExifToolResult.SourceFile;
+            Tags     = [PSCustomObject] $tags
+        }
+    }
+}
+
+function Get-TagsGrouped {
+    [CmdletBinding(PositionalBinding = $false)]
+    [OutputType([Hashtable])]
+    Param (
+        [Parameter(Mandatory)]
+        [PSObject] $ExifToolResult
+    )
+
+    $tagGroups = @{}
+    foreach ($member in Get-Member -InputObject $ExifToolResult -MemberType NoteProperty) {
+        if ($member.Name -EQ 'SourceFile') {
+            continue
+        }
+
+        $groupName, $tagName = $member.Name -split ':'
+        $tagValue = Select-Object -InputObject $ExifToolResult -ExpandProperty $member.Name
+
+        if (-not $tagGroups[$groupName]) {
+            $tagGroups[$groupName] = @{}
+        }
+        $tagGroups[$groupName][$tagName] = $tagValue
     }
 
-    if ($Value -is [array]) {
-        return $Value -join ';'
+    $tags = @{}
+    foreach ($groupName in $tagGroups.Keys) {
+        $tags[$groupName] = [PSCustomObject] ($tagGroups[$groupName])
     }
 
-    return [string] $Value
+    return $tags
+}
+
+function Get-Tags {
+    [CmdletBinding(PositionalBinding = $false)]
+    [OutputType([Hashtable])]
+    Param (
+        [Parameter(Mandatory)]
+        [PSObject] $ExifToolResult
+    )
+
+    $tags = @{}
+    foreach ($member in Get-Member -InputObject $ExifToolResult -MemberType NoteProperty) {
+        if ($member.Name -EQ 'SourceFile') {
+            continue
+        }
+        $tags[$member.Name] = Select-Object -InputObject $ExifToolResult -ExpandProperty $member.Name
+    }
+    return $tags
 }
 
 #endregion

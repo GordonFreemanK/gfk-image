@@ -1,147 +1,191 @@
-# What is this?
+## What is this?
 
-This PowerShell module is aimed at integrating scripts in a visual workflow for batch-processing photos. At the moment, this consists of:
-- setting metadata [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on the photo location and time
-- setting metadata tags based on digiKam tags (requires digiKam)
+This PowerShell module provides:
+- A simplified wrapper around [ExifTool](https://exiftool.org/) (not included) to read and write image metadata
+- A command to make [digiKam](https://www.digikam.org/download/) Batch Queue Manager's User Shell Script plugin PowerShell-aware
+- Useful commands to:
+  - Calculate [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on a date/time and GPS location
+  - Load digiKam tags for an image as if they were a PowerShell drive
+- An example [.ExifTool_config](GFK.Image/ExifTool/.ExifTool_config) file to configure shortcut tags on ExifTool  
 
-Written mostly in C# / PowerShell, and tested on Windows. All the tools and technologies used are open-source and available on both Linux and Windows.
+Written in C# / PowerShell, and tested on Windows.
 
-# Pre-requisites
+## Pre-requisites
 
-- [PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) version 5.1 and above
-- [digiKam](https://www.digikam.org/download/)
-- [ExifTool](https://exiftool.org/) should come installed with digiKam but the latest version can be downloaded directly and [added to the path](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.2#saving-changes-to-environment-variables) or installed using a [third-party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
+These tools must be installed and are free, open-source and available on Windows, Linux and macOS.
 
-# Quick start
+- [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) (version 6.0 and above)  is the default modern shell on Windows systems, written in C# [sources](https://github.com/powershell/powershell).
+
+
+- [digiKam](https://www.digikam.org/download/) is a photo manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins.
+
+The digiKam **User Shell Script** plugin allows providing a shell script to be run against each image in the batch. The script is transformed by digiKam and passed to the shell (`sh` on Linux and `cmd` on Windows).
+
+- [ExifTool](https://exiftool.org/) is a command-line utility written in Perl ([sources](https://github.com/exiftool/exiftool)) to losslessly (without modifying the image itself) edit image metadata (aka **EXIF/IPTC/XMP tags**), and is in fact used by digiKam as well as many other image management applications to manage metadata.
+
+ExifTool can be installed using [these instructions](https://exiftool.org/install.html) or:
+  - On linux: install using the package manager
+  - On Windows: [third party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
+
+## Included third-party package
+
+- [GeoTimeZone](https://www.nuget.org/packages/GeoTimeZone) is a [NuGet](https://www.nuget.org/) package written in C# ([sources](https://github.com/mattjohnsonpint/GeoTimeZone)) to get the [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for a GPS location. It is based on the offline data constructed from [OpenStreetMap](https://www.openstreetmap.org) data by the [Timezone Boundary Builder](https://github.com/evansiroky/timezone-boundary-builder) project.
+
+## Quick Start
 
 **Important! This tool *modifies your files*! You should back them up before using it.**
 
-Execute the following commands in an **elevated** PowerShell prompt.
-
-## Install the PowerShell module
+- ### Install the PowerShell module
 ```powershell
  Install-Module GFK.Image
 ```
 
-## Install a fake cmd.exe into digiKam's folder
+- ### Install PowerShell in digiKam
 ```powershell
 Install-PSDigiKam
 ```
-**Note:** Run this again after upgrading digiKam or GFK.Image
+***Note:** Run this again after upgrading digiKam or GFK.Image.*
 
-## Add this code in the User Shell Script window in digiKam
+- ### Choose and configure an image in your digiKam collection
+  - Set a tag value, for instance `Author/Gordon Freeman` (`right click > Assign Tag`)
+  - Set an `EXIF: Original` date (`Item > Adjust Time & Date...`)
+  - Set GPS coordinates (`Item > Edit Geolocation...`)
+  - Disable 
+
+- ### Add PowerShell code in the User Shell Script window in digiKam Batch Queue Manager
+  - Load the image in Batch Queue Manager
+  - Select `Behaviour > If Target File Exists > Overwrite automatically` (do this only if you have backups!)
+  - Choose the User Shell Script tool
+  - Paste the following code
+  - Run the Batch Queue Manager
+
 ```powershell
+# Do not include isolated "&" characters as they will break the digiKam PowerShell integration
+
+# This will ensure that the script stops on error
+# Errors are reported in digiKam as "User Script: Script process crashed"
 $ErrorActionPreference = 'Stop'
 
+# Double double quotes here are intentional (one of the set gets replaced by digiKam)
+# File paths containing "$" or "`" characters will fail
 $sourcePath = ""$INPUT""
 $destinationPath = ""$OUTPUT""
-New-PSDigiKamDrive $Env:TAGSPATH
 
+# Create a Tags: drive to navigate digiKam tags
+New-PSDigiKamDrive Tags $Env:TAGSPATH
+$author = (ls Tags:/Author).Value
+
+# Temporarily set the ExifTool configuration file path to the one included in the module
+$Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
+
+# Example metadata read
+$latitude, $longitude, $taken = Get-ImageMetadata `
+    -FilePath $sourcePath `
+    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,EXIF:DateTimeOriginal
+$takenDateTime = Convert-ImageDateTime -DateTime $taken
+$takenDateTimeOffset = Get-DateTimeOffset $takenDateTime $latitude $longitude
+
+# $sourcePath is the original file and $destinationPath is the file to be modified
+# This command must be invoked before starting modifications on $destinationPath
+# After this line whatever happens digiKam considers the script a success and logs "Item processed successfully (overwritten)"
+# This means any failure after this line will interrupt the process and be logged, but not be considered a failure by digiKam
 cp $sourcePath $destinationPath
 
-# Example metadata read/write operations
-
-$latitude, $longitude, $taken, $digitized = Get-ImageMetadata $FilePath `
-    '-XMP-exif:GPSLatitude' `
-    '-XMP-exif:GPSLongitude' `
-    '-EXIF:DateTimeOriginal' `
-    '-EXIF:CreateDate'
-
-Set-ImageMetadata $destinationPath `
-    -Author (ls Tags:/Author).PSChildName `
-    -Modified (Get-Date) `
-    -Taken (Get-DateTimeOffset (Convert-ImageDateTime -DateTime $taken) $latitude $longitude) `
-    -Digitized (Get-DateTimeOffset (Convert-ImageDateTime -DateTime $digitized) $latitude $longitude)
+# Example metadata write using shortcut tags defined in the temporary ExifTool configuration
+Set-ImageMetadata `
+    -FilePath $destinationPath `
+    -Tags @{
+        Author = $author;
+        Modified = Get-Date;
+        Taken = $takenDateTimeOffset
+    }
 ```
 
-### Notes
+## Expected results
 
-- `$INPUT` is the original file and `$OUTPUT` is the file to be modified, therefore `cp` (`Copy-Item`) must be invoked before starting modifications on `$OUTPUT`
-- *double double* quotes around `$INPUT` and `$OUTPUT` are intentional (one of the set gets replaced by digiKam)
-- **file paths including `$` or a backtick (`) will fail**
-- `$ErrorActionPreference = 'Stop'` will ensure that the script stops on error. Errors are reported in digiKam as `User Script: Script process crashed` but if the file was actually copied it considers the step a success and logs `Item processed successfully (overwritten)`. This means any failure after the line `Copy-Item $sourcePath $destinationPath` will interrupt the process and be logged, but not be considered as a failure by digiKam.
+- The value `Gordon Freeman` should be set in:
+  - `EXIF > Image Information > Artist`
+  - `XMP > Dublin Core > Creator`
+- The date you set previously should now also be set in:
+  - `EXIF > Image Information > Date and Time`
+  - `EXIF > Photograph Information > Date and Time (original)`
+  - `XMP > Adobe Photoshop > Date Created`
+  - `XMP > Basic Schema > Modify Date`
+  - `XMP > Exif-specify Properties > Date and Time Original`
+  - `XMP > TIFF Properties > Date and Time`
+- The offset corresponding to the date and coordinates you chose should be set in the four XMP fields above as well as in:
+  - `EXIF > Offset Time`
+  - `EXIF > Offset Time Original`
+  
+  ***Note:** EXIF offsets are only visible on digiKam versions 7.3 and above*
 
-# External tools
+## Implementation
 
-- [GeoTimeZone](https://www.nuget.org/packages/GeoTimeZone) is a [NuGet](https://www.nuget.org/) package (C#, [source](https://github.com/mattjohnsonpint/GeoTimeZone)) to get the [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for a GPS location. This is based on the offline data constructed from [OpenStreetMap](https://www.openstreetmap.org) data by the [Timezone Boundary Builder](https://github.com/evansiroky/timezone-boundary-builder) project.
+### 1. PowerShell commands included in the module
 
-- [ExifTool](https://exiftool.org/) is a command-line utility (Perl, [source](https://github.com/exiftool/exiftool)) to losslessly (without modifying the image itself) edit photo metadata (aka **EXIF/IPTC/XMP tags**), and is actually used by digiKam as well as many other photo management applications to manage metadata.
+**Notes:**
+- use `Get-Help <CommandName>` to get more information about these commands*
+- `-WhatIf` and `-Confirm` switches are available for all commands that write data
 
-- [digiKam](https://www.digikam.org/) is a photo manager (C++, [source](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing collections of photos using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of photos using configurable plugins.
-- The digiKam **User Shell Script** plugin allows defining a shell script to be run against each photo in the batch. The script is transformed by digiKam and passed to the shell (`sh` on Linux and `cmd` on Windows).    
+#### **a. Helper commands**
 
-# Implementation
+ - `Get-DateTimeOffset`
 
-## 1. ExifTool configuration
-
-To help with the manual and automated workflows, we use a custom ExifTool configuration file (see documentation in the official [example file](https://www.exiftool.org/config.html)) to create custom [shortcuts tags](https://www.exiftool.org/TagNames/Shortcuts.html), which are ways to read or write multiple tags at once. This configuration file is then copied to the root of the user home folder, where it will be picked up by ExifTool.
-
-**Important: any instance of ExifTool running under your user session will be using this configuration file once it is copied!** If you want to safely modify it, test it by *not* copying it and using the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options) instead.
-
-The following shortcut tags are created by this repository, change them as needed:
-- `Author`: author of the picture
-- `Taken`: date the picture was taken
-- `Digitized`: date the picture was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
-- `Modified`: date the picture was modified
-
-**Note:** shortcut tag values cannot be set with the `=` operator and need to be set with the `<` operator. In turn, the `<` operator does not play well with constant values when they contain special characters such as `$`. It is easier to use the [`-userParam` option](https://exiftool.org/exiftool_pod.html#Advanced-options) for assigning constant values to shortcut tags e.g. `exiftool myfile -MyTag<$MyTagParam -userParam MyTagParam='some string'`.
-
-## 2. PowerShell module
-
-### Get-DateTimeOffset
-
-This cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) (local or not), latitude and longitude (in signed [decimal degree](https://en.wikipedia.org/wiki/Decimal_degrees) format) and returns a [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset).
+This cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) (local or not), latitude and longitude (in signed [decimal degree](https://en.wikipedia.org/wiki/Decimal_degrees) format) and returns a [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset) including the offset for the local time zone *at that time*.
 
 *Usage (this example uses automatic DateTime conversion from a string for the input):*
 ```powershell
 PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString()
 19/01/2022 15:16:17 +03:00
 ```
-### ExifTool wrapper commands
 
-These two commands rely on `exiftool` being an existing command in the current session. You can ensure so on linux by installing it using the package manager or on Windows by following the [official installation steps](https://exiftool.org/install.html#Windows) or using a [third party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows).
+#### **ExifTool commands**
 
-**Get-ImageMetadata**
+- `Get-ImageMetadata`: gets metadata tags or shortcut tags
+- `Set-ImageMetadata`: sets metadata tags or shortcut tags
+- `Convert-ImageDateTime`: a utility to convert dates from ExifTool format to [datetime] objects
 
-This cmdlet 
-
-**Set-ImageMetadata**
-
-This function writes tags or shortcut tags to the given file (or folder) using ExifTool. Array values are concatenated with ';'.
-
-This function reads the dates (`EXIF:DateTimeOriginal` for the date taken and `EXIF:CreateDate` for the date digitized) and GPS locations (`XMP-exif:GPSLatitude` and `XMP-exif:GPSLongitude`) from the given file (or folder) using ExifTool, calculates the offsets then writes back the dates and offsets to the the `Taken` and `Digitized` shortcut tags on the given file.
+**Notes:**
+- `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names, tag names and optionnally tag groups (EXIF, IPTC, XMP). More details are available with `Get-Help Get-Metadata`*
+- `Get-ImageMetadata` and `Set-ImageMetadata` will echo the exiftool command if using the `-Verbose` switch 
 
 *Usage:*
 ```powershell
-C:\> Set-ImageTag 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -Author 'Gordon Freeman','Adrian Shephard'
+PS C:\> $filePath = 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg'
+PS C:\> Set-ImageMetadata -FilePath $filePath -Tags @{'XMP:CreatedDate'='2022-01-19 15:16:17+03:00';Artist='Gordon Freeman','Adrian Shephard'}
     1 image files updated
-C:\> Set-DateTimeOffsets 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg'
-    1 image files updated
+PS C:\> $artist,$createdDate = Get-ImageMetatada -FilePath $filePath -TagNames Artist,XMP:CreatedDate
+    1 image files read
+PS C:\> $artist,$createdDate
+Gordon Freeman;Adrian Shephard
+2022:01:19 15:16:17+03:00
+PS C:\> $allMetadata = Get-ImageMetatada -FilePath $filePath -TagNames All -Full -Grouped
+    1 image files read
+PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
+Gordon Freeman;Adrian Shephard
+2022:01:19 15:16:17+03:00
+PS C:\> '{0:r}' -f (Convert-ImageDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
+Wed, 19 Jan 2022 15:16:17 GMT+3
 ```
 
-Note on setting dates with offsets with ExifTool. There are multiple types of date/time tags in the metadata:
-- EXIF uses one tag for date+time and one for offset (e.g. `EXIF:DateTimeOriginal` and `EXIF:OffsetTimeOriginal`)
-- IPTC uses one tag for date and one for time+offset (e.g. `IPTC:DateCreated` and `IPTC:TimeCreated`)
-- XMP stores the date+time+offset in a single tag (e.g. `XMP-exif:DateTimeOriginal`)
+#### **digiKam commands**
 
-Luckily, we can construct a fully qualified date/time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`) and ExifTool automatically stores the relevant part in any of these fields.
-
-### Install-PSDigiKam
-
-This Windows-only cmdlet changes the shell for the User Shell Script plugin in digiKam to `pwsh` by copying a PowerShell bootstrapper named `cmd.exe` in the digiKam install location.
-
-### Uninstall-PSDigiKam
-
-This Windows-only cmdlet resets the shell for the User Shell Script plugin in digiKam to the default `cmd.exe`.
-
-### New-PSDigiKamDrive
-
-This cmdlet reads a string containing an image tags as formatted by digiKam (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
+- `Install-PSDigiKam` (Windows 64 bit only, requires elevation): changes the shell for the User Shell Script plugin in digiKam to `pwsh.exe` by copying a PowerShell bootstrapper named `cmd.exe` in the digiKam install location (more details [below](#2-injecting-pwshexe-into-digikam)).
+- `Uninstall-PSDigiKam` (Windows 64 bit only, requires elevation): resets the shell for the User Shell Script plugin in digiKam to the default `cmd.exe`.
 
 *Usage:*
 ```powershell
-PS C:\> New-PSDigiKamDrive 'Author/GFK;People/Adrian Shephard;People/The G-Man'
-PS C:\> ls Tags:\People
+PS C:\> Install-PSDigiKam
+PS C:\> Uninstall-PSDigiKam
+```
+
+- `New-PSDigiKamDrive:` reads a string containing an image tags as formatted by digiKam (using a `;` as a separator between tags and a `/` as a path separator within each tag) and creates a `Tags:` drive in the PowerShell session.
+
+*Usage:*
+```powershell
+PS C:\> New-PSDigiKamDrive Tags 'Author/GFK;People/Adrian Shephard;People/The G-Man'
+PS C:\> cd Tags:\
+PS Tags:\> (ls People).Value
 Adrian Shephard
 The G-Man
 ```
@@ -150,21 +194,46 @@ The G-Man
 - PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
 - This PSProvider does not support renaming, moving or deleting items
 
-## 3. Injecting `pwsh.exe` into digiKam
+### 2. Injecting `pwsh.exe` into digiKam
 
 On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serializing them using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to the [Windows command prompt](https://en.wikipedia.org/wiki/Cmd.exe).
 
-`cmd.exe` rules about [argument passing](http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/) and [character escaping](https://fabianlee.org/2018/10/10/saltstack-escaping-dollar-signs-in-cmd-run-parameters-to-avoid-interpolation/) make it difficult to work with spaces and special characters. To circumvent this issue we create a standalone executable called `cmd.exe` which is really a .net application that we copy to the digiKam application folder where it will take precedence over the actual Windows command prompt executable. This application takes the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core).
+In order to avoid `cmd.exe` altogether, we inject a standalone executable, called `cmd.exe`, but which is really a PowerShell bootstrapper,  in the digiKam application path where it will take precedence over the actual Windows command prompt executable.
+This executable takes the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core).
 
-We are now able to use PowerShell code in the User Shell Script plugin, which can be saved as part of a Batch Queue Manager workflow.
+We are now able to use PowerShell code in the User Shell Script plugin, and save it as part of a Batch Queue Manager workflow.
 
-### Notes
-
+**Notes:**
 - The digiKam plugin does not log but the fake cmd.exe logs any failure to a **cmd.log file on the user desktop**.
-
 - Loading PowerShell is a relatively CPU-intensive task. **Consider using multi-threading** by selecting `Queue Settings > Behaviour > Work on all processor cores` in Batch Queue Manager, unless your scripts use a non-thread-safe resource, or if I/O is the bottleneck (e.g. operations relying on a slow network connection).
 - **Avoid any isolated `&` as they will be lost in translation and replaced by a new line**.
 - **Disable digiKam metadata writing for the fields modified by these scripts** (unselect the relevant sections in `Settings > Configure digiKam... > Metadata > Behaviour > Write This Information to the Metadata`), or they will be overwritten after the batch script runs.
+
+### 3. ExifTool configuration
+
+Included in this module is an [example ExifTool configuration file](GFK.Image/ExifTool/.ExifTool_config) (read how these files can be used in the documentation in the [official example file](https://www.exiftool.org/config.html)) to create custom [shortcuts tags](https://www.exiftool.org/TagNames/Shortcuts.html), which are ways to read or write multiple metadata tags at once.
+
+This example configures the following shortcut tags:
+- `Author`: author of the picture
+- `Taken`: date the picture was taken
+- `Digitized`: date the picture was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
+- `Modified`: date the picture was modified
+
+If the PowerShell module is installed, the file can be found at `$exifToolConfigurationPath = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool`
+
+It can be used by exiftool directly using the [-config switch]([-config option](https://exiftool.org/exiftool_pod.html#Advanced-options)) or by the ExifTool wrapper commands in this module using the `-ConfigurationPath $exifToolConfigurationPath` switch.
+
+Alternatively, you can enter the statement `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running commands related to ExifTool.
+
+Finally, you can `cp $exifToolConfigurationPath ~` to place it in your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it!**
+
+**Notes:**
+- There are multiple types of date/time tags in the metadata:
+  - EXIF uses one tag for date+time and one for offset (e.g. `EXIF:DateTimeOriginal` and `EXIF:OffsetTimeOriginal`)
+  - IPTC uses one tag for date and one for time+offset (e.g. `IPTC:DateCreated` and `IPTC:TimeCreated`)
+  - XMP stores the date+time+offset in a single tag (e.g. `XMP-exif:DateTimeOriginal`)
+
+Fortunately, we can construct a fully qualified date/time in [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`) and ExifTool automatically stores the relevant part in any of these fields.
 
 ## Unicode with ExifTool on Windows
 

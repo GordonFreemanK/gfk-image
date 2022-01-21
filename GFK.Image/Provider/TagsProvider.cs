@@ -20,7 +20,7 @@ namespace GFK.Image.Provider
         {
             var tag = TagsDrive.Repository.AddTag(path);
 
-            WriteItemObject(tag, tag, true);
+            WriteItemObject(tag, tag.Path, true);
         }
 
         protected override void GetItem(string path)
@@ -28,7 +28,7 @@ namespace GFK.Image.Provider
             var tag = TagsDrive.Repository.GetTag(path);
             if (tag != null)
             {
-                WriteItemObject(tag, tag, true);
+                WriteItemObject(tag, tag.Path, true);
             }
         }
 
@@ -46,7 +46,7 @@ namespace GFK.Image.Provider
         {
             foreach (var tag in TagsDrive.Repository.GetChildTags(path, depth))
             {
-                WriteItemObject(tag, tag, true);
+                WriteItemObject(tag, tag.Path, true);
             }
         }
     }
