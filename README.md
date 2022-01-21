@@ -1,8 +1,8 @@
 ## What is this?
 
 This PowerShell module provides:
-- A simplified wrapper around [ExifTool](https://exiftool.org/) (not included) to read and write image metadata
-- A command to make [digiKam](https://www.digikam.org/download/) Batch Queue Manager's User Shell Script plugin PowerShell-aware
+- A simplified wrapper around [ExifTool](https://exiftool.org/) (tool not included) to read and write image metadata
+- A Windows-only command to make [digiKam](https://www.digikam.org/download/) Batch Queue Manager's User Shell Script plugin PowerShell-aware
 - Useful commands to:
   - Calculate [UTC offsets](https://en.wikipedia.org/wiki/UTC_offset) automatically based on a date/time and GPS location
   - Load digiKam tags for an image as if they were a PowerShell drive
@@ -14,18 +14,16 @@ Written in C# / PowerShell, and tested on Windows.
 
 These tools must be installed and are free, open-source and available on Windows, Linux and macOS.
 
-- [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) (version 6.0 and above)  is the default modern shell on Windows systems, written in C# [sources](https://github.com/powershell/powershell).
+- [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) (version 6.0 and above)  is the default modern shell on Windows systems, written in C# ([sources](https://github.com/powershell/powershell)).
 
 
-- [digiKam](https://www.digikam.org/download/) is a photo manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins.
-
-The digiKam **User Shell Script** plugin allows providing a shell script to be run against each image in the batch. The script is transformed by digiKam and passed to the shell (`sh` on Linux and `cmd` on Windows).
+- [digiKam](https://www.digikam.org/download/) is an image manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins, including the **User Shell Script** plugin.
 
 - [ExifTool](https://exiftool.org/) is a command-line utility written in Perl ([sources](https://github.com/exiftool/exiftool)) to losslessly (without modifying the image itself) edit image metadata (aka **EXIF/IPTC/XMP tags**), and is in fact used by digiKam as well as many other image management applications to manage metadata.
 
-ExifTool can be installed using [these instructions](https://exiftool.org/install.html) or:
-  - On linux: install using the package manager
-  - On Windows: [third party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
+ExifTool can be installed by following [the official instructions](https://exiftool.org/install.html) or:
+  - On Linux, by using the package manager
+  - On Windows, by using [this third party installer](https://oliverbetz.de/pages/Artikel/ExifTool-for-Windows)
 
 ## Included third-party package
 
@@ -50,7 +48,6 @@ Install-PSDigiKam
   - Set a tag value, for instance `Author/Gordon Freeman` (`right click > Assign Tag`)
   - Set an `EXIF: Original` date (`Item > Adjust Time & Date...`)
   - Set GPS coordinates (`Item > Edit Geolocation...`)
-  - Disable 
 
 - ### Add PowerShell code in the User Shell Script window in digiKam Batch Queue Manager
   - Load the image in Batch Queue Manager
@@ -60,7 +57,7 @@ Install-PSDigiKam
   - Run the Batch Queue Manager
 
 ```powershell
-# Do not include isolated "&" characters as they will break the digiKam PowerShell integration
+# Important! Do not use isolated "&" characters anywhere in this script as they will break the digiKam PowerShell integration
 
 # This will ensure that the script stops on error
 # Errors are reported in digiKam as "User Script: Script process crashed"
@@ -82,8 +79,11 @@ $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 $latitude, $longitude, $taken = Get-ImageMetadata `
     -FilePath $sourcePath `
     -TagNames XMP:GPSLatitude,XMP:GPSLongitude,EXIF:DateTimeOriginal
-$takenDateTime = Convert-ImageDateTime -DateTime $taken
-$takenDateTimeOffset = Get-DateTimeOffset $takenDateTime $latitude $longitude
+$takenDateTime = ConvertFrom-ImageDateTime -DateTime $taken
+$takenDateTimeOffset = Get-DateTimeOffset `
+    -DateTime $takenDateTime `
+    -Latitude $latitude `
+    -Longitude $longitude
 
 # $sourcePath is the original file and $destinationPath is the file to be modified
 # This command must be invoked before starting modifications on $destinationPath
@@ -135,7 +135,7 @@ This cmdlet takes a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/syste
 
 *Usage (this example uses automatic DateTime conversion from a string for the input):*
 ```powershell
-PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString()
+PS C:\> (Get-DateTimeOffset -DateTime '2022-01-19 15:16:17' -Latitude -3.075833 -Longitude 37.353333).ToString()
 19/01/2022 15:16:17 +03:00
 ```
 
@@ -143,7 +143,7 @@ PS C:\> (Get-DateTimeOffset '2022-01-19 15:16:17' -3.075833 37.353333).ToString(
 
 - `Get-ImageMetadata`: gets metadata tags or shortcut tags
 - `Set-ImageMetadata`: sets metadata tags or shortcut tags
-- `Convert-ImageDateTime`: a utility to convert dates from ExifTool format to [datetime] objects
+- `ConvertFrom-ImageDateTime`: a utility to convert dates from ExifTool format to [datetime] objects
 
 **Notes:**
 - `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names, tag names and optionnally tag groups (EXIF, IPTC, XMP). More details are available with `Get-Help Get-Metadata`*
@@ -164,7 +164,7 @@ PS C:\> $allMetadata = Get-ImageMetatada -FilePath $filePath -TagNames All -Full
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> '{0:r}' -f (Convert-ImageDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
+PS C:\> '{0:r}' -f (ConvertFrom-ImageDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
 Wed, 19 Jan 2022 15:16:17 GMT+3
 ```
 
@@ -196,7 +196,7 @@ The G-Man
 
 ### 2. Injecting `pwsh.exe` into digiKam
 
-On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serializing them using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to the [Windows command prompt](https://en.wikipedia.org/wiki/Cmd.exe).
+On Windows, the [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serializing them using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to `sh` on Linux or [cmd](https://en.wikipedia.org/wiki/Cmd.exe).
 
 In order to avoid `cmd.exe` altogether, we inject a standalone executable, called `cmd.exe`, but which is really a PowerShell bootstrapper,  in the digiKam application path where it will take precedence over the actual Windows command prompt executable.
 This executable takes the arguments passed by the digiKam plugin and reconstructs the original user-defined script by replacing `&` with new lines, then passes it for execution to `pwsh.exe` (PowerShell Core).
@@ -214,10 +214,10 @@ We are now able to use PowerShell code in the User Shell Script plugin, and save
 Included in this module is an [example ExifTool configuration file](GFK.Image/ExifTool/.ExifTool_config) (read how these files can be used in the documentation in the [official example file](https://www.exiftool.org/config.html)) to create custom [shortcuts tags](https://www.exiftool.org/TagNames/Shortcuts.html), which are ways to read or write multiple metadata tags at once.
 
 This example configures the following shortcut tags:
-- `Author`: author of the picture
-- `Taken`: date the picture was taken
-- `Digitized`: date the picture was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
-- `Modified`: date the picture was modified
+- `Author`: author of the photo
+- `Taken`: date the photo was taken
+- `Digitized`: date the photo was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
+- `Modified`: date the photo was modified
 
 If the PowerShell module is installed, the file can be found at `$exifToolConfigurationPath = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool`
 

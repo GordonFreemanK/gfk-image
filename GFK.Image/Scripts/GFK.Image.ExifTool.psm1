@@ -99,7 +99,7 @@ function Get-ImageMetadata {
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
         $toolResults = &exiftool $arguments
         if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
-            return $toolResults | ConvertFrom-ExifToolValue
+            return $toolResults | ConvertFrom-ImageValue
         }
         else {
             return ConvertFrom-Json ($toolResults -join "`n") | New-ImageMetadata -Grouped $Grouped
@@ -158,7 +158,7 @@ function Set-ImageMetadata() {
         foreach ($tagName in $Tags.Keys) {
             $tagNameArgument = Get-TagNameArgument -TagName $tagName
             $paramName = "Param$(($index++))"
-            $tagValue = ConvertTo-ExifToolValue -TagValue $Tags[$tagName]
+            $tagValue = ConvertTo-ImageValue -TagValue $Tags[$tagName]
             $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=`"$tagValue`""
         }
         $arguments += '--', $FilePath
@@ -170,16 +170,16 @@ function Set-ImageMetadata() {
     }
 }
 
-function Convert-ImageDateTime {
+function ConvertFrom-ImageDateTime {
     <#
     .SYNOPSIS
         Converts a metadata date/time or date+time into a [datetime] object
     .DESCRIPTION
         Relies on ExifTool's default formats for such fields. Supports EXIF (naive full date), IPTC (date + naive or local time), XMP (naive or local full date)
     .EXAMPLE
-        Convert-ImageDateTime -Date '2022:01:19' -Time '15:16:17'
-        Convert-ImageDateTime -DateTime '2022:01:19 15:16:17+03:00'
-        Convert-ImageDateTime -DateTime (Get-ImageMetadata $filePath XMP:CreateDate)
+        ConvertFrom-ImageDateTime -Date '2022:01:19' -Time '15:16:17'
+        ConvertFrom-ImageDateTime -DateTime '2022:01:19 15:16:17+03:00'
+        ConvertFrom-ImageDateTime -DateTime (Get-ImageMetadata $filePath XMP:CreateDate)
     #>
     [CmdletBinding(PositionalBinding = $false)]
     [OutputType([datetime])]
@@ -227,7 +227,7 @@ function Get-TagNameArgument {
     }
 }
 
-function ConvertFrom-ExifToolValue {
+function ConvertFrom-ImageValue {
     [CmdletBinding(PositionalBinding = $false)]
     Param (
         [Parameter(Mandatory, ValueFromPipeline)]
@@ -242,7 +242,7 @@ function ConvertFrom-ExifToolValue {
     }
 }
 
-function ConvertTo-ExifToolValue {
+function ConvertTo-ImageValue {
     [CmdletBinding(PositionalBinding = $false)]
     Param (
         [Parameter(Mandatory, ValueFromPipeline)]
