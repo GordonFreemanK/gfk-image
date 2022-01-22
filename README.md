@@ -204,10 +204,10 @@ This executable takes the arguments passed by the digiKam plugin and reconstruct
 We are now able to use PowerShell code in the User Shell Script plugin, and save it as part of a Batch Queue Manager workflow.
 
 **Notes:**
-- The digiKam plugin does not log but the fake cmd.exe logs any failure to a **cmd.log file on the user desktop**.
-- Loading PowerShell is a relatively CPU-intensive task. **Consider using multi-threading** by selecting `Queue Settings > Behaviour > Work on all processor cores` in Batch Queue Manager, unless your scripts use a non-thread-safe resource, or if I/O is the bottleneck (e.g. operations relying on a slow network connection).
-- **Avoid any isolated `&` as they will be lost in translation and replaced by a new line**.
-- **Disable digiKam metadata writing for the fields modified by these scripts** (unselect the relevant sections in `Settings > Configure digiKam... > Metadata > Behaviour > Write This Information to the Metadata`), or they will be overwritten after the batch script runs.
+- The digiKam plugin does not log but the fake cmd.exe logs any failure to `${Env:LocalAppData}\GFK\GFK.Image.cmd\cmd.log`
+- Loading PowerShell is a relatively CPU-intensive task. **Consider using multi-threading** by selecting `Queue Settings > Behaviour > Work on all processor cores` in Batch Queue Manager, unless your scripts use a non-thread-safe resource, or if I/O is the bottleneck (e.g. operations relying on a slow network connection)
+- **Avoid any isolated `&` as they will be lost in translation and replaced by a new line**
+- **Disable digiKam metadata writing for the fields modified by these scripts** (unselect the relevant sections in `Settings > Configure digiKam... > Metadata > Behaviour > Write This Information to the Metadata`), or they will be overwritten after the batch script runs
 
 ### 3. ExifTool configuration
 

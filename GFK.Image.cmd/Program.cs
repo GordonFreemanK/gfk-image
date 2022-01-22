@@ -9,7 +9,12 @@ namespace GFK.Image.cmd
     {
         public static async Task Main(string[] args)
         {
-            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "cmd.log");
+            var applicationDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "GFK",
+                "GFK.Image.cmd");
+            Directory.CreateDirectory(applicationDirectory);
+            var logPath = Path.Combine(applicationDirectory, "cmd.log");
             var logger = new Logger(logPath);
 
             try
