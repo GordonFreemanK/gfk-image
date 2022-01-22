@@ -248,11 +248,11 @@ Get-Module GFK.Image | Uninstall-Module
 At this point you may change the code as you see fit locally. When you are ready to test it, deploy it to your user folder:
 ```powershell
 $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
-dotnet publish GFK.Image -c Release -o $publishPath
-dotnet publish GFK.Image.cmd -c Release -o (Join-Path $publishPath cmd)
+dotnet publish GFK.Image -o $publishPath
+dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd)
 ```
 
-The module should now be available in any terminal. You may remove it with:
+The module should now be available in any `pwsh` session. You may remove it with:
 ```powershell
 $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
 rm -R $publishPath
