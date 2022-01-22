@@ -4,20 +4,22 @@ on: [push]
 
 jobs:
   test:
-    name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
-      - name: Setup .NET
+      - name: setup
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.x
-      - name: Test
+      - name: test
         run: dotnet test
-      - name: Publish GFK.Image
+      - name: publish GFK.Image
         run: dotnet publish GFK.Image -o pub
-      - name: Publish GFK.Image.cmd
+      - name: publish GFK.Image.cmd
         run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
-      - name: Import GFK.Image
-        run: Import-Module pub/GFK.Image/GFK.Image.psd1
+      - name: import GFK.Image
+        run: |
+          $PSVersionTable
+          Get-Module -ListAvailable
+          Import-Module pub/GFK.Image/GFK.Image.psd1
