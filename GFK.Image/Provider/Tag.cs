@@ -1,7 +1,14 @@
-﻿namespace GFK.Image.Provider;
-
-public record Tag(string Path, string Value)
+﻿namespace GFK.Image.Provider
 {
-    public string Path { get; } = Path;
-    public string Value { get; } = Value;
+    public class Tag
+    {
+        public Tag(string path, string value)
+        {
+            Path = path;
+            Value = value;
+        }
+
+        public string Path { get; }
+        public string Value { get; }
+    }
 }
