@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="UserContentModel">
+    <attachedFolders />
+    <explicitIncludes>
+      <Path>.github/workflows/deploy.yml</Path>
+      <Path>.github/workflows/test.yml</Path>
+      <Path>.gitignore</Path>
+      <Path>LICENSE</Path>
+      <Path>README.md</Path>
+    </explicitIncludes>
+    <explicitExcludes />
+  </component>
+</project>
