@@ -19,3 +19,5 @@ jobs:
         run: dotnet publish GFK.Image -o pub
       - name: Publish GFK.Image.cmd
         run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
+      - name: Import GFK.Image
+        run: Import-Module pub/GFK.Image/GFK.Image.psd1
