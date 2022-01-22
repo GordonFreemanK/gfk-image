@@ -22,4 +22,6 @@ jobs:
         shell: pwsh
         run: |
           ls
+          ls pub
+          ls pub/GFK.Image
           Import-Module pub/GFK.Image/GFK.Image.psd1
