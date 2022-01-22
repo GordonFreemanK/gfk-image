@@ -202,7 +202,7 @@ The G-Man
 The [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serializing them using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to `sh` on Linux and [cmd](https://en.wikipedia.org/wiki/Cmd.exe) on Windows.
 
 In order to avoid `cmd.exe` altogether, we inject a standalone executable, also called `cmd.exe`, but which is really a PowerShell bootstrapper,  in the digiKam application path where it will take precedence over the actual Windows command prompt executable.
-This executable takes reconstructs the original user-defined script then passes it for execution to `pwsh.exe` (PowerShell Core).
+This executable rebuilds the original user-defined script then passes it for execution to `pwsh.exe` (PowerShell Core).
 
 We are now able to use PowerShell code in the User Shell Script plugin, and save it as part of a Batch Queue Manager workflow.
 
