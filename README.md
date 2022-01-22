@@ -224,7 +224,7 @@ This example configures the following shortcut tags:
 
 If the PowerShell module is installed, the file can be found at `$exifToolConfigurationPath = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool`
 
-It can be used by exiftool directly using the [-config switch]([-config option](https://exiftool.org/exiftool_pod.html#Advanced-options)) or by the ExifTool wrapper commands in this module using the `-ConfigurationPath $exifToolConfigurationPath` switch.
+It can be used by exiftool directly using the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options) or by the ExifTool wrapper commands in this module using the `-ConfigurationPath $exifToolConfigurationPath` switch.
 
 Alternatively, you can enter the statement `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running commands related to ExifTool.
 
