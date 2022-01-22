@@ -25,7 +25,9 @@ namespace GFK.Image.UnitTests
             var result = _tagsRepository.GetTag(@"Tags:\Author\Gordon Freeman");
 
             // Assert
-            Assert.That(result, Is.EqualTo(@"Tags:\Author\Gordon Freeman"));
+            Assert.That(
+                result,
+                Is.EqualTo(new Tag(@"Tags:\Author\Gordon Freeman", "Gordon Freeman")).Using<Tag>(AreTagsEqual));
         }
 
         [Test]
@@ -112,54 +114,57 @@ namespace GFK.Image.UnitTests
         public void Finds_all_tags_recursively()
         {
             // Act
-            var result = _tagsRepository.GetChildTags(@"Tags:", null);
+            var result = _tagsRepository.GetChildTags("Tags:", null);
 
             // Assert
             Assert.That(
                 result,
                 Is.EqualTo(
-                    new[]
-                    {
-                        @"Tags:\Author\Gordon Freeman",
-                        @"Tags:\Author\Adrian Shephard",
-                        @"Tags:\Author\Adrian Shephard\Other",
-                        @"Tags:\People\The G-Man"
-                    }));
+                        new[]
+                        {
+                            new Tag(@"Tags:\Author\Gordon Freeman", "Gordon Freeman"),
+                            new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard"),
+                            new Tag(@"Tags:\Author\Adrian Shephard\Other", "Other"),
+                            new Tag(@"Tags:\People\The G-Man", "The G-Man")
+                        })
+                    .Using<Tag>(AreTagsEqual));
         }
 
         [Test]
         public void Finds_all_tags_non_recursively()
         {
             // Act
-            var result = _tagsRepository.GetChildTags(@"Tags:", 0);
+            var result = _tagsRepository.GetChildTags("Tags:", 0);
 
             // Assert
             Assert.That(
                 result,
                 Is.EqualTo(
-                    new[]
-                    {
-                        @"Tags:\Author",
-                        @"Tags:\People"
-                    }));
+                        new[]
+                        {
+                            new Tag(@"Tags:\Author", "Author"),
+                            new Tag(@"Tags:\People", "People")
+                        })
+                    .Using<Tag>(AreTagsEqual));
         }
 
         [Test]
         public void Finds_tags_with_limited_recursion()
         {
             // Act
-            var result = _tagsRepository.GetChildTags(@"Tags:", 1);
+            var result = _tagsRepository.GetChildTags("Tags:", 1);
 
             // Assert
             Assert.That(
                 result,
                 Is.EqualTo(
-                    new[]
-                    {
-                        @"Tags:\Author\Gordon Freeman",
-                        @"Tags:\Author\Adrian Shephard",
-                        @"Tags:\People\The G-Man"
-                    }));
+                        new[]
+                        {
+                            new Tag(@"Tags:\Author\Gordon Freeman", "Gordon Freeman"),
+                            new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard"),
+                            new Tag(@"Tags:\People\The G-Man", "The G-Man")
+                        })
+                    .Using<Tag>(AreTagsEqual));
         }
 
         [Test]
@@ -172,11 +177,14 @@ namespace GFK.Image.UnitTests
             Assert.That(
                 result,
                 Is.EqualTo(
-                    new[]
-                    {
-                        @"Tags:\Author\Gordon Freeman",
-                        @"Tags:\Author\Adrian Shephard"
-                    }));
+                        new[]
+                        {
+                            new Tag(@"Tags:\Author\Gordon Freeman", "Gordon Freeman"),
+                            new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard"),
+                        })
+                    .Using<Tag>(AreTagsEqual));
         }
+
+        private static bool AreTagsEqual(Tag left, Tag right) => left.Path == right.Path && left.Value == right.Value;
     }
 }
