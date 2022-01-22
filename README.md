@@ -222,13 +222,11 @@ This example configures the following shortcut tags:
 - `Digitized`: date the photo was digitized (expected to be same as `Taken` for digital photography, but different for film photography)
 - `Modified`: date the photo was modified
 
-If the PowerShell module is installed, the file can be found at `$exifToolConfigurationPath = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool`
-
-It can be used by exiftool directly using the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options) or by the ExifTool wrapper commands in this module using the `-ConfigurationPath $exifToolConfigurationPath` switch.
-
-Alternatively, you can enter the statement `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running commands related to ExifTool.
-
-Finally, you can `cp $exifToolConfigurationPath ~` to place it in your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it!**
+After this PowerShell module is installed, the file can be found at `$exifToolConfigurationPath = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool`. You can:
+- use it with ExifTool with the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options)
+- use it with `Get-ImageMetadata` and `Set-ImageMetadata` with the `-ConfigurationPath` switch
+- add `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running ExifTool-related commands
+- run `cp $exifToolConfigurationPath ~` to copy it to your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it**
 
 # 4. Unicode with ExifTool on Windows
 
