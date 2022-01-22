@@ -261,3 +261,8 @@ rm -R $publishPath
 ```
 
 Note that both publishing and removing will fail if the module is loaded in any powershell environment (the file is locked and cannot be removed). If you are not sure which one it is, you can kill all pwsh.exe processes.
+
+# 6. Changelog
+
+## 1.0.0
+Initial draft (unlisted)
