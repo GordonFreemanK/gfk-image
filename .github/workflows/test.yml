@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -19,7 +19,4 @@ jobs:
       - name: publish GFK.Image.cmd
         run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
       - name: import GFK.Image
-        run: |
-          $PSVersionTable
-          Get-Module -ListAvailable
-          Import-Module pub/GFK.Image/GFK.Image.psd1
+        run: Import-Module pub/GFK.Image/GFK.Image.psd1
