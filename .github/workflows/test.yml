@@ -20,8 +20,4 @@ jobs:
         run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
       - name: import GFK.Image
         shell: pwsh
-        run: |
-          ls
-          ls pub
-          ls pub/GFK.Image
-          Import-Module pub/GFK.Image/GFK.Image.psd1
+        run: Import-Module ./pub/GFK.Image/GFK.Image.psd1
