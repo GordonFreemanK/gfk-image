@@ -15,7 +15,7 @@ jobs:
       - name: test
         run: dotnet test
       - name: publish GFK.Image
-        run: dotnet publish GFK.Image -o pub
+        run: dotnet publish GFK.Image -o pub/GFK.Image
       - name: publish GFK.Image.cmd
         run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
       - name: import GFK.Image
