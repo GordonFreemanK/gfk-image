@@ -1,0 +1,33 @@
+﻿name: Test
+
+on: [push]
+
+jobs:
+  dotnet-build:
+    name: .NET build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+      - name: Build
+        run: dotnet build
+  dotnet-test:
+    name: .NET tests
+    needs: [dotnet-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: dotnet test --no-build
+  dotnet-publish:
+    name: Publish
+    needs: [dotnet-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GFK.Image
+        run: dotnet publish GFK.Image --no-build -o pub
+      - name: Publish GFK.Image.cmd
+        run: dotnet publish GFK.Image.cmd --no-build -o pub/GFK.Image/cmd
