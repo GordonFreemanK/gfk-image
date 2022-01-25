@@ -10,12 +10,10 @@ using Newtonsoft.Json;
 namespace GFK.Image.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "DateTimeOffset")]
-    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = ParameterSetNameOffline)]
+    [CmdletBinding(PositionalBinding = false)]
     [OutputType(typeof(DateTimeOffset))]
     public class GetDateTimeOffsetCmdlet : PSCmdlet
     {
-        private const string ParameterSetNameOffline = "Offline";
-        private const string ParameterSetNameOnline = "Online";
         private const string GoogleApiTimeZoneUrl = "https://maps.googleapis.com/maps/api/timezone/json";
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
@@ -27,12 +25,12 @@ namespace GFK.Image.Cmdlets
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public double Longitude { get; set; }
         
-        [Parameter(Mandatory = true, ParameterSetName = ParameterSetNameOnline)]
+        [Parameter]
         public string? GoogleApiKey { get; set; }
 
         protected override void ProcessRecord()
         {
-            var dateTimeOffset = ParameterSetName == ParameterSetNameOffline
+            var dateTimeOffset = GoogleApiKey == null
                 ? GetDateTimeOffsetOffline()
                 : GetDateTimeOffsetOnline().GetAwaiter().GetResult();
 
