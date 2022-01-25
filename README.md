@@ -239,7 +239,7 @@ These are three modes in which `Get-DateTimeOffset` can work:
 ```powershell
 PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method TimeApi).ToString()
 25/01/1993 12:00:00 +01:00
-PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GoogleApi -Key AIzaSyDMSP7UKeNisRxLnBVQix4JaOWy88pPGS4).ToString()
+PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GoogleApi -Key <googleApiKey>).ToString()
 25/01/1993 12:00:00 +01:00
 PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GeoTimeZone).ToString()
 25/01/1993 12:00:00 +00:00
