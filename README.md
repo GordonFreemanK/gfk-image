@@ -264,7 +264,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
 
 &ast; The speed difference between online and offline should be minimal and might be irrelevant depending on your workflow and internet speed.
 
-&ast;&ast; At the time of writing, the Google API allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
+&ast;&ast; At the time of writing, the [pricing structure](https://developers.google.com/maps/documentation/timezone/usage-and-billing) for individuals of the Google Time Zone API allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
 
 ## d. Google API setup
 
@@ -283,18 +283,21 @@ The only way I found to make the combination of PowerShell and exiftool fully co
 
 # 5. Modifying and running the code locally (Windows)
 
-Get the repository:
+## a. Get the repository
 ```powershell
 git clone https://github.com/GordonFreemanK/gfk-image.git
 cd gfk-image
 ```
 
-Uninstall any version of the module you may have installed:
+## b. Uninstall any version of the module you may have installed:
 ```powershell
 Get-Module GFK.Image | Uninstall-Module
 ```
 
-At this point you may change the code as you see fit locally. When you are ready to test it, deploy it to your user folder:
+## c. Modify the code
+
+## d. Deploy the module to the user environment for testing
+
 ```powershell
 $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
 dotnet publish GFK.Image -o $publishPath
@@ -308,6 +311,42 @@ rm -R $publishPath
 ```
 
 Note that both publishing and removing will fail if the module is loaded in any PowerShell session (the files are locked and cannot be removed). If you are not sure which one it is, you can kill all pwsh.exe processes.
+
+## e. (Optional) Update generated C# help files
+
+Inline XML documentation is not supported for C# cmdlets such as `Get-DateTimeOffset`. To update this:
+
+### i. Publish the module
+
+As described above.
+
+### ii. Update the intermediate markdown files
+
+```powershell
+Import-Module GFK.Image
+Import-Module platyPS -Scope CurrentUser
+Update-MarkdownHelp docs
+```
+
+### iii. Modify the markdown files
+
+They are located in the `/docs` directory.
+
+### iv. Update the generated XML documentation
+
+```powershell
+New-ExternalHelp docs -OutputPath .\GFK.Image\en-US\ -Force
+```
+
+### v. Delete and publish the module again
+
+As described above.
+
+### vi. Test the result
+
+```powershell
+Get-Help Get-DateTimeOffset -ShowWindow
+```
 
 # 6. Changelog
 

@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<helpItems schema="maml" xmlns="http://msh">
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-DateTimeOffset</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>DateTimeOffset</command:noun>
+      <maml:description>
+        <maml:para>Calculates the UTC offset associated with a date/time and a location</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This command takes a DateTime object and a latitude and longitude in decimal formats, and outputs a DateTimeOffset for a local date including the UTC offset for that particular location and date/time.</maml:para>
+      <maml:para>The command currently implements three ways of calculating the offset:</maml:para>
+      <maml:para>- The TimeApi method uses the free online service Time API (https://www.timeapi.io/swagger/index.html)</maml:para>
+      <maml:para>- The GoogleApi method uses the pay-as-you-on online service Google Time Zone API (https://developers.google.com/maps/documentation/timezone/overview)</maml:para>
+      <maml:para>- The GeoTimeZone method uses the free offline NuGet library GeoTimeZone (https://github.com/mattjohnsonpint/GeoTimeZone)</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-DateTimeOffset</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>DateTime</maml:name>
+          <maml:description>
+            <maml:para>A DateTime expected to have no offset specified (DateTimeKind.Unspecified)</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
+          <dev:type>
+            <maml:name>DateTime</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>Latitude</maml:name>
+          <maml:description>
+            <maml:para>The latitude, in signed digital format</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Single</command:parameterValue>
+          <dev:type>
+            <maml:name>Single</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>Longitude</maml:name>
+          <maml:description>
+            <maml:para>The longitude, in signed digital format</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Single</command:parameterValue>
+          <dev:type>
+            <maml:name>Single</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Method</maml:name>
+          <maml:description>
+            <maml:para>The type of offset lookup to perform</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">GeoTimeZone</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">TimeApi</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">GoogleApi</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">GetDateTimeOffsetMethod</command:parameterValue>
+          <dev:type>
+            <maml:name>GetDateTimeOffsetMethod</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Uri</maml:name>
+          <maml:description>
+            <maml:para>The base URI of the online service</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Uri</command:parameterValue>
+          <dev:type>
+            <maml:name>Uri</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>DateTime</maml:name>
+        <maml:description>
+          <maml:para>A DateTime expected to have no offset specified (DateTimeKind.Unspecified)</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">DateTime</command:parameterValue>
+        <dev:type>
+          <maml:name>DateTime</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>Latitude</maml:name>
+        <maml:description>
+          <maml:para>The latitude, in signed digital format</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Single</command:parameterValue>
+        <dev:type>
+          <maml:name>Single</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>Longitude</maml:name>
+        <maml:description>
+          <maml:para>The longitude, in signed digital format</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Single</command:parameterValue>
+        <dev:type>
+          <maml:name>Single</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Method</maml:name>
+        <maml:description>
+          <maml:para>The type of offset lookup to perform</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">GetDateTimeOffsetMethod</command:parameterValue>
+        <dev:type>
+          <maml:name>GetDateTimeOffsetMethod</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Uri</maml:name>
+        <maml:description>
+          <maml:para>The base URI of the online service</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Uri</command:parameterValue>
+        <dev:type>
+          <maml:name>Uri</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.DateTime</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Single</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.DateTimeOffset</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; (Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method TimeApi -Uri 'https://www.timeapi.io').ToString('o')
+25/08/2020 12:00:00 +01:00</dev:code>
+        <dev:remarks>
+          <maml:para>This example uses the Time API. The -Method and -Uri parameters are optional and this example shows the default values.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 2 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GoogleApi -Key &lt;Your API key here&gt; -Uri 'https://maps.googleapis.com/maps/api/timezone/json'
+25/08/2020 12:00:00 +01:00</dev:code>
+        <dev:remarks>
+          <maml:para>This example uses the Google API. The -Uri parameter is optional and this example shows the default value.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------------- Example 3 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GeoTimeZone
+25/08/2020 12:00:00 +01:00</dev:code>
+        <dev:remarks>
+          <maml:para>This example uses the GeoTimeZone NuGet package.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+</helpItems>
