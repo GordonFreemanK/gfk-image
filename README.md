@@ -264,7 +264,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
 
 &ast; The speed difference between online and offline should be minimal and might be irrelevant depending on your workflow and internet speed.
 
-&ast;&ast; At the time of writing, the Google API allows 100,000 requests the first month after registration and 40,000 monthly requests thereafter. This might be more than enough for most people.
+&ast;&ast; At the time of writing, the Google API allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
 
 ## d. Google API setup
 
