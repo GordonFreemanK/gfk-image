@@ -307,7 +307,7 @@ $publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'P
 rm -R $publishPath
 ```
 
-Note that both publishing and removing will fail if the module is loaded in any powershell environment (the file is locked and cannot be removed). If you are not sure which one it is, you can kill all pwsh.exe processes.
+Note that both publishing and removing will fail if the module is loaded in any PowerShell session (the files are locked and cannot be removed). If you are not sure which one it is, you can kill all pwsh.exe processes.
 
 # 6. Changelog
 
