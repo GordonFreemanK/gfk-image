@@ -251,7 +251,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
   - The second call is made wit the Google Time Zone API endpoint
 - The second call uses the offline information as available in `GeoTimeZone` (for the time zone information) and in .NET (for the offset for a date/time and timezone).
 
-**These three calls will most of the time return the same value**, but some times historical changes in base UTC offset and DST application for a specific location can throw off the offline resolution. In this example, the coordinates correspond to Lisbon in Portugal, where between 1992 and 1996 the time zone was CET (UTC+01:00), as opposed to WET (UTC+00:00) before and since.
+**These three calls will most of the time return the same value**, but sometimes historical changes in base UTC offset and DST application for a specific location can throw off the offline resolution. In this example, the coordinates correspond to Lisbon in Portugal, where between 1992 and 1996 the time zone was CET (UTC+01:00), as opposed to WET (UTC+00:00) before and since.
 
 ## c. Pros and cons
 
