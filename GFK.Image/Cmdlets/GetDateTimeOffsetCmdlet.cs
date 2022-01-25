@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Management.Automation;
-using System.Net.Http;
-using System.Threading.Tasks;
-using GeoTimeZone;
-using GFK.Time.API;
+using GFK.Image.DateTimeOffsetBuilder;
 
 namespace GFK.Image.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "DateTimeOffset")]
-    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "Online")]
+    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "TimeApi")]
     [OutputType(typeof(DateTimeOffset))]
-    public class GetDateTimeOffsetCmdlet : PSCmdlet
+    public class GetDateTimeOffsetCmdlet : PSCmdlet, IDynamicParameters
     {
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public DateTime DateTime { get; set; }
@@ -20,53 +17,66 @@ namespace GFK.Image.Cmdlets
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public float Longitude { get; set; }
-        
-        [Parameter(ParameterSetName = "Online")]
-        public Uri TimeApiUri { get; set; } = new Uri("https://www.timeapi.io");
 
-        [Parameter(Mandatory = true, ParameterSetName = "Offline")]
-        public SwitchParameter Offline { get; set; }
+        [Parameter]
+        public GetDateTimeOffsetMethod Method { get; set; } = GetDateTimeOffsetMethod.TimeApi;
+
+        private TimeApiParameters? _timeApiParameters;
+        private GoogleApiParameters? _googleApiParameters;
+
+        public object? GetDynamicParameters()
+        {
+            return Method switch
+            {
+                GetDateTimeOffsetMethod.TimeApi => _timeApiParameters = new TimeApiParameters(),
+                GetDateTimeOffsetMethod.GoogleApi => _googleApiParameters = new GoogleApiParameters(),
+                _ => null
+            };
+        }
 
         protected override void ProcessRecord()
         {
-            var dateTimeOffset = this.Offline
-                ? GetDateTimeOffsetOffline()
-                : GetDateTimeOffsetOnline().GetAwaiter().GetResult();
-
+            var dateTimeOffset = GetDateTimeOffsetFactory()
+                .Build(DateTime, Latitude, Longitude)
+                .GetAwaiter()
+                .GetResult();
             WriteObject(dateTimeOffset);
         }
 
-        private async Task<DateTimeOffset> GetDateTimeOffsetOnline()
+        private IDateTimeOffsetFactory GetDateTimeOffsetFactory()
         {
-            using var httpClient = new HttpClient {BaseAddress = TimeApiUri};
-
-            var timeApiClient = new TimeApiClient(httpClient);
-
-            var currentTime = await timeApiClient.CoordinateAsync(Latitude, Longitude);
-            if (currentTime.TimeZone == null)
-                throw new Exception($"Could not get timezone for latitude {Latitude} and longitude {Longitude}");
-
-            var convertRequest = new ConvertRequest(
-                DateTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                null,
-                currentTime.TimeZone,
-                "UTC");
-            var conversion = await timeApiClient.ConvertTimeZoneAsync(convertRequest);
-            
-            var offset = DateTime - conversion.ConversionResult.DateTime;
-
-            return new DateTimeOffset(DateTime, offset);
+            switch (Method)
+            {
+                case GetDateTimeOffsetMethod.GeoTimeZone:
+                    return new GeoTimeZoneDateTimeOffsetFactory();
+                case GetDateTimeOffsetMethod.TimeApi:
+                    if (_timeApiParameters == null)
+                        throw new Exception("Could not bind Time API parameters");
+                    return new TimeApiDateTimeOffsetFactory(_timeApiParameters.Uri);
+                case GetDateTimeOffsetMethod.GoogleApi:
+                    if (_googleApiParameters == null)
+                        throw new Exception("Could not bind Google API parameters");
+                    if (_googleApiParameters.Key == null)
+                        throw new Exception("Could not bind Google API key");
+                    return new GoogleApiDateTimeOffsetFactory(_googleApiParameters.Uri, _googleApiParameters.Key);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(Method));
+            }
         }
 
-        private DateTimeOffset GetDateTimeOffsetOffline()
+        private class TimeApiParameters
         {
-            var timeZoneResult = TimeZoneLookup.GetTimeZone(Latitude, Longitude);
+            [Parameter(ParameterSetName = "TimeApi")]
+            public Uri Uri { get; set; } = new Uri("https://www.timeapi.io");
+        }
 
-            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(timeZoneResult.Result);
+        private class GoogleApiParameters
+        {
+            [Parameter(ParameterSetName = "GoogleApi")]
+            public Uri Uri { get; set; } = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
 
-            var offset = timeZoneInfo.GetUtcOffset(DateTime);
-
-            return new DateTimeOffset(DateTime, offset);
+            [Parameter(Mandatory = true, ParameterSetName = "GoogleApi")]
+            public string? Key { get; set; }
         }
     }
 }
