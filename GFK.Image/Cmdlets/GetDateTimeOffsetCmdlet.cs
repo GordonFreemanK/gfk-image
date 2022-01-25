@@ -1,40 +1,61 @@
 ﻿using System;
 using System.Management.Automation;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
 using GeoTimeZone;
-using Newtonsoft.Json;
+using GFK.Time.API;
 
 namespace GFK.Image.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "DateTimeOffset")]
-    [CmdletBinding(PositionalBinding = false)]
+    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "Online")]
     [OutputType(typeof(DateTimeOffset))]
     public class GetDateTimeOffsetCmdlet : PSCmdlet
     {
-        private const string GoogleApiTimeZoneUrl = "https://maps.googleapis.com/maps/api/timezone/json";
-
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public DateTime DateTime { get; set; }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
-        public double Latitude { get; set; }
+        public float Latitude { get; set; }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
-        public double Longitude { get; set; }
+        public float Longitude { get; set; }
         
-        [Parameter]
-        public string? GoogleApiKey { get; set; }
+        [Parameter(ParameterSetName = "Online")]
+        public Uri TimeApiUri { get; set; } = new Uri("https://www.timeapi.io");
+
+        [Parameter(Mandatory = true, ParameterSetName = "Offline")]
+        public SwitchParameter Offline { get; set; }
 
         protected override void ProcessRecord()
         {
-            var dateTimeOffset = GoogleApiKey == null
+            var dateTimeOffset = this.Offline
                 ? GetDateTimeOffsetOffline()
                 : GetDateTimeOffsetOnline().GetAwaiter().GetResult();
 
             WriteObject(dateTimeOffset);
+        }
+
+        private async Task<DateTimeOffset> GetDateTimeOffsetOnline()
+        {
+            using var httpClient = new HttpClient {BaseAddress = TimeApiUri};
+
+            var timeApiClient = new TimeApiClient(httpClient);
+
+            var currentTime = await timeApiClient.CoordinateAsync(Latitude, Longitude);
+            if (currentTime.TimeZone == null)
+                throw new Exception($"Could not get timezone for latitude {Latitude} and longitude {Longitude}");
+
+            var convertRequest = new ConvertRequest(
+                DateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                null,
+                currentTime.TimeZone,
+                "UTC");
+            var conversion = await timeApiClient.ConvertTimeZoneAsync(convertRequest);
+            
+            var offset = DateTime - conversion.ConversionResult.DateTime;
+
+            return new DateTimeOffset(DateTime, offset);
         }
 
         private DateTimeOffset GetDateTimeOffsetOffline()
@@ -45,35 +66,6 @@ namespace GFK.Image.Cmdlets
 
             var offset = timeZoneInfo.GetUtcOffset(DateTime);
 
-            return new DateTimeOffset(DateTime, offset);
-        }
-
-        private async Task<DateTimeOffset> GetDateTimeOffsetOnline()
-        {
-            var queryString = HttpUtility.ParseQueryString(string.Empty);
-            queryString.Add("location",$"{Latitude},{Longitude}");
-            queryString.Add("timestamp", ((DateTimeOffset)DateTime).ToUnixTimeSeconds().ToString());
-            queryString.Add("sensor", false.ToString());
-            queryString.Add("key", GoogleApiKey);
-
-            string response;
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                response = await httpClient.GetStringAsync($"{GoogleApiTimeZoneUrl}?{queryString}");
-            }
-
-            var googleApiTimeZoneResponse =
-                JsonConvert.DeserializeObject<GoogleApiTimeZoneTimeZone>(response)
-                ?? throw new Exception("Error deserializing Google API response");
-            if (googleApiTimeZoneResponse.Status != "OK")
-                throw new Exception(
-                    $"Google API Time Zone call unsuccessful: {googleApiTimeZoneResponse.ErrorMessage}");
-
-            var offset =
-                TimeSpan.FromSeconds(googleApiTimeZoneResponse.DstOffset + googleApiTimeZoneResponse.RawOffset);
-            
             return new DateTimeOffset(DateTime, offset);
         }
     }

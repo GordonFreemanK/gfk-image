@@ -244,16 +244,14 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
 ```
 
 ## b. Explanation
-- The first call uses the offline information as available in `GeoTimeZone` (for the time zone information) and it .NET (for the offset as it relates to the time zone information).
+- The first call uses the offline information as available in `GeoTimeZone` (for the time zone information) and in .NET (for the offset as it relates to the time zone information).
 - The second call uses the online information provided by the Google Time Zone API. This is actually the correct UTC offset for that location and date.
 
-**These two calls will most of the time return the same value**, but some times historical changes in base UTC offset and DST application for a specific location can throw off the offline resolution. In this example, the coordinates correspond to Lisbon in Portugal, where between 1992 and 1996 the time zone was CET (UTC+01:00), as opposed to WET (UTC+00:00) since.
-
-The online resolution will always be correct.
+**These two calls will most of the time return the same value**, but some times historical changes in base UTC offset and DST application for a specific location can throw off the offline resolution. In this example, the coordinates correspond to Lisbon in Portugal, where between 1992 and 1996 the time zone was CET (UTC+01:00), as opposed to WET (UTC+00:00) since then.
 
 ## c. Advantages and disadvantages
 
-- The offline resolution will work faster and will continue working without internet access. The speed difference is not big and might be fairly irrelevant depending on your workflow and internet speed.
+- The offline resolution will work faster and will continue working without internet access. The speed difference should be minimal and might be irrelevant depending on your workflow and internet speed.
 - The Google API is not free ([pricing](https://developers.google.com/maps/documentation/timezone/usage-and-billing)). But at the time of writing, the pricing structure allows for 100000 (100k) requests free the first month after opening your account and 40000 (40k) per months afterwards. Depending on your volume this might be largely enough. 
 - The Google API requires initial setup to get working
 - You might not be comfortable creating a developer account with Google (this requires personal information and payment method, even when using it for free)
