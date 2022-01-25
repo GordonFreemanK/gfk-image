@@ -27,8 +27,9 @@ ExifTool can be installed by following [the official instructions](https://exift
 
 # 3. Other third party tools
 
+- the [Time API](https://www.timeapi.io/) is a free **online** service we can use to get information regarding UTC and DST offsets.
+
 - [GeoTimeZone](https://www.nuget.org/packages/GeoTimeZone) (included) is a [NuGet](https://www.nuget.org/) package written in C# ([sources](https://github.com/mattjohnsonpint/GeoTimeZone)) to get the [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for a GPS location. It is based on the **offline** data constructed from [OpenStreetMap](https://www.openstreetmap.org) data by the [Timezone Boundary Builder](https://github.com/evansiroky/timezone-boundary-builder) project.
-- the Google Maps Platform [Time Zone API](https://developers.google.com/maps/documentation/timezone/overview) is an **online** service we can optionally use for precise information regarding UTC and DST offsets.
 
 # 4. Quick Start
 
@@ -139,7 +140,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '2022-01-19 15:16:17' -Latitude -3.075833 
 19/01/2022 15:16:17 +03:00
 ```
 
-*Note: this command comes in two flavours: Online and Offline. There is a separate section below to explain the difference.* 
+*Note: this command comes in two flavours: Online and Offline. See the separate section below explaining the difference.* 
 
 ### iii. ExifTool commands
 
@@ -238,35 +239,21 @@ After this PowerShell module is installed, the file can be found at `$exifToolCo
 These are the two ways in which `Get-DateTimeOffset` can work:
 ```powershell
 PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333).ToString()
-25/01/1993 12:00:00 +00:00
-PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -GoogleApiKey $googleApiKey).ToString()
 25/01/1993 12:00:00 +01:00
+PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Offline).ToString()
+25/01/1993 12:00:00 +00:00
 ```
 
 ## b. Explanation
-- The first call uses the offline information as available in `GeoTimeZone` (for the time zone information) and in .NET (for the offset as it relates to the time zone information).
-- The second call uses the online information provided by the Google Time Zone API. This is actually the correct UTC offset for that location and date.
+- The first call uses the online information provided by the Time API. This is actually the correct UTC offset for that location and date.
+- The second call uses the offline information as available in `GeoTimeZone` (for the time zone information) and in .NET (for the offset for a date/time and timezone).
 
 **These two calls will most of the time return the same value**, but some times historical changes in base UTC offset and DST application for a specific location can throw off the offline resolution. In this example, the coordinates correspond to Lisbon in Portugal, where between 1992 and 1996 the time zone was CET (UTC+01:00), as opposed to WET (UTC+00:00) since then.
 
 ## c. Advantages and disadvantages
 
 - The offline resolution will work faster and will continue working without internet access. The speed difference should be minimal and might be irrelevant depending on your workflow and internet speed.
-- The Google API is not free ([pricing](https://developers.google.com/maps/documentation/timezone/usage-and-billing)). But at the time of writing, the pricing structure allows for 100000 (100k) requests free the first month after opening your account and 40000 (40k) per months afterwards. Depending on your volume this might be largely enough. 
-- The Google API requires initial setup to get working
-- You might not be comfortable creating a developer account with Google (this requires personal information and payment method, even when using it for free)
-
-## d. Google API setup
-
- - Create a Google account
- - Create a Google API account: [Get Started](https://developers.google.com/maps)
- - Add a billing account to your API account (this will not be charged)
- - Create a new project e.g. gfk-image
- - Go to APIs on the left menu, enable the Time Zone API
- - Go to Credentials on the left menu, create a new API key
-   - (optional) restrict it to the Time Zone API
-   - You will need to copy the key when you create it as it cannot be retrieved afterwards. If you lose it you can delete and create as many API keys as you want
-
+- The online API might become unavailable in the future, whereas the offline information will always be available.
 
 # 4. Unicode with ExifTool on Windows
 
