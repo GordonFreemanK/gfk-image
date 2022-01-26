@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace GFK.Image.DateTimeOffsetBuilder
+namespace GFK.Image.DateTimeOffsetBuilder;
+
+internal interface IDateTimeOffsetFactory
 {
-    internal interface IDateTimeOffsetFactory
-    {
-        Task<DateTimeOffset> Build(DateTime dateTime, float latitude, float longitude);
-    }
+    Task<DateTimeOffset> Build(DateTime dateTime, float latitude, float longitude);
 }

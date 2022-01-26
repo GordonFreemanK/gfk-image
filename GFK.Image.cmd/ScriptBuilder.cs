@@ -2,34 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GFK.Image.cmd
+namespace GFK.Image.cmd;
+
+public static class ScriptBuilder
 {
-    public static class ScriptBuilder
+    public static string GetScript(IEnumerable<string> commandArguments)
     {
-        public static string GetScript(IEnumerable<string> commandArguments)
+        var script = new StringBuilder();
+
+        var newLine = true;
+        foreach (var commandArgument in commandArguments)
         {
-            var script = new StringBuilder();
+            if (string.Equals(commandArgument, "/C", StringComparison.OrdinalIgnoreCase) && script.Length == 0)
+                continue;
 
-            var newLine = true;
-            foreach (var commandArgument in commandArguments)
+            if (string.Equals(commandArgument, "&", StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(commandArgument, "/C", StringComparison.OrdinalIgnoreCase) && script.Length == 0)
-                    continue;
-
-                if (string.Equals(commandArgument, "&", StringComparison.OrdinalIgnoreCase))
-                {
-                    script.AppendLine();
-                    newLine = true;
-                }
-                else
-                {
-                    if (!newLine) script.Append(' ');
-                    script.Append(commandArgument);
-                    newLine = false;
-                }
+                script.AppendLine();
+                newLine = true;
             }
-
-            return script.ToString();
+            else
+            {
+                if (!newLine) script.Append(' ');
+                script.Append(commandArgument);
+                newLine = false;
+            }
         }
+
+        return script.ToString();
     }
 }
