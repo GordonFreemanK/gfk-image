@@ -16,10 +16,10 @@ public class TagsRepository : ITagsRepository
     private readonly char _itemSeparator;
     private readonly List<string> _tags;
 
-    public TagsRepository(char itemSeparator)
+    public TagsRepository(string root, char itemSeparator)
     {
         _itemSeparator = itemSeparator;
-        _tags = new List<string>();
+        _tags = new List<string> { root };
     }
 
     public Tag AddTag(string path)

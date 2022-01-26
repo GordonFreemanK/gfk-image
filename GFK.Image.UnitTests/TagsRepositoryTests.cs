@@ -10,12 +10,36 @@ public class TagsRepositoryTests
     [SetUp]
     public void Setup()
     {
-        _tagsRepository = new TagsRepository('\\');
+        _tagsRepository = new TagsRepository( "Tags:",'\\');
 
         _tagsRepository.AddTag(@"Tags:\Author\Gordon Freeman");
         _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard");
         _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard\Other");
         _tagsRepository.AddTag(@"Tags:\People\The G-Man");
+    }
+
+    [Test]
+    public void Gets_root()
+    {
+        // Act
+        var result = _tagsRepository.GetTag("Tags:");
+
+        // Assert
+        Assert.That(
+            result,
+            Is.EqualTo(new Tag(@"Tags:", "Tags:")).Using<Tag>(AreTagsEqual));
+    }
+
+    [Test]
+    public void Gets_root_with_path_separator()
+    {
+        // Act
+        var result = _tagsRepository.GetTag(@"Tags:\");
+
+        // Assert
+        Assert.That(
+            result,
+            Is.EqualTo(new Tag(@"Tags:", "Tags:")).Using<Tag>(AreTagsEqual));
     }
 
     [Test]
@@ -85,6 +109,16 @@ public class TagsRepositoryTests
     {
         // Act
         var result = _tagsRepository.IsPathValid("Tags:");
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void Root_path_with_path_separator_is_valid()
+    {
+        // Act
+        var result = _tagsRepository.IsPathValid(@"Tags:\");
 
         // Assert
         Assert.That(result, Is.True);
@@ -183,6 +217,14 @@ public class TagsRepositoryTests
                         new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard")
                     })
                 .Using<Tag>(AreTagsEqual));
+    }
+
+    [Test]
+    public void Test()
+    {
+        _tagsRepository = new TagsRepository( "Bleh:",'\\');
+        _tagsRepository.AddTag(@"Bleh:\blip\bloop");
+        Assert.That(_tagsRepository.GetTag(@"Bleh:\"), Is.Not.Null);
     }
 
     private static bool AreTagsEqual(Tag left, Tag right) => left.Path == right.Path && left.Value == right.Value;
