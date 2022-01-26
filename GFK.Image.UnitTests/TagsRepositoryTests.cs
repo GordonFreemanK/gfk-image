@@ -10,36 +10,12 @@ public class TagsRepositoryTests
     [SetUp]
     public void Setup()
     {
-        _tagsRepository = new TagsRepository( "Tags:",'\\');
+        _tagsRepository = new TagsRepository( '\\');
 
         _tagsRepository.AddTag(@"Tags:\Author\Gordon Freeman");
         _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard");
         _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard\Other");
         _tagsRepository.AddTag(@"Tags:\People\The G-Man");
-    }
-
-    [Test]
-    public void Gets_root()
-    {
-        // Act
-        var result = _tagsRepository.GetTag("Tags:");
-
-        // Assert
-        Assert.That(
-            result,
-            Is.EqualTo(new Tag(@"Tags:", "Tags:")).Using<Tag>(AreTagsEqual));
-    }
-
-    [Test]
-    public void Gets_root_with_path_separator()
-    {
-        // Act
-        var result = _tagsRepository.GetTag(@"Tags:\");
-
-        // Assert
-        Assert.That(
-            result,
-            Is.EqualTo(new Tag(@"Tags:", "Tags:")).Using<Tag>(AreTagsEqual));
     }
 
     [Test]
