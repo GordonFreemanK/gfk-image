@@ -57,9 +57,15 @@ function New-PSDigiKamDrive {
     )
 
     Process {
-        New-PSDrive -Name $Name -PSProvider Tags -Root "${Name}:" -Scope Global | Out-Null
+        $root = "${Name}:"
+        New-PSDrive -Name $Name -PSProvider Tags -Root $root -Scope Global | Out-Null
 
-        $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" | Out-Null }    
+        $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object {
+            $filePath = Join-Path $root $_
+            if ($PSCmdlet.ShouldProcess($filePath, "Create file")) {
+                New-Item $filePath | Out-Null
+            }
+        }    
     }
 }
 
