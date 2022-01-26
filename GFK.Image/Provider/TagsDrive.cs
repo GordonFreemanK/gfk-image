@@ -6,7 +6,7 @@ public class TagsDrive : PSDriveInfo
 {
     public TagsDrive(PSDriveInfo driveInfo, char itemSeparator) : base(driveInfo)
     {
-        Repository = new TagsRepository(driveInfo.Root, itemSeparator);
+        Repository = new TagsRepository(itemSeparator);
     }
 
     public ITagsRepository Repository { get; }
