@@ -6,9 +6,11 @@ namespace GFK.Image.Provider;
 [CmdletProvider("Tags", ProviderCapabilities.None)]
 public class TagsProvider : NavigationCmdletProvider
 {
+    public override char ItemSeparator => '\\';
+
     private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
 
-    protected override PSDriveInfo NewDrive(PSDriveInfo drive) => new TagsDrive(drive);
+    protected override PSDriveInfo NewDrive(PSDriveInfo drive) => new TagsDrive(drive, ItemSeparator);
 
     protected override bool IsValidPath(string path) => true;
 

@@ -4,9 +4,9 @@ namespace GFK.Image.Provider;
 
 public class TagsDrive : PSDriveInfo
 {
-    public TagsDrive(PSDriveInfo driveInfo) : base(driveInfo)
+    public TagsDrive(PSDriveInfo driveInfo, char itemSeparator) : base(driveInfo)
     {
-        Repository = new TagsRepository();
+        Repository = new TagsRepository(itemSeparator);
     }
 
     public ITagsRepository Repository { get; }
