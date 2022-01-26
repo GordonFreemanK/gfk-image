@@ -63,6 +63,6 @@ public class TagsRepository : ITagsRepository
     {
         do position = tag.IndexOf(Separator, position + 1);
         while (position >= 0 && depth-- > 0);
-        return position >= 0 ? tag.Substring(0, position) : tag;
+        return position >= 0 ? tag[..position] : tag;
     }
 }

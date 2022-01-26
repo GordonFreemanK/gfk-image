@@ -30,10 +30,10 @@ public class GetDateTimeOffsetCmdlet : PSCmdlet
     public SwitchParameter Offline { get; set; }
 
     [Parameter(ParameterSetName = TimeApi)]
-    public Uri TimeApiUri { get; set; } = new Uri("https://www.timeapi.io");
+    public Uri TimeApiUri { get; set; } = new("https://www.timeapi.io");
 
     [Parameter(ParameterSetName = GoogleApi)]   
-    public Uri GoogleApiUri { get; set; } = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
+    public Uri GoogleApiUri { get; set; } = new("https://maps.googleapis.com/maps/api/timezone/json");
         
     [Parameter(Mandatory = true, ParameterSetName = GoogleApi)]   
     public string? GoogleApiKey { get; set; }

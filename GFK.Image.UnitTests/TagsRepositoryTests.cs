@@ -180,7 +180,7 @@ public class TagsRepositoryTests
                     new[]
                     {
                         new Tag(@"Tags:\Author\Gordon Freeman", "Gordon Freeman"),
-                        new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard"),
+                        new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard")
                     })
                 .Using<Tag>(AreTagsEqual));
     }
