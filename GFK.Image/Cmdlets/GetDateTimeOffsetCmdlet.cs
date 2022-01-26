@@ -18,7 +18,9 @@ namespace GFK.Image.Cmdlets
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public float Longitude { get; set; }
 
-        [Parameter]
+        [Parameter(ParameterSetName = "TimeApi")]
+        [Parameter(ParameterSetName = "GoogleApi")]
+        [Parameter(ParameterSetName = "GeoTimeZone")]
         public GetDateTimeOffsetMethod Method { get; set; } = GetDateTimeOffsetMethod.TimeApi;
 
         private TimeApiParameters? _timeApiParameters;
@@ -64,17 +66,28 @@ namespace GFK.Image.Cmdlets
             }
         }
 
-        private class TimeApiParameters
+        private class ApiParameters
         {
             [Parameter(ParameterSetName = "TimeApi")]
+            [Parameter(ParameterSetName = "GoogleApi")]
             public Uri Uri { get; set; } = new Uri("https://www.timeapi.io");
         }
 
-        private class GoogleApiParameters
+        private class TimeApiParameters : ApiParameters
         {
-            [Parameter(ParameterSetName = "GoogleApi")]
-            public Uri Uri { get; set; } = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
+            public TimeApiParameters()
+            {
+                Uri = new Uri("https://www.timeapi.io");
+            }
+        }
 
+        private class GoogleApiParameters : ApiParameters
+        {
+            public GoogleApiParameters()
+            {
+                Uri = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
+            }
+            
             [Parameter(Mandatory = true, ParameterSetName = "GoogleApi")]
             public string? Key { get; set; }
         }

@@ -12,9 +12,22 @@ Calculates the UTC offset associated with a date/time and a location
 
 ## SYNTAX
 
+### TimeApi
 ```
 Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
  [-Method <GetDateTimeOffsetMethod>] [-Uri <Uri>] [<CommonParameters>]
+```
+
+### GoogleApi
+```
+Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
+ [-Method <GetDateTimeOffsetMethod>] [-Uri <Uri>] [<CommonParameters>]
+```
+
+### GeoTimeZone
+```
+Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
+ [-Method <GetDateTimeOffsetMethod>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -122,7 +135,7 @@ The base URI of the online service
 
 ```yaml
 Type: Uri
-Parameter Sets: (All)
+Parameter Sets: TimeApi, GoogleApi
 Aliases:
 
 Required: False
