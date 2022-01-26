@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -12,9 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="GeoTimeZone" Version="4.1.0" />
-    <PackageReference Include="PowerShellStandard.Library" Version="5.1.0">
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="System.Management.Automation" Version="7.2.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +28,13 @@
     <None Update="exiftool\.ExifTool_config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="en-US\GFK.Image.dll-Help.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GFK.Time.API.Client\GFK.Time.API.Client.csproj" />
   </ItemGroup>
 
 </Project>

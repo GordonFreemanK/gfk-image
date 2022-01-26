@@ -1,0 +1,23 @@
+﻿name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Test
+        run: dotnet test
+      - name: Publish GFK.Image
+        run: dotnet publish GFK.Image -o pub/GFK.Image
+      - name: Publish GFK.Image.cmd
+        run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
+      - name: Import GFK.Image
+        shell: pwsh
+        run: Import-Module ./pub/GFK.Image/GFK.Image.psd1

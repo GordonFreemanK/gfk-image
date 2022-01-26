@@ -33,7 +33,7 @@ Copyright = '(c) GordonFreemanK. All rights reserved.'
 Description = 'PowerShell scripts to manipulate photo metadata using ExifTool and an application to enable PowerShell in digiKam'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '5.1'
+PowerShellVersion = '6.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -69,7 +69,7 @@ PowerShellVersion = '5.1'
 NestedModules = @('GFK.Image.dll','Scripts/GFK.Image.digiKam.psm1','Scripts/GFK.Image.ExifTool.psm1')
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('Install-PSDigiKam','Uninstall-PSDigiKam', 'New-TagsDrive', 'Set-Authors', 'Set-DateTimeOffsets')
+FunctionsToExport = @('Install-PSDigiKam','Uninstall-PSDigiKam', 'New-PSDigiKamDrive', 'Get-ImageMetadata', 'Set-ImageMetadata', 'ConvertFrom-ImageDateTime')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @('Get-DateTimeOffset')
@@ -101,7 +101,7 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        ProjectUri = 'https://github.com/GordonFreemanK/digikam-scripts'
+        ProjectUri = 'https://github.com/GordonFreemanK/gfk-image'
 
         # A URL to an icon representing this module.
         # IconUri = ''

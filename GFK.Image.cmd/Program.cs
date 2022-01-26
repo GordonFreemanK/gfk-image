@@ -1,56 +1,44 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
+using GFK.Image.cmd;
 
-namespace GFK.Image.cmd
+var applicationDirectory = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+    "GFK",
+    "GFK.Image.cmd");
+Directory.CreateDirectory(applicationDirectory);
+var logPath = Path.Combine(applicationDirectory, "cmd.log");
+var logger = new Logger(logPath);
+
+try
 {
-    public static class Program
+    var script = ScriptBuilder.GetScript(args);
+
+    var processStartInfo = new ProcessStartInfo
     {
-        public static async Task Main(string[] args)
-        {
-            var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "cmd.log");
-            var logger = new Logger(logPath);
+        FileName = "pwsh.exe",
+        ArgumentList = { "-Command", script },
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false
+    };
 
-            try
-            {
-                var script = ScriptBuilder.GetScript(args);
+    using var process = new Process { StartInfo = processStartInfo };
 
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = "pwsh.exe",
-                    ArgumentList = { "-Command", script },
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false
-                };
+    process.Start();
 
-                var environmentVariables = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Process);
-                foreach (string? key in environmentVariables.Keys)
-                {
-                    if (key == null)
-                        continue;
-                    processStartInfo.EnvironmentVariables[key] = (string?)environmentVariables[key];
-                }
+    await process.WaitForExitAsync();
 
-                using var process = new Process { StartInfo = processStartInfo };
+    await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
 
-                process.Start();
-
-                process.WaitForExit();
-
-                await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
-
-                // By default PowerShell returns 0 for success and 1 for failure (can be overriden in code)
-                // digiKam interprets -1 as a failure and anything else a success
-                // This ensures that digiKam knows when the script fails
-                Environment.Exit(process.ExitCode == 0 ? 0 : -1);
-            }
-            catch (Exception e)
-            {
-                await logger.WriteAsync($"Uncaught exception: {e.Message}");
-                Environment.Exit(-1);
-            }            
-        }
-    }
+    // By default PowerShell returns 0 for success and 1 for failure (can be overriden in code)
+    // digiKam interprets -1 as a failure and anything else a success
+    // This ensures that digiKam knows when the script fails
+    return process.ExitCode == 0 ? 0 : -1;
+}
+catch (Exception e)
+{
+    await logger.WriteAsync($"Uncaught exception: {e.Message}");
+    return -1;
 }

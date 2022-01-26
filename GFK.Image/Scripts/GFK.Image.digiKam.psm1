@@ -1,48 +1,72 @@
 #Requires -PSEdition Core
 #Requires -Module GFK.Image
 
-<#
-.SYNOPSIS
-    Add the PowerShell injection to digiKam
-.NOTES
-    digiKam is expected to be installed for this command to work
-#>
-[CmdletBinding]
+Set-StrictMode -Version Latest
+
 function Install-PSDigiKam {
+    <#
+    .SYNOPSIS
+        Add the PowerShell injection to digiKam
+    .NOTES
+        digiKam is expected to be installed for this command to work
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    Param([switch]$Force)
+
     Test-IsAdministrator
 
     $sourcePath = Join-Path (Split-Path $PSScriptRoot) cmd cmd.exe
-    Copy-Item $sourcePath (Get-DigiKamPath) -Force
+    Copy-Item $sourcePath (Get-DigiKamPath) -Force:$Force
 }
 
-<#
-.SYNOPSIS
-    Removes the PowerShell injection from digiKam
-.NOTES
-    digiKam is expected to be installed for this command to work
-#>
-[CmdletBinding]
 function Uninstall-PSDigiKam {
+    <#
+    .SYNOPSIS
+        Removes the PowerShell injection from digiKam
+    .NOTES
+        digiKam is expected to be installed for this command to work
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    Param([switch]$Force)
+
     Test-IsAdministrator
 
     $path = Join-Path (Get-DigiKamPath) cmd.exe
-    Remove-Item $path -Force
+    if (Test-Path $path) {
+        Remove-Item $path -Force:$Force
+    }
 }
 
-<#
-.SYNOPSIS
-    Creates a Tags:/ drive from digiKam tags
-.DESCRIPTION
-    Hierarchized tags passed by digiKam are in a single string where ';' is the tag separator and '/' is the path separator
-    This will load these tags in a new PowerShell drive called Tag:/ to enable exploring them
-#>
-[CmdletBinding]
-function New-TagsDrive {
-    param ([Parameter(Mandatory)][string]$Tags)
+function New-PSDigiKamDrive {
+    <#
+    .SYNOPSIS
+        Creates a Tags drive from digiKam tags
+    .DESCRIPTION
+        Hierarchized tags passed by digiKam are in a single string where ';' is the tag separator and '/' is the path separator
+        This will load these tags in a new PowerShell drive to enable exploring them
+    .NOTES
+        Backslashes (\) will be replaced by carets (-) in tag values due to a limitation in PowerShell support
+    #>
+    [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
+    Param (
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string] $Name = 'Tags',
 
-    New-PSDrive -Name Tags -PSProvider Tags -Root 'Tags:' -Scope Global | Out-Null
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string] $Tags
+    )
 
-    $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object { New-Item "Tags:\$_" | Out-Null }
+    Process {
+        $root = "${Name}:"
+        New-PSDrive -Name $Name -PSProvider Tags -Root $root -Scope Global | Out-Null
+
+        $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object {
+            $filePath = Join-Path $root $_
+            if ($PSCmdlet.ShouldProcess($filePath, "Create tag")) {
+                New-Item $filePath | Out-Null
+            }
+        }    
+    }
 }
 
 #region Private functions
@@ -56,6 +80,9 @@ function Test-IsAdministrator {
 }
 
 function Get-DigiKamPath {
+    [OutputType([string])]
+    param()
+
     if ($env:OS -ne 'Windows_NT' -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
         throw 'This command is only compatible with win64 systems'
     }
