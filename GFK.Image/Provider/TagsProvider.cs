@@ -9,9 +9,9 @@ namespace GFK.Image.Provider;
 [CmdletProvider("Tags", ProviderCapabilities.None)]
 public class TagsProvider : NavigationCmdletProvider
 {
-    public override char ItemSeparator => '/';
+    public override char ItemSeparator => '\\';
 
-    public override char AltItemSeparator => '/';
+    public override char AltItemSeparator => '\\';
 
     private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
 

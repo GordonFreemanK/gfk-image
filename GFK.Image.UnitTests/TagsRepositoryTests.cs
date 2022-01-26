@@ -85,6 +85,26 @@ public class TagsRepositoryTests
     }
 
     [Test]
+    public void Root_is_valid()
+    {
+        // Act
+        var result = _tagsRepository.IsPathValid("Tags:");
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void Root_with_path_separator_is_valid()
+    {
+        // Act
+        var result = _tagsRepository.IsPathValid(@"Tags:\");
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
     public void Tag_path_is_valid()
     {
         // Act
@@ -217,14 +237,6 @@ public class TagsRepositoryTests
                         new Tag(@"Tags:\Author\Adrian Shephard", "Adrian Shephard")
                     })
                 .Using<Tag>(AreTagsEqual));
-    }
-
-    [Test]
-    public void Test()
-    {
-        _tagsRepository = new TagsRepository( "Bleh:",'\\');
-        _tagsRepository.AddTag(@"Bleh:\blip\bloop");
-        Assert.That(_tagsRepository.GetTag(@"Bleh:\"), Is.Not.Null);
     }
 
     private static bool AreTagsEqual(Tag left, Tag right) => left.Path == right.Path && left.Value == right.Value;
