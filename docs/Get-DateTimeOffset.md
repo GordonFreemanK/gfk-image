@@ -14,20 +14,19 @@ Calculates the UTC offset associated with a date/time and a location
 
 ### TimeApi
 ```
-Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
- [-Method <GetDateTimeOffsetMethod>] [-Uri <Uri>] [<CommonParameters>]
+Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single> [-Online] [-TimeApiUri <Uri>]
+ [<CommonParameters>]
 ```
 
 ### GoogleApi
 ```
-Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
- [-Method <GetDateTimeOffsetMethod>] [-Uri <Uri>] [<CommonParameters>]
+Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single> [-Online] [-GoogleApiUri <Uri>]
+ -GoogleApiKey <String> [<CommonParameters>]
 ```
 
 ### GeoTimeZone
 ```
-Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single>
- [-Method <GetDateTimeOffsetMethod>] [<CommonParameters>]
+Get-DateTimeOffset -DateTime <DateTime> -Latitude <Single> -Longitude <Single> [-Offline] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,23 +44,23 @@ The command currently implements three ways of calculating the offset:
 
 ### Example 1
 ```powershell
-PS C:\> (Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method TimeApi -Uri 'https://www.timeapi.io').ToString('o')
+PS C:\> (Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Online -TimeApiUri 'https://www.timeapi.io').ToString('o')
 25/08/2020 12:00:00 +01:00
 ```
 
-This example uses the Time API. The -Method and -Uri parameters are optional and this example shows the default values.
+This example uses the Time API. The -Online and -TimeApiUri parameters are optional, this example shows the default URI value.
 
 ### Example 2
 ```powershell
-PS C:\> Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GoogleApi -Key <Your API key here> -Uri 'https://maps.googleapis.com/maps/api/timezone/json'
+PS C:\> Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Online -GoogleApiUri 'https://maps.googleapis.com/maps/api/timezone/json' -GoogleApiKey <Your API key here>
 25/08/2020 12:00:00 +01:00
 ```
 
-This example uses the Google API. The -Uri parameter is optional and this example shows the default value.
+This example uses the Google API. The -Online and -GoogleApiUri parameters are optional, this example shows the default URI value.
 
 ### Example 3
 ```powershell
-PS C:\> Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GeoTimeZone
+PS C:\> Get-DateTimeOffset -DateTime '2020-08-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Offline
 25/08/2020 12:00:00 +01:00
 ```
 
@@ -114,14 +113,28 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Method
-The type of offset lookup to perform
+### -GoogleApiKey
+A valid API key for the Google Maps Platform with access to the Time Zone API
 
 ```yaml
-Type: GetDateTimeOffsetMethod
-Parameter Sets: (All)
+Type: String
+Parameter Sets: GoogleApi
 Aliases:
-Accepted values: GeoTimeZone, TimeApi, GoogleApi
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -GoogleApiUri
+The base URI for the Google Time Zone API
+
+```yaml
+Type: Uri
+Parameter Sets: GoogleApi
+Aliases:
 
 Required: False
 Position: Named
@@ -130,12 +143,42 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Uri
-The base URI of the online service
+### -Offline
+Use GeoTimeZone for the offset calculation
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: GeoTimeZone
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Online
+Use Time API or Google API for the offset calculation
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: TimeApi, GoogleApi
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TimeApiUri
+The base URI for the Time API
 
 ```yaml
 Type: Uri
-Parameter Sets: TimeApi, GoogleApi
+Parameter Sets: TimeApi
 Aliases:
 
 Required: False

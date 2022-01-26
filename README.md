@@ -237,17 +237,17 @@ After this PowerShell module is installed, the file can be found at `$exifToolCo
 
 These are three modes in which `Get-DateTimeOffset` can work:
 ```powershell
-PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method TimeApi).ToString()
+PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Online).ToString()
 25/01/1993 12:00:00 +01:00
-PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GoogleApi -Key <googleApiKey>).ToString()
+PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Online -GoogleApiKey <googleApiKey>).ToString()
 25/01/1993 12:00:00 +01:00
-PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Method GeoTimeZone).ToString()
+PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -Longitude -9.13333 -Offline).ToString()
 25/01/1993 12:00:00 +00:00
 ```
 
 ## b. Explanation
 - The first two calls uses information provided by online services. The returned value is the correct UTC offset for that location and date.
-  - The first call is made with the Time API endpoint (this is the default, i.e. the method used if the `Method` parameter is not specified)
+  - The first call is made with the Time API endpoint (this is the default, i.e. the method used if the `-Online` parameter is not specified)
   - The second call is made wit the Google Time Zone API endpoint
 - The second call uses the offline information as available in `GeoTimeZone` (for the time zone information) and in .NET (for the offset for a date/time and timezone).
 
@@ -264,7 +264,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
 
 &ast; The speed difference between online and offline should be minimal and might be irrelevant depending on your workflow and internet speed.
 
-&ast;&ast; At the time of writing, the [pricing structure](https://developers.google.com/maps/documentation/timezone/usage-and-billing) for individuals of the Google Time Zone API allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
+&ast;&ast; At the time of writing, the [pricing structure](https://developers.google.com/maps/documentation/timezone/usage-and-billing) of the Google Time Zone API for individuals allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
 
 ## d. Google API setup
 

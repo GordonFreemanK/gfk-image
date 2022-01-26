@@ -5,10 +5,14 @@ using GFK.Image.DateTimeOffsetBuilder;
 namespace GFK.Image.Cmdlets
 {
     [Cmdlet(VerbsCommon.Get, "DateTimeOffset")]
-    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "TimeApi")]
+    [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = TimeApi)]
     [OutputType(typeof(DateTimeOffset))]
-    public class GetDateTimeOffsetCmdlet : PSCmdlet, IDynamicParameters
+    public class GetDateTimeOffsetCmdlet : PSCmdlet
     {
+        private const string TimeApi = nameof(TimeApi);
+        private const string GoogleApi = nameof(GoogleApi);
+        private const string GeoTimeZone = nameof(GeoTimeZone);
+
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public DateTime DateTime { get; set; }
 
@@ -18,24 +22,22 @@ namespace GFK.Image.Cmdlets
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true)]
         public float Longitude { get; set; }
 
-        [Parameter(ParameterSetName = "TimeApi")]
-        [Parameter(ParameterSetName = "GoogleApi")]
-        [Parameter(ParameterSetName = "GeoTimeZone")]
-        public GetDateTimeOffsetMethod Method { get; set; } = GetDateTimeOffsetMethod.TimeApi;
+        [Parameter(ParameterSetName = TimeApi)]
+        [Parameter(ParameterSetName = GoogleApi)]   
+        public SwitchParameter Online { get; set; }
 
-        private TimeApiParameters? _timeApiParameters;
-        private GoogleApiParameters? _googleApiParameters;
+        [Parameter(Mandatory = true, ParameterSetName = GeoTimeZone)]
+        public SwitchParameter Offline { get; set; }
 
-        public object? GetDynamicParameters()
-        {
-            return Method switch
-            {
-                GetDateTimeOffsetMethod.TimeApi => _timeApiParameters = new TimeApiParameters(),
-                GetDateTimeOffsetMethod.GoogleApi => _googleApiParameters = new GoogleApiParameters(),
-                _ => null
-            };
-        }
+        [Parameter(ParameterSetName = TimeApi)]
+        public Uri TimeApiUri { get; set; } = new Uri("https://www.timeapi.io");
 
+        [Parameter(ParameterSetName = GoogleApi)]   
+        public Uri GoogleApiUri { get; set; } = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
+        
+        [Parameter(Mandatory = true, ParameterSetName = GoogleApi)]   
+        public string? GoogleApiKey { get; set; }
+        
         protected override void ProcessRecord()
         {
             var dateTimeOffset = GetDateTimeOffsetFactory()
@@ -47,49 +49,19 @@ namespace GFK.Image.Cmdlets
 
         private IDateTimeOffsetFactory GetDateTimeOffsetFactory()
         {
-            switch (Method)
+            switch (ParameterSetName)
             {
-                case GetDateTimeOffsetMethod.GeoTimeZone:
+                case TimeApi:
+                    return new TimeApiDateTimeOffsetFactory(TimeApiUri);
+                case GoogleApi:
+                    if (GoogleApiKey == null)
+                        throw new Exception("GoogleApiKey is required");
+                    return new GoogleApiDateTimeOffsetFactory(GoogleApiUri, GoogleApiKey);
+                case GeoTimeZone:
                     return new GeoTimeZoneDateTimeOffsetFactory();
-                case GetDateTimeOffsetMethod.TimeApi:
-                    if (_timeApiParameters == null)
-                        throw new Exception("Could not bind Time API parameters");
-                    return new TimeApiDateTimeOffsetFactory(_timeApiParameters.Uri);
-                case GetDateTimeOffsetMethod.GoogleApi:
-                    if (_googleApiParameters == null)
-                        throw new Exception("Could not bind Google API parameters");
-                    if (_googleApiParameters.Key == null)
-                        throw new Exception("Could not bind Google API key");
-                    return new GoogleApiDateTimeOffsetFactory(_googleApiParameters.Uri, _googleApiParameters.Key);
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(Method));
+                    throw new Exception("Cannot bind parameter set name");
             }
-        }
-
-        private class ApiParameters
-        {
-            [Parameter(ParameterSetName = "TimeApi")]
-            [Parameter(ParameterSetName = "GoogleApi")]
-            public Uri Uri { get; set; } = new Uri("https://www.timeapi.io");
-        }
-
-        private class TimeApiParameters : ApiParameters
-        {
-            public TimeApiParameters()
-            {
-                Uri = new Uri("https://www.timeapi.io");
-            }
-        }
-
-        private class GoogleApiParameters : ApiParameters
-        {
-            public GoogleApiParameters()
-            {
-                Uri = new Uri("https://maps.googleapis.com/maps/api/timezone/json");
-            }
-            
-            [Parameter(Mandatory = true, ParameterSetName = "GoogleApi")]
-            public string? Key { get; set; }
         }
     }
 }
