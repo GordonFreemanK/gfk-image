@@ -36,7 +36,7 @@ The command currently implements three ways of calculating the offset:
 
 - The TimeApi method uses the free online service Time API (https://www.timeapi.io/swagger/index.html)
 
-- The GoogleApi method uses the pay-as-you-on online service Google Time Zone API (https://developers.google.com/maps/documentation/timezone/overview)
+- The GoogleApi method uses the pay-as-you-go online service Google Time Zone API (https://developers.google.com/maps/documentation/timezone/overview)
 
 - The GeoTimeZone method uses the free offline NuGet library GeoTimeZone (https://github.com/mattjohnsonpint/GeoTimeZone)
 

@@ -13,7 +13,7 @@
       <maml:para>This command takes a DateTime object and a latitude and longitude in decimal formats, and outputs a DateTimeOffset for a local date including the UTC offset for that particular location and date/time.</maml:para>
       <maml:para>The command currently implements three ways of calculating the offset:</maml:para>
       <maml:para>- The TimeApi method uses the free online service Time API (https://www.timeapi.io/swagger/index.html)</maml:para>
-      <maml:para>- The GoogleApi method uses the pay-as-you-on online service Google Time Zone API (https://developers.google.com/maps/documentation/timezone/overview)</maml:para>
+      <maml:para>- The GoogleApi method uses the pay-as-you-go online service Google Time Zone API (https://developers.google.com/maps/documentation/timezone/overview)</maml:para>
       <maml:para>- The GeoTimeZone method uses the free offline NuGet library GeoTimeZone (https://github.com/mattjohnsonpint/GeoTimeZone)</maml:para>
     </maml:description>
     <command:syntax>
