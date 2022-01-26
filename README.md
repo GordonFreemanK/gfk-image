@@ -255,16 +255,16 @@ PS C:\> (Get-DateTimeOffset -DateTime '1993-01-25T12:00:00' -Latitude 38.71667 -
 
 ## c. Pros and cons
 
-|                                                                                            | Pros                                                                                  | Cons                                                                                                                                |
-|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| [Time API](https://www.timeapi.io/)                                                        | <ul><li>Free</li><li>Exact</li></ul>                                                  | <ul><li>Slower &ast;</li><li>Might break or stop working in the future</li></ul>                                                    |
-| [Google Time Zone API](https://developers.google.com/maps/documentation/timezone/overview) | <ul><li>Exact</li><li>Can be expected to not break in the future</li></ul>            | <ul><li>Slower &ast;</li><li>Not free &ast;&ast;</li><li>Require setup</li><li>Registration requires personal information</li></ul> |
-| [GeoTimeZone](https://github.com/mattjohnsonpint/GeoTimeZone)                              | <ul><li>Free</li><li>Fastest</li><li>Works offline</li><li>Will always work</li></ul> | <ul><li>Can be inexact in certain conditions</li></ul>                                                                              |
+|                                                                                            | Pros                                                                                  | Cons                                                                                                                                 |
+|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| [Time API](https://www.timeapi.io/)                                                        | <ul><li>Free</li><li>Exact</li></ul>                                                  | <ul><li>Slower &ast;</li><li>Might break or stop working in the future</li></ul>                                                     |
+| [Google Time Zone API](https://developers.google.com/maps/documentation/timezone/overview) | <ul><li>Exact</li><li>Can be expected to not break in the future</li></ul>            | <ul><li>Slower &ast;</li><li>Not free &ast;&ast;</li><li>Requires setup</li><li>Registration requires personal information</li></ul> |
+| [GeoTimeZone](https://github.com/mattjohnsonpint/GeoTimeZone)                              | <ul><li>Free</li><li>Fastest</li><li>Works offline</li><li>Will always work</li></ul> | <ul><li>Can be inexact in certain conditions</li></ul>                                                                               |
 
 
 &ast; The speed difference between online and offline should be minimal and might be irrelevant depending on your workflow and internet speed.
 
-&ast;&ast; At the time of writing, the [pricing structure](https://developers.google.com/maps/documentation/timezone/usage-and-billing) of the Google Time Zone API for individuals allows for 100,000 free requests the first month after registration and 40,000 free requests monthly requests thereafter. This might be more than enough for most people.
+&ast;&ast; At the time of writing, the [pricing structure](https://developers.google.com/maps/documentation/timezone/usage-and-billing) of the Google Time Zone API for individuals allows for 100,000 free requests the first month after registration and 40,000 free requests monthly thereafter. This might be more than enough for most people.
 
 ## d. Google API setup
 
