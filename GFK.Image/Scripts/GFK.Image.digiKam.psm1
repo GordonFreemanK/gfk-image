@@ -62,7 +62,7 @@ function New-PSDigiKamDrive {
 
         $Tags -replace '\\', '-' -replace '/', '\' -split ';' | Foreach-Object {
             $filePath = Join-Path $root $_
-            if ($PSCmdlet.ShouldProcess($filePath, "Create file")) {
+            if ($PSCmdlet.ShouldProcess($filePath, "Create tag")) {
                 New-Item $filePath | Out-Null
             }
         }    
