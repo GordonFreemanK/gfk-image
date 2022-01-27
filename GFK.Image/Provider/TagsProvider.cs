@@ -9,16 +9,16 @@ namespace GFK.Image.Provider;
 [CmdletProvider("Tags", ProviderCapabilities.None)]
 public class TagsProvider : NavigationCmdletProvider
 {
-    public override char ItemSeparator => '\\';
+    private const char Separator = '/';
 
-    public override char AltItemSeparator => '\\';
+    public override char ItemSeparator => Separator;
 
-    private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
+    public override char AltItemSeparator => Separator;
 
     protected override PSDriveInfo NewDrive(PSDriveInfo drive)
     {
         WriteVerbose($"Root: {drive.Root}");
-        return new TagsDrive(drive, ItemSeparator);
+        return new TagsDrive(drive, Separator);
     }
 
     protected override bool IsValidPath(string path)
@@ -28,20 +28,24 @@ public class TagsProvider : NavigationCmdletProvider
 
     protected override bool ItemExists(string path)
     {
-        return LogAndExecute(() => TagsDrive.Repository.IsPathValid(path), new object?[] { path });
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
+        return LogAndExecute(() => TagsDrive.Repository.IsPathValid(cleanPath),
+            new object?[] { path });
     }
 
     protected override bool IsItemContainer(string path)
     {
-        return LogAndExecute(() => TagsDrive.Repository.IsPathValid(path), new object?[] { path });
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
+        return LogAndExecute(() => TagsDrive.Repository.IsPathValid(cleanPath), new object?[] { path });
     }
 
     protected override void NewItem(string path, string itemTypeName, object newItemValue)
     {
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
         LogAndExecute(
             () =>
             {
-                var tag = TagsDrive.Repository.AddTag(path);
+                var tag = TagsDrive.Repository.AddTag(cleanPath);
                 WriteItemObject(tag, tag.Path, true);
             },
             new[] { path, itemTypeName, newItemValue });
@@ -49,10 +53,11 @@ public class TagsProvider : NavigationCmdletProvider
 
     protected override void GetItem(string path)
     {
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
         LogAndExecute(
             () =>
             {
-                var tag = TagsDrive.Repository.GetTag(path);
+                var tag = TagsDrive.Repository.GetTag(cleanPath);
                 if (tag != null)
                 {
                     WriteItemObject(tag, tag.Path, true);
@@ -71,53 +76,46 @@ public class TagsProvider : NavigationCmdletProvider
         LogAndExecute(() => GetChildItems(path, recurse ? default : (uint)0), new object?[] { path, recurse });
     }
 
-    protected override string MakePath(string parent, string child)
+    protected override string MakePath(string? parent, string? child)
     {
-        return LogAndExecute(() => base.MakePath(parent, child), new object?[] { parent, child });
-    }
-
-    protected override string[] ExpandPath(string path)
-    {
-        return LogAndExecute(() => base.ExpandPath(path), new object?[] { path });
-    }
-
-    protected override bool ConvertPath(string path, string filter, ref string updatedPath, ref string updatedFilter)
-    {
-        var result = base.ConvertPath(path, filter, ref updatedPath, ref updatedFilter);
-        return LogAndExecute(() => result, new object?[] { path, filter, updatedPath, updatedFilter });
+        var cleanParent = TagsDrive.PathMaker.FixRoot(parent);
+        var cleanChild = TagsDrive.PathMaker.FixRoot(child);
+        return LogAndExecute(
+            () => TagsDrive.PathMaker.MakePath(cleanParent, cleanChild),
+            new object?[] { parent, child });
     }
 
     protected override string NormalizeRelativePath(string path, string basePath)
     {
-        return LogAndExecute(() => base.NormalizeRelativePath(path, basePath), new object?[] { path, basePath });
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
+        var cleanBasePath = TagsDrive.PathMaker.FixRoot(basePath);
+        return LogAndExecute(
+            () => base.NormalizeRelativePath(cleanPath, cleanBasePath),
+            new object?[] { path, basePath });
     }
 
-    protected override string GetParentPath(string path, string? root)
+    protected override string GetParentPath(string? path, string? root)
     {
-        return LogAndExecute(() => base.GetParentPath(path, root), new object?[] { path, root });
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
+        return LogAndExecute(() => TagsDrive.PathMaker.GetParentPath(cleanPath),
+            new object?[] { path, root });
     }
 
     protected override string GetChildName(string path)
     {
-        return LogAndExecute(() => base.GetChildName(path), new object?[] { path });
-    }
-
-    protected override void GetChildNames(string path, ReturnContainers returnContainers)
-    {
-        LogAndExecute(() => base.GetChildNames(path, returnContainers), new object?[] { path, returnContainers });
-    }
-
-    protected override bool HasChildItems(string path)
-    {
-        return LogAndExecute(() => base.HasChildItems(path), new object?[] { path });
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
+        return LogAndExecute(
+            () => TagsDrive.PathMaker.GetChildName(cleanPath),
+            new object?[] { path });
     }
 
     private int GetChildItems(string path, uint? depth)
     {
+        var cleanPath = TagsDrive.PathMaker.FixRoot(path);
         return LogAndExecute(
             () =>
             {
-                var childTags = TagsDrive.Repository.GetChildTags(path, depth);
+                var childTags = TagsDrive.Repository.GetChildTags(cleanPath, depth);
                 foreach (var tag in childTags)
                 {
                     WriteItemObject(tag, tag.Path, true);
@@ -164,4 +162,6 @@ public class TagsProvider : NavigationCmdletProvider
             throw;
         }
     }
+    
+    private TagsDrive TagsDrive => (TagsDrive)PSDriveInfo;
 }
