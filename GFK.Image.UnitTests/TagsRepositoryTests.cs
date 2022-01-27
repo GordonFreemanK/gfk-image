@@ -10,7 +10,7 @@ public class TagsRepositoryTests
     [SetUp]
     public void Setup()
     {
-        _tagsRepository = new TagsRepository( '\\');
+        _tagsRepository = new TagsRepository('\\');
 
         _tagsRepository.AddTag(@"Tags:\Author\Gordon Freeman");
         _tagsRepository.AddTag(@"Tags:\Author\Adrian Shephard");
