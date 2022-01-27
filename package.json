@@ -27,7 +27,7 @@
       [
         "@semantic-release/exec",
         {
-          "publishCmd": "Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}"
+          "publishCmd": "pwsh -Command { Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version} }"
         }
       ]
     ]
