@@ -91,6 +91,16 @@ public class TagsRepositoryTests
     }
 
     [Test]
+    public void Root_path_with_path_separator_is_valid()
+    {
+        // Act
+        var result = _tagsRepository.IsPathValid(@"Tags:\");
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
     public void Non_existent_path_is_invalid()
     {
         // Act
