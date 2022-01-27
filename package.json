@@ -1,14 +1,15 @@
 {
   "scripts": {
     "build": "dotnet build",
-    "build-package": "cross-env dotnet publish GFK.Image -c Release -o pub/GFK.Image && dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd"
+    "test": "dotnet test",
+    "deploy:local": "dotnet publish GFK.Image -c Release -o pub/GFK.Image --no-logo; dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd --no-logo",
+    "deploy:user": "$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'; dotnet publish GFK.Image -o $publishPath --nologo; dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd) --nologo"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/github": "^8.0.2",
     "@semantic-release/release-notes-generator": "^10.0.3",
-    "cross-env": "^7.0.3",
     "semantic-release": "^19.0.2"
   },
   "release": {
@@ -22,7 +23,7 @@
       [
         "@semantic-release/exec",
         {
-          "publishCmd": "Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}"
+          "publishCmd": "pwsh -command \". 'Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}'\""
         }
       ]
     ]

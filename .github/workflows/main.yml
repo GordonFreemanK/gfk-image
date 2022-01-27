@@ -28,12 +28,11 @@ jobs:
       - name: Test GFK.Image manifest
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
-      - name: Release
-        shell: pwsh
+      - name: GitHub release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: yarn && yarn run semantic-release
-      - name: Publish GFK.Image to PowerShell Gallery
+      - name: PSGallery release
         shell: pwsh
         run: |
           $moduleVersion = (Get-Module pub/GFK.Image -ListAvailable).Version
