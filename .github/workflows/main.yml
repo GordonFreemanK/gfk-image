@@ -32,10 +32,14 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: npm install && npx semantic-release
+        run: yarn && yarn run semantic-release
       - name: Publish GFK.Image to PowerShell Gallery
         shell: pwsh
         run: |
-          if ((Get-Module pub/GFK.Image -ListAvailable).Version -NE '1.0.0') {
+          $moduleVersion = (Get-Module pub/GFK.Image -ListAvailable).Version
+          if ($moduleVersion -EQ '1.0.0') {
+            Write-Host 'Found default version 1.0.0 in module manifest: skipping publication'
+          } else {
+            Write-Host "Publishing GFK.Image version $moduleVersion"
             Publish-Module -Path pub/GFK.Image -NuGetApiKey ${{secrets.PSGALLERY_TOKEN}}
           }
