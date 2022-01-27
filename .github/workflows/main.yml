@@ -29,6 +29,7 @@ jobs:
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
       - name: Release
+        shell: pwsh
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: npm install && npx semantic-release

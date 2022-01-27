@@ -5,5 +5,31 @@
     "@semantic-release/github": "^8.0.2",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "semantic-release": "^19.0.2"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "pub/**",
+              "label": "GFK.Image"
+            }
+          ]
+        }
+      ],
+      [
+        "@semantic-release/exec",
+        {
+          "publishCmd": "Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}"
+        }
+      ]
+    ]
   }
 }
