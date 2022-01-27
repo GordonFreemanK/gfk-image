@@ -32,15 +32,16 @@ function Get-ImageMetadata {
         Tags not found on the file will not be  in the output at all (even as empty strings)
         
         Without the -Grouped switch specified, the Tags property of each ImageMetadata object is a flat list of properties for the tags found, without group information (EXIF/IPTC/XMP)
-        Collisions therefore in case of tag duplication across groups ExifTool chooses which tag value to output.
-        Choose this if you want to handle multiple files and are not concerned with group the tags are stored in, or if you fully specify the groups on the TagNames parameter (e.g. 'EXIF:CreateDate').
+        Collisions are possible in case of tag duplication across groups ExifTool chooses which tag value to output.
+        Choose this if you want to handle multiple files and are not concerned with which group the tags are stored in, or if you fully specify the groups on the TagNames parameter (e.g. 'EXIF:CreateDate').
 
         With the -Grouped switch specified, the Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags found.
         There will be no collisions in this mode.
         Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file.
     .NOTES
-        Recursion is available as a switch. The option will have no effect if the path is not a directory.
-        An optional ExifTool configuration can be specified as a parameter.
+        - You can show the actual ExifTool command with the -Verbose switch
+        - Recursion is available as a switch. The option will have no effect if the path is not a directory.
+        - An optional ExifTool configuration can be specified as a parameter.
 
     #>
     [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'ValuesOnly')]
@@ -120,7 +121,10 @@ function Set-ImageMetadata() {
                 '-XMP-xmp:MetadataDate' = Get-Date
             }
     .NOTES
-        Shortcut tag values cannot be set with the `=` operator and need to be set with the `<` operator.
+        - You can show the actual ExifTool command with the -Verbose switch, and show only the command without running
+        it with -Verbose -WhatIf 
+        - An optional ExifTool configuration can be specified as a parameter.
+        - Shortcut tag values cannot be set with the `=` operator and need to be set with the `<` operator.
         In turn, the `<` operator does not play well with constant values when they contain special characters such as `$`.
         Therefore to support both constant and non-constant values on tags and on shortcut tags, we use the '-userParam' option.
     #>
