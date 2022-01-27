@@ -12,11 +12,7 @@ public class TagsProvider : NavigationCmdletProvider
 
     public override char AltItemSeparator => Separator;
 
-    protected override PSDriveInfo NewDrive(PSDriveInfo drive)
-    {
-        WriteVerbose($"Root: {drive.Root}");
-        return new TagsDrive(drive, Separator);
-    }
+    protected override PSDriveInfo NewDrive(PSDriveInfo drive) => new TagsDrive(drive);
 
     protected override bool IsValidPath(string path) => true;
 

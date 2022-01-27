@@ -4,10 +4,10 @@ namespace GFK.Image.Provider;
 
 public class TagsDrive : PSDriveInfo
 {
-    public TagsDrive(PSDriveInfo driveInfo, char separator) : base(driveInfo)
+    public TagsDrive(PSDriveInfo driveInfo) : base(driveInfo)
     {
-        PathMaker = new PathMaker(separator, driveInfo.Root);
-        Repository = new TagsRepository(separator);
+        PathMaker = new PathMaker(driveInfo.Provider.ItemSeparator, driveInfo.Root);
+        Repository = new TagsRepository(driveInfo.Provider.ItemSeparator);
     }
 
     public IPathMaker PathMaker { get; }
