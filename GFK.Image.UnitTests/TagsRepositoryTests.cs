@@ -61,26 +61,6 @@ public class TagsRepositoryTests
     }
 
     [Test]
-    public void Root_is_valid()
-    {
-        // Act
-        var result = _tagsRepository.IsPathValid("Tags:");
-
-        // Assert
-        Assert.That(result, Is.True);
-    }
-
-    [Test]
-    public void Root_with_path_separator_is_valid()
-    {
-        // Act
-        var result = _tagsRepository.IsPathValid(@"Tags:\");
-
-        // Assert
-        Assert.That(result, Is.True);
-    }
-
-    [Test]
     public void Tag_path_is_valid()
     {
         // Act
