@@ -34,11 +34,13 @@ jobs:
         run: yarn && yarn run semantic-release
       - name: PSGallery release
         shell: pwsh
+        env:
+          PSGALLERY_TOKEN: ${{secrets.PSGALLERY_TOKEN}}
         run: |
           $moduleVersion = (Get-Module pub/GFK.Image -ListAvailable).Version
           if ($moduleVersion -EQ '1.0.0') {
             Write-Host 'Found default version 1.0.0 in module manifest: skipping publication'
           } else {
             Write-Host "Publishing GFK.Image version $moduleVersion"
-            Publish-Module -Path pub/GFK.Image -NuGetApiKey ${{secrets.PSGALLERY_TOKEN}}
+            Publish-Module -Path pub/GFK.Image -NuGetApiKey $env:PSGALLERY_TOKEN
           }
