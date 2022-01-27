@@ -2,6 +2,7 @@
 bin/
 obj/
 pub/
+/node_modules/
 
 # IDE-specific files
 .vs/
