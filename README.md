@@ -1,3 +1,5 @@
+[![Test](https://github.com/GordonFreemanK/gfk-image/actions/workflows/test.yml/badge.svg)](https://github.com/GordonFreemanK/gfk-image/actions/workflows/test.yml)
+
 # 1. What is this?
 
 This PowerShell module provides:
