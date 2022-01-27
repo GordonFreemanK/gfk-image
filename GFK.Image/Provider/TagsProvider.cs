@@ -3,6 +3,14 @@ using System.Management.Automation.Provider;
 
 namespace GFK.Image.Provider;
 
+/// <summary>
+/// This class aims at providing a basic implementation for a PowerShell drive that allows adding items as stored in the
+/// digiKam domain (where the forward slash is the hierarchical separator and backslash is a valid tag name character)
+/// Items can only be added and not renamed, moved or deleted.
+/// Note that the expectations on the protected virtual methods are not always clear even though the default
+/// implementation can be seen on the
+/// <a href="https://github.com/PowerShell/PowerShell/blob/7dc4587014bfa22919c933607bf564f0ba53db2e/src/System.Management.Automation/namespaces/NavigationProviderBase.cs">PowerShell repository</a>.
+/// </summary>
 [CmdletProvider("Tags", ProviderCapabilities.None)]
 public class TagsProvider : NavigationCmdletProvider
 {
