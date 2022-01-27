@@ -98,11 +98,8 @@ public class PathMaker : IPathMaker
         if (path == null)
             return string.Empty;
 
-        if (Path.DirectorySeparatorChar == _separator)
-            return path;
-
         var cleanRoot = _root.TrimEnd(_separator);
-        var brokenRoot = $@"{cleanRoot}{Path.DirectorySeparatorChar}";
+        var brokenRoot = $@"{cleanRoot}\";
         if (!path.StartsWith(brokenRoot))
             return path;
 
