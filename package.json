@@ -1,9 +1,14 @@
 {
+  "scripts": {
+    "build": "dotnet build",
+    "build-package": "cross-env dotnet publish GFK.Image -c Release -o pub/GFK.Image && dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd"
+  },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/github": "^8.0.2",
     "@semantic-release/release-notes-generator": "^10.0.3",
+    "cross-env": "^7.0.3",
     "semantic-release": "^19.0.2"
   },
   "release": {
