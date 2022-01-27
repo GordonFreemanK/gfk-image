@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
@@ -24,14 +25,17 @@ jobs:
         run: dotnet publish GFK.Image -c Release -o pub/GFK.Image
       - name: Publish GFK.Image.cmd locally
         run: dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd
-      # only reason to import is to implicitly check that the psd1 file is well formed
-      - name: Import GFK.Image
+      - name: Test GFK.Image manifest
         shell: pwsh
-        run: Import-Module ./pub/GFK.Image/GFK.Image.psd1
+        run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
       - name: Release
+        shell: pwsh
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: npx semantic-release
       - name: Publish GFK.Image to PowerShell Gallery
         shell: pwsh
-        run: Publish-Module -Path pub/GFK.Image -NuGetApiKey ${{secrets.PS_GALLERY}}
+        run: |
+          if ((Get-Module pub/GFK.Image -ListAvailable).Version -NE '1.0.0') {
+            Publish-Module -Path pub/GFK.Image -NuGetApiKey ${{secrets.PSGALLERY_TOKEN}}
+          }
