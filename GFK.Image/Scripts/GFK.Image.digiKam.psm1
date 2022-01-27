@@ -61,7 +61,7 @@ function New-PSDigiKamDrive {
         New-PSDrive -Name $Name -PSProvider Tags -Root $root -Scope Global | Out-Null
 
         $Tags -split ';' | Foreach-Object {
-            $filePath = Join-Path $root $_
+            $filePath = "${root}/$_"
             if ($PSCmdlet.ShouldProcess($filePath, "Create tag")) {
                 New-Item $filePath | Out-Null
             }

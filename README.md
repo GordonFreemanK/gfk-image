@@ -190,15 +190,13 @@ PS C:\> Uninstall-PSDigiKam
 *Usage:*
 ```powershell
 PS C:\> New-PSDigiKamDrive -Name Tags -Tags 'Author/GFK;People/Adrian Shephard;People/The G-Man'
-PS C:\> cd Tags:\
-PS Tags:\> (ls People).Value
+PS C:\> cd Tags:
+PS Tags:/> (ls People).Value
 Adrian Shephard
 The G-Man
 ```
 
-*Notes:*
-- PowerShell uses `\ ` as a path separator. `\ ` in tag values will be replaced by `-`.
-- This PSProvider does not support renaming, moving or deleting items
+*Note: this PSProvider does not support renaming, moving or deleting items*
 
 ## b. Injecting `pwsh.exe` into digiKam
 
