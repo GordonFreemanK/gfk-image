@@ -5,8 +5,8 @@
     "test:deploy": "yarn deploy:local; Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1",
     "test:release": "yarn semantic-release",
     "test:all": "yarn test; yarn test:deploy; yarn test:release",
-    "deploy:local": "scripts/New-Module pub",
-    "deploy:user": "scripts/New-Module (Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules')",
+    "deploy:local": "dotnet publish -o pub/GFK.Image",
+    "deploy:user": "dotnet publish -o (Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) PowerShell/modules/GFK.Image)",
     "deploy:psgallery": "yarn deploy:local -c Release; Publish-Module -Path pub/GFK.Image",
     "docs:md": "yarn deploy:local; Import-Module ./pub/GFK.Image/GFK.Image.psd1; Install-Module platyPS -Force; Update-MarkdownHelp docs",
     "docs:xml": "yarn docs:md; New-ExternalHelp docs -OutputPath ./GFK.Image/en-US -Force"

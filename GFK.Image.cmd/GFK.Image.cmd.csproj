@@ -15,4 +15,10 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <Target Name="SetPublishDir" AfterTargets="PrepareForPublish">
+    <PropertyGroup>
+      <PublishDir>$(PublishDir)/cmd</PublishDir>
+    </PropertyGroup>
+  </Target>
+
 </Project>

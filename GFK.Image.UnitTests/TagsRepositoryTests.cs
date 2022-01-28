@@ -261,7 +261,7 @@ public class TagsRepositoryTests
     };
 
     [TestCaseSource(nameof(MakePathCases))]
-    public string Make_path(string? parent, string? child)
+    public string Make_path(string parent, string child)
     {
         return _tagsRepository.MakePath(parent, child);
     }
@@ -278,7 +278,7 @@ public class TagsRepositoryTests
     };
 
     [TestCaseSource(nameof(MakePathRootedChildCases))]
-    public string Make_path_if_child_is_rooted(string? parent, string? child)
+    public string Make_path_if_child_is_rooted(string parent, string child)
     {
         return _tagsRepository.MakePath(parent, child);
     }
@@ -300,7 +300,7 @@ public class TagsRepositoryTests
     };
     
     [TestCaseSource(nameof(GetParentPathCases))]
-    public string Get_parent_path(string? path)
+    public string Get_parent_path(string path)
     {
         return _tagsRepository.GetParentPath(path);
     }
@@ -322,7 +322,7 @@ public class TagsRepositoryTests
     };
     
     [TestCaseSource(nameof(GetChildNameCases))]
-    public string Get_child_name(string? path)
+    public string Get_child_name(string path)
     {
         return _tagsRepository.GetChildName(path);
     }

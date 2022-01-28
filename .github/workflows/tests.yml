@@ -16,10 +16,8 @@ jobs:
           dotnet-version: 6.0.x
       - name: Test
         run: dotnet test
-      - name: Publish GFK.Image
-        run: dotnet publish GFK.Image -o pub/GFK.Image
-      - name: Publish GFK.Image.cmd
-        run: dotnet publish GFK.Image.cmd -o pub/GFK.Image/cmd
-      - name: Test GFK.Image manifest
+      - name: Publish module locally
+        run: dotnet publish -o pub/GFK.Image
+      - name: Test module manifest
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1

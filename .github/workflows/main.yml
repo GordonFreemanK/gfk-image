@@ -21,10 +21,9 @@ jobs:
           node-version: "lts/*"
       - name: Test
         run: dotnet test -c Release
-      - name: Publish GFK.Image locally
-        shell: pwsh
-        run: scripts/New-Module pub -c Release
-      - name: Test GFK.Image manifest
+      - name: Publish module locally
+        run: dotnet publish -o pub/GFK.Image -c Release
+      - name: Test module manifest
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
       - name: GitHub release
