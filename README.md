@@ -347,8 +347,3 @@ As described above.
 ```powershell
 Get-Help Get-DateTimeOffset -ShowWindow
 ```
-
-# 6. Changelog
-
-## 1.0.0
-Initial draft (unlisted)
