@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace GFK.Image.Provider;
 
 public interface ITagsRepository
 {
-    Tag AddTag(string? path);
-    Tag? GetTag(string? path);
-    bool ItemExists(string? path);
-    IReadOnlyCollection<Tag> GetChildTags(string? path, uint? depth);
-    string MakePath(string? parent, string? child);
-    string GetParentPath(string? path);
-    string GetChildName(string? path);
+    Tag AddTag(string path);
+    Tag? GetTag(string path);
+    bool ItemExists(string path);
+    IReadOnlyCollection<Tag> GetChildTags(string path, uint? depth);
+    string MakePath(string parent, string child);
+    string GetParentPath(string path);
+    string GetChildName(string path);
 }
 
 public class TagsRepository : ITagsRepository
@@ -28,37 +27,29 @@ public class TagsRepository : ITagsRepository
         _tags = new List<string>();
     }
 
-    public Tag AddTag(string? path)
+    public Tag AddTag(string path)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         path = path.TrimEnd(_itemSeparator);
         _tags.Add(path);
         return BuildTag(path);
     }
 
-    public Tag? GetTag(string? path)
+    public Tag? GetTag(string path)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         path = path.TrimEnd(_itemSeparator);
         return _tags.Contains(path)
             ? BuildTag(path)
             : null;
     }
 
-    public bool ItemExists(string? path)
+    public bool ItemExists(string path)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         path = path.TrimEnd(_itemSeparator);
         return _tags.Any(tag => tag == path || tag.StartsWith($"{path}{_itemSeparator}"));
     }
 
-    public IReadOnlyCollection<Tag> GetChildTags(string? path, uint? depth)
+    public IReadOnlyCollection<Tag> GetChildTags(string path, uint? depth)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         path = path.TrimEnd(_itemSeparator) + _itemSeparator;
         return _tags
             .Where(tag => tag.StartsWith(path))
@@ -73,11 +64,8 @@ public class TagsRepository : ITagsRepository
     /// Handles relative and absolute paths
     /// If the second path is absolute then the first path is irrelevant
     /// </summary>
-    public string MakePath(string? parent, string? child)
+    public string MakePath(string parent, string child)
     {
-        if (parent == null) throw new ArgumentNullException(nameof(parent));
-        if (child == null) throw new ArgumentNullException(nameof(child));
-
         return
             child == string.Empty ? parent
             : parent == string.Empty || child.StartsWith(_root) ? child
@@ -89,10 +77,8 @@ public class TagsRepository : ITagsRepository
     /// Handles relative and absolute paths
     /// If root returns the same path 
     /// </summary>
-    public string GetParentPath(string? path)
+    public string GetParentPath(string path)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         var trimEnd = path.TrimEnd(_itemSeparator);
         var lastSeparator = trimEnd.LastIndexOf(_itemSeparator);
         return lastSeparator switch
@@ -108,10 +94,8 @@ public class TagsRepository : ITagsRepository
     /// Handles relative and absolute paths
     /// If root returns the same path
     /// </summary>
-    public string GetChildName(string? path)
+    public string GetChildName(string path)
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
-
         var cleanPath = path.TrimEnd(_itemSeparator);
         if (cleanPath == string.Empty)
             return path;

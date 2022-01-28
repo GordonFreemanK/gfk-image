@@ -1,3 +1,4 @@
+using System;
 using System.Management.Automation;
 using System.Management.Automation.Provider;
 
@@ -14,26 +15,47 @@ namespace GFK.Image.Provider;
 [CmdletProvider("Tags", ProviderCapabilities.None)]
 public class TagsProvider : NavigationCmdletProvider
 {
+    private IPathCleaner? _pathCleaner;
+    private ITagsRepository? _tagsRepository;
+    
     public override char ItemSeparator => '/';
+
     public override char AltItemSeparator => ItemSeparator;
 
-    protected override PSDriveInfo NewDrive(PSDriveInfo drive) => new TagsDrive(drive);
+    protected override PSDriveInfo NewDrive(PSDriveInfo drive)
+    {
+        var root = drive.Root.TrimEnd(ItemSeparator);
+        _pathCleaner = new PathCleaner(root, ItemSeparator);
+        _tagsRepository = new TagsRepository(root, ItemSeparator);
+        return new TagsDrive(drive);
+    }
 
     protected override bool IsValidPath(string path) => true;
 
-    protected override bool ItemExists(string path) => TagsRepository.ItemExists(path);
+    protected override bool IsItemContainer(string path) => ItemExists(path);
 
-    protected override bool IsItemContainer(string path) => TagsRepository.ItemExists(path);
+    protected override bool ItemExists(string path)
+    {
+        path = PathCleaner.CleanInput(path);
+
+        return TagsRepository.ItemExists(path);
+    }
 
     protected override void NewItem(string path, string itemTypeName, object newItemValue)
     {
+        path = PathCleaner.CleanInput(path);
+
         var tag = TagsRepository.AddTag(path);
+
         WriteItemObject(tag, tag.Path, true);
     }
 
     protected override void GetItem(string path)
     {
+        path = PathCleaner.CleanInput(path);
+
         var tag = TagsRepository.GetTag(path);
+
         if (tag != null)
         {
             WriteItemObject(tag, tag.Path, true);
@@ -52,27 +74,44 @@ public class TagsProvider : NavigationCmdletProvider
 
     private void GetChildItems(string path, uint? depth)
     {
+        path = PathCleaner.CleanInput(path);
+
         var childTags = TagsRepository.GetChildTags(path, depth);
+
         foreach (var tag in childTags)
         {
             WriteItemObject(tag, tag.Path, true);
         }
     }
 
-    protected override string MakePath(string? parent, string? child)
-    {
-        return TagsRepository.MakePath(parent, child);
-    }
-
-    protected override string GetParentPath(string? path, string? root)
-    {
-        return TagsRepository.GetParentPath(path);
-    }
-
     protected override string GetChildName(string path)
     {
-        return TagsRepository.GetChildName(path);
+        path = PathCleaner.CleanInput(path);
+
+        var result = TagsRepository.GetChildName(path);
+
+        return PathCleaner.CleanOutput(result);
+    }
+    
+    protected override string GetParentPath(string? path, string? root)
+    {
+        path = PathCleaner.CleanInput(path);
+
+        var result = TagsRepository.GetParentPath(path);
+
+        return PathCleaner.CleanOutput(result);
     }
 
-    private ITagsRepository TagsRepository => (TagsDrive)PSDriveInfo;
+    protected override string MakePath(string? parent, string? child)
+    {
+        parent = PathCleaner.CleanInput(parent);
+        child = PathCleaner.CleanInput(child);
+
+        var result = TagsRepository.MakePath(parent, child);
+
+        return PathCleaner.CleanOutput(result);
+    }
+
+    private IPathCleaner PathCleaner => _pathCleaner ?? throw new ArgumentNullException(nameof(PSDriveInfo));
+    private ITagsRepository TagsRepository => _tagsRepository ?? throw new ArgumentNullException(nameof(PSDriveInfo));
 }

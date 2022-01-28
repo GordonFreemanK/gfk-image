@@ -56,9 +56,6 @@ public class PathCleaner : IPathCleaner
     /// </remarks>
     public string CleanOutput(string path)
     {
-        var cleanPath = path.TrimEnd(_itemSeparator);
-        return cleanPath == _root
-            ? $"{cleanPath}{_itemSeparator}"
-            : path;
+        return path == _root ? $"{_root}{_itemSeparator}" : path;
     }
 }
