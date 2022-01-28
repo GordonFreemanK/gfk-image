@@ -22,9 +22,8 @@ jobs:
       - name: Test
         run: dotnet test -c Release
       - name: Publish GFK.Image locally
-        run: dotnet publish GFK.Image -c Release -o pub/GFK.Image
-      - name: Publish GFK.Image.cmd locally
-        run: dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd
+        shell: pwsh
+        run: scripts/New-Module pub -c Release
       - name: Test GFK.Image manifest
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
