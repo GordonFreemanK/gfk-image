@@ -3,6 +3,7 @@ bin/
 obj/
 pub/
 /node_modules/
+/yarn-error.log
 
 # IDE-specific files
 .vs/

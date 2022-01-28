@@ -2,8 +2,14 @@
   "scripts": {
     "build": "dotnet build",
     "test": "dotnet test",
-    "deploy:local": "dotnet publish GFK.Image -c Release -o pub/GFK.Image --no-logo; dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd --no-logo",
-    "deploy:user": "$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'; dotnet publish GFK.Image -o $publishPath --nologo; dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd) --nologo"
+    "test:deploy": "yarn deploy:local; Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1",
+    "test:release": "yarn semantic-release",
+    "test:all": "yarn test; yarn test:deploy; yarn test:release",
+    "deploy": "yarn deploy:local; Publish-Module -Path pub/GFK.Image",
+    "deploy:local": "dotnet publish GFK.Image -c Release -o pub/GFK.Image --nologo; dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd --nologo",
+    "deploy:user": "$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'; dotnet publish GFK.Image -o $publishPath --nologo; dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd) --nologo",
+    "docs:md": "yarn deploy:local; Import-Module ./pub/GFK.Image/GFK.Image.psd1; Install-Module platyPS -Force; Update-MarkdownHelp docs",
+    "docs:xml": "yarn docs:md; New-ExternalHelp docs -OutputPath ./GFK.Image/en-US -Force"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",

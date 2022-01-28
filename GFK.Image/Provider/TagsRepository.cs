@@ -99,17 +99,15 @@ public class TagsRepository : ITagsRepository
         var cleanPath = path.TrimEnd(_itemSeparator);
         if (cleanPath == string.Empty)
             return path;
-        
+
         var lastSeparator = cleanPath.LastIndexOf(_itemSeparator);
         return lastSeparator >= 0 ? cleanPath[(lastSeparator + 1)..] : cleanPath;
-
     }
 
     private Tag BuildTag(string path)
     {
         return new Tag(path, path.Split(_itemSeparator).Last());
     }
-
 
     private string GetPartialPath(string tag, int position, uint depth)
     {
