@@ -159,7 +159,7 @@ PS C:\> $artist,$createdDate = Get-ImageMetadata -FilePath $filePath -TagNames A
 PS C:\> $artist,$createdDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full -Grouped
+PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full
     1 image files read
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard
@@ -169,7 +169,7 @@ Wed, 19 Jan 2022 15:16:17 GMT+3
 ```
 
 *Notes:*
-- `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names, tag names and optionally tag groups (EXIF, IPTC, XMP). More details are available with `Get-Help Get-ImageMetadata`
+- `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names and tags organized by groups (EXIF, IPTC, XMP, File, etc). More details are available with `Get-Help Get-ImageMetadata`
 - `Get-ImageMetadata` and `Set-ImageMetadata` will echo the exiftool command if using the `-Verbose` switch
 - There are multiple types of date/time tags in EXIF/IPTC/XMP. All these types can be set from a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) or [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset) value. `Set-ImageMetadata` serializes it to the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`) and ExifTool automatically stores the relevant part in any of these fields:
   - EXIF uses one tag for date+time and one for offset (e.g. `EXIF:DateTimeOriginal` and `EXIF:OffsetTimeOriginal`)

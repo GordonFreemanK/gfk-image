@@ -27,25 +27,19 @@ function Get-ImageMetadata {
         (You could actually work with more than one file is you splice the resulting array. This would theoretically be faster than running the command multiple times)
 
         PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist,CreateDate -Full
-        PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist,CreateDate -Full -Grouped
         In full mode, the command returns one ImageMetadata object per file found (each contains the file path and a Tags property)
         Tags not found on the file will not be  in the output at all (even as empty strings)
-        
-        Without the -Grouped switch specified, the Tags property of each ImageMetadata object is a flat list of properties for the tags found, without group information (EXIF/IPTC/XMP)
-        Collisions are possible in case of tag duplication across groups ExifTool chooses which tag value to output.
-        Choose this if you want to handle multiple files and are not concerned with which group the tags are stored in, or if you fully specify the groups on the TagNames parameter (e.g. 'EXIF:CreateDate').
-
-        With the -Grouped switch specified, the Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags found.
-        There will be no collisions in this mode.
-        Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file.
+        The Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags found
+        There will be no file or tag collisions in this mode
+        Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file
     .NOTES
         - You can show the actual ExifTool command with the -Verbose switch
-        - Recursion is available as a switch. The option will have no effect if the path is not a directory.
-        - An optional ExifTool configuration can be specified as a parameter.
+        - Recursion is available as a switch. The option will have no effect if the path is not a directory
+        - An optional ExifTool configuration can be specified as a parameter
 
     #>
-    [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'ValuesOnly')]
-    [OutputType([string[]], ParameterSetName = 'ValuesOnly')]
+    [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Basic')]
+    [OutputType([string[]], ParameterSetName = 'Basic')]
     [OutputType([ImageMetadata[]], ParameterSetName = 'Full')]
     Param(
         [SupportsWildcards()]
@@ -57,9 +51,6 @@ function Get-ImageMetadata {
 
         [Parameter(ParameterSetName = 'Full')]
         [switch] $Full,
-
-        [Parameter(ParameterSetName = 'Full')]
-        [switch] $Grouped,
 
         [switch] $Recurse,
 
@@ -78,14 +69,11 @@ function Get-ImageMetadata {
             $arguments = @()
         }
 
-        if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
-            $arguments += '-s3', '-f'
-        }
-        elseif ($Grouped) {
+        if ($Full) {
             $arguments += '-j', '-G', '-a'
         }
         else {
-            $arguments += '-j'
+            $arguments += '-s3', '-f'
         }
 
         if ($Recurse) {
@@ -96,11 +84,11 @@ function Get-ImageMetadata {
     
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
         $toolResults = &exiftool $arguments
-        if ($PSCmdlet.ParameterSetName -EQ 'ValuesOnly') {
-            return $toolResults | ConvertFrom-ImageValue
+        if ($Full) {
+            return ConvertFrom-Json ($toolResults -join "`n") | New-ImageMetadata
         }
         else {
-            return ConvertFrom-Json ($toolResults -join "`n") | New-ImageMetadata -Grouped $Grouped
+            return $toolResults | ConvertFrom-ImageValue
         }
     }
 }
@@ -267,18 +255,28 @@ function New-ImageMetadata {
     [CmdletBinding(PositionalBinding = $false)]
     Param (
         [Parameter(Mandatory, ValueFromPipeline)]
-        [PSObject] $ExifToolResult,
-
-        [Parameter(Mandatory)]
-        [bool] $Grouped
+        [PSObject] $ExifToolResult
     )
 
     Process {
-        if ($Grouped) {
-            $tags = Get-TagsGrouped -ExifToolResult $ExifToolResult
+        $tagGroups = @{}
+        foreach ($member in Get-Member -InputObject $ExifToolResult -MemberType NoteProperty) {
+            if ($member.Name -EQ 'SourceFile') {
+                continue
+            }
+
+            $groupName, $tagName = $member.Name -split ':'
+            $tagValue = Select-Object -InputObject $ExifToolResult -ExpandProperty $member.Name
+
+            if (-not $tagGroups[$groupName]) {
+                $tagGroups[$groupName] = @{}
+            }
+            $tagGroups[$groupName][$tagName] = $tagValue
         }
-        else {
-            $tags = Get-Tags -ExifToolResult $ExifToolResult
+
+        $tags = @{}
+        foreach ($groupName in $tagGroups.Keys) {
+            $tags[$groupName] = [PSCustomObject] ($tagGroups[$groupName])
         }
 
         return [ImageMetadata] @{
@@ -286,55 +284,6 @@ function New-ImageMetadata {
             Tags     = [PSCustomObject] $tags
         }
     }
-}
-
-function Get-TagsGrouped {
-    [CmdletBinding(PositionalBinding = $false)]
-    [OutputType([Hashtable])]
-    Param (
-        [Parameter(Mandatory)]
-        [PSObject] $ExifToolResult
-    )
-
-    $tagGroups = @{}
-    foreach ($member in Get-Member -InputObject $ExifToolResult -MemberType NoteProperty) {
-        if ($member.Name -EQ 'SourceFile') {
-            continue
-        }
-
-        $groupName, $tagName = $member.Name -split ':'
-        $tagValue = Select-Object -InputObject $ExifToolResult -ExpandProperty $member.Name
-
-        if (-not $tagGroups[$groupName]) {
-            $tagGroups[$groupName] = @{}
-        }
-        $tagGroups[$groupName][$tagName] = $tagValue
-    }
-
-    $tags = @{}
-    foreach ($groupName in $tagGroups.Keys) {
-        $tags[$groupName] = [PSCustomObject] ($tagGroups[$groupName])
-    }
-
-    return $tags
-}
-
-function Get-Tags {
-    [CmdletBinding(PositionalBinding = $false)]
-    [OutputType([Hashtable])]
-    Param (
-        [Parameter(Mandatory)]
-        [PSObject] $ExifToolResult
-    )
-
-    $tags = @{}
-    foreach ($member in Get-Member -InputObject $ExifToolResult -MemberType NoteProperty) {
-        if ($member.Name -EQ 'SourceFile') {
-            continue
-        }
-        $tags[$member.Name] = Select-Object -InputObject $ExifToolResult -ExpandProperty $member.Name
-    }
-    return $tags
 }
 
 #endregion
