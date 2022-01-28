@@ -5,8 +5,8 @@ namespace GFK.Image.Provider;
 
 public interface IPathCleaner
 {
-    string FixRoot(string? path);
-    string EnsureRootSeparator(string path);
+    string CleanInput(string? path);
+    string CleanOutput(string path);
 }
 
 public class PathCleaner : IPathCleaner
@@ -21,7 +21,10 @@ public class PathCleaner : IPathCleaner
     }
     
     /// <summary>
-    /// Fix root path
+    /// Cleans paths sent by PowerShell to the PSProvider
+    /// </summary>
+    /// <remarks>
+    /// The only task is to fix the root:
     /// On Windows machines, PowerShell (version 7.2) is pretty set on backslash being a separator, but we need the
     /// forward slash to be a separator and backslash to be a valid character in a tag name (as is the case in digiKam).
     /// In the base <see cref="NavigationCmdletProvider"/> implementation, the value used by most of the virtual
@@ -33,8 +36,8 @@ public class PathCleaner : IPathCleaner
     /// paths to those implementations. For instance if the commands "cd Tags:/Tag1/; cd C:; cd Tags:",
     /// <see cref="TagsProvider.GetChildName"/> receives a path of Tags:\/Tag1. This method aims at removing those rogue
     /// backslashes from the drive name, while making sure that backslash remains a valid tag name character. 
-    /// </summary>
-    public string FixRoot(string? path)
+    /// </remarks>
+    public string CleanInput(string? path)
     {
         if (path == null)
             return string.Empty;
@@ -46,9 +49,12 @@ public class PathCleaner : IPathCleaner
     }
     
     /// <summary>
-    /// Adds a separator if path is root
+    /// Cleans the paths sent by the PSProvider to PowerShell
     /// </summary>
-    public string EnsureRootSeparator(string path)
+    /// <remarks>
+    /// Only task is to ensure that if the path is the drive root it ends with a separator
+    /// </remarks>
+    public string CleanOutput(string path)
     {
         var cleanPath = path.TrimEnd(_itemSeparator);
         return cleanPath == _root

@@ -36,7 +36,7 @@ public class PathCleanerTests
     [TestCaseSource(nameof(FixRootCases))]
     public string Fix_root(string? path)
     {
-        return _pathCleaner.FixRoot(path);
+        return _pathCleaner.CleanInput(path);
     }
 
     private static readonly IEnumerable<TestCaseData> EnsureRootSeparatorCases = new[]
@@ -54,6 +54,6 @@ public class PathCleanerTests
     [TestCaseSource(nameof(EnsureRootSeparatorCases))]
     public string Ensure_root_separator(string path)
     {
-        return _pathCleaner.EnsureRootSeparator(path);
+        return _pathCleaner.CleanOutput(path);
     }
 }
