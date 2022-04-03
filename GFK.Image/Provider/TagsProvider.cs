@@ -31,14 +31,14 @@ public class TagsProvider : NavigationCmdletProvider
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        return TagsDrive.TagsRepository.ItemExists(path);
+        return TagsDrive.Repository.ItemExists(path);
     }
 
     protected override void NewItem(string path, string itemTypeName, object newItemValue)
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        var tag = TagsDrive.TagsRepository.AddTag(path);
+        var tag = TagsDrive.Repository.AddTag(path);
 
         WriteItemObject(tag, tag.Path, true);
     }
@@ -47,7 +47,7 @@ public class TagsProvider : NavigationCmdletProvider
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        var tag = TagsDrive.TagsRepository.GetTag(path);
+        var tag = TagsDrive.Repository.GetTag(path);
 
         if (tag != null)
         {
@@ -69,7 +69,7 @@ public class TagsProvider : NavigationCmdletProvider
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        var childTags = TagsDrive.TagsRepository.GetChildTags(path, depth);
+        var childTags = TagsDrive.Repository.GetChildTags(path, depth);
 
         foreach (var tag in childTags)
         {
@@ -81,7 +81,7 @@ public class TagsProvider : NavigationCmdletProvider
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        var result = TagsDrive.TagsRepository.GetChildName(path);
+        var result = TagsDrive.Repository.GetChildName(path);
 
         return TagsDrive.PathCleaner.CleanOutput(result);
     }
@@ -90,7 +90,7 @@ public class TagsProvider : NavigationCmdletProvider
     {
         path = TagsDrive.PathCleaner.CleanInput(path);
 
-        var result = TagsDrive.TagsRepository.GetParentPath(path);
+        var result = TagsDrive.Repository.GetParentPath(path);
 
         return TagsDrive.PathCleaner.CleanOutput(result);
     }
@@ -100,7 +100,7 @@ public class TagsProvider : NavigationCmdletProvider
         parent = TagsDrive.PathCleaner.CleanInput(parent);
         child = TagsDrive.PathCleaner.CleanInput(child);
 
-        var result = TagsDrive.TagsRepository.MakePath(parent, child);
+        var result = TagsDrive.Repository.MakePath(parent, child);
 
         return TagsDrive.PathCleaner.CleanOutput(result);
     }

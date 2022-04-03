@@ -5,7 +5,7 @@ namespace GFK.Image.Provider;
 public interface ITagsDrive
 {
     IPathCleaner PathCleaner { get; }
-    ITagsRepository TagsRepository { get; }
+    ITagsRepository Repository { get; }
 }
 
 public class TagsDrive : PSDriveInfo, ITagsDrive
@@ -14,9 +14,9 @@ public class TagsDrive : PSDriveInfo, ITagsDrive
     {
         var root = driveInfo.Root.TrimEnd(itemSeparator);
         PathCleaner = new PathCleaner(root, itemSeparator);
-        TagsRepository = new TagsRepository(root, itemSeparator);
+        Repository = new TagsRepository(root, itemSeparator);
     }
 
     public IPathCleaner PathCleaner { get; }
-    public ITagsRepository TagsRepository { get; }
+    public ITagsRepository Repository { get; }
 }
