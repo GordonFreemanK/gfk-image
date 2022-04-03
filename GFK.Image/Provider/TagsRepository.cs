@@ -62,7 +62,7 @@ public class TagsRepository : ITagsRepository
     /// <summary>
     /// Creates a path from two paths
     /// Handles relative and absolute paths
-    /// If the second path is absolute then the first path is irrelevant
+    /// If the second path is absolute then the first path is ignored
     /// </summary>
     public string MakePath(string parent, string child)
     {
