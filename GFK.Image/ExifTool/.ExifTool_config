@@ -54,5 +54,16 @@
     ],
 );
 
+# NOTE: All tag names used in the following tables are case sensitive.
+
+# The %Image::ExifTool::UserDefined hash defines new tags to be added
+# to existing tables.
+%Image::ExifTool::UserDefined = (
+    # XMP tags may be added to existing namespaces:
+    'Image::ExifTool::XMP::xmpMM' => {
+        PreservedCreateDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+    },
+);
+
 #------------------------------------------------------------------------------
 1;  #end
