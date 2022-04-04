@@ -81,7 +81,8 @@ $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 # Example metadata read
 $latitude, $longitude, $taken = Get-ImageMetadata `
     -FilePath $sourcePath `
-    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,EXIF:DateTimeOriginal
+    -SourceFiles '%d%f.xmp','@' `
+    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,Composite:CreateDate
 $takenDateTime = ConvertFrom-ImageDateTime -DateTime $taken
 $takenDateTimeOffset = Get-DateTimeOffset `
     -DateTime $takenDateTime `
@@ -97,11 +98,13 @@ cp $sourcePath $destinationPath
 # Example metadata write using shortcut tags defined in the temporary ExifTool configuration
 Set-ImageMetadata `
     -FilePath $destinationPath `
+    -SourceFiles '%d%f.xmp','@' `
     -Tags @{
-        Author = $author;
-        Modified = Get-Date;
-        Taken = $takenDateTimeOffset
-    }
+  Author = $author;
+  Modified = Get-Date;
+  Taken = $takenDateTimeOffset;
+  Digitized = $takenDateTimeOffset;
+}
 ```
 
 ## e. Expected results

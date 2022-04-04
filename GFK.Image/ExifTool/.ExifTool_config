@@ -75,10 +75,10 @@
         # specified, then at least one of the Desire'd tags must exist.  See
         # the Composite table in Image::ExifTool::Exif for more examples,
         # and lib/Image/ExifTool/README for all of the details.
-        TakenDate => {
+        CreateDate => {
             Groups => { 2 => 'Time' },
             Desire => {
-                0 => 'EXIF:ModifyDate', # video files are expected not to have EXIF, fallback on the file modification date
+                0 => 'EXIF:CreateDate', # video files are expected not to have EXIF, fallback on the file modification date
                 1 => 'File:FileModifyDate'
             },
             ValueConv => '$val[0] // $val[1]',

@@ -46,6 +46,8 @@ function Get-ImageMetadata {
         [Parameter(Mandatory, ValueFromPipeline)]
         [string] $FilePath,
 
+        [string[]] $SourceFiles = @(),
+
         [Parameter(Mandatory)]
         [string[]] $TagNames,
 
@@ -67,6 +69,13 @@ function Get-ImageMetadata {
         }
         else {
             $arguments = @()
+        }
+        
+        $arguments += $SourceFiles | ForEach-Object { '-srcfile', $_ }
+
+        $extension = Split-Path -Extension $FilePath
+        if ($extension) {
+            $arguments += '-ext', $extension
         }
 
         if ($Full) {
@@ -122,6 +131,8 @@ function Set-ImageMetadata() {
         [Parameter(Mandatory, ValueFromPipeline)]
         [string]$FilePath,
 
+        [string[]] $SourceFiles = @(),
+
         [Parameter(Mandatory)]
         [hashtable] $Tags,
 
@@ -141,8 +152,15 @@ function Set-ImageMetadata() {
         else {
             $arguments = @()
         }
+
         $arguments += '-overwrite_original'
-    
+        $arguments += $SourceFiles | ForEach-Object { '-srcfile', $_ }
+
+        $extension = Split-Path -Extension $FilePath
+        if ($extension) {
+            $arguments += '-ext', $extension
+        }
+
         $index = 0
         foreach ($tagName in $Tags.Keys) {
             $tagNameArgument = Get-TagNameArgument -TagName $tagName
