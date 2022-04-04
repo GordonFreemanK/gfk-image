@@ -78,12 +78,19 @@ $author = (ls Tags:/Author).Value
 # Temporarily set the ExifTool configuration file path to the one included in the module
 $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 
-# Example metadata read
-$latitude, $longitude, $taken = Get-ImageMetadata `
-    -FilePath $sourcePath `
-    -SourceFiles '%d%f.xmp','@' `
-    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,Composite:CreateDate
+# Metadata read using composite tag defined in the ExifTool configuration
+$taken = Get-ImageMetadata `
+    -FilePaths $sourcePath `
+    -TagNames Composite:CreateDate
 $takenDateTime = ConvertFrom-ImageDateTime -DateTime $taken
+
+# Metadata read using source files. This will get the values from an xmp sidecar if it exists
+$latitude, $longitude = Get-ImageMetadata `
+    -FilePaths $sourcePath `
+    -SourceFiles '%d%f.xmp','@' `
+    -TagNames XMP:GPSLatitude,XMP:GPSLongitude
+
+# Calculate offset for location and time
 $takenDateTimeOffset = Get-DateTimeOffset `
     -DateTime $takenDateTime `
     -Latitude $latitude `
@@ -95,9 +102,11 @@ $takenDateTimeOffset = Get-DateTimeOffset `
 # This means any failure after this line will interrupt the process and be logged, but not be considered a failure by digiKam
 cp $sourcePath $destinationPath
 
-# Example metadata write using shortcut tags defined in the temporary ExifTool configuration
+# Metadata write using shortcut tags defined in the temporary ExifTool configuration
+# We should only write to destination, but the implementation of the Batch Queue Manager does not take the xmp sidecar in account
+# By also writing to source we ensure that the sidecar gets updated
 Set-ImageMetadata `
-    -FilePath $destinationPath `
+    -FilePaths $sourcePath,$destinationPath `
     -SourceFiles '%d%f.xmp','@' `
     -Tags @{
   Author = $author;

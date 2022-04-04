@@ -44,7 +44,7 @@ function Get-ImageMetadata {
     Param(
         [SupportsWildcards()]
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string] $FilePath,
+        [string[]] $FilePaths,
 
         [string[]] $SourceFiles = @(),
 
@@ -72,11 +72,7 @@ function Get-ImageMetadata {
         }
         
         $arguments += $SourceFiles | ForEach-Object { '-srcfile', $_ }
-
-        $extension = Split-Path -Extension $FilePath
-        if ($extension) {
-            $arguments += '-ext', $extension
-        }
+        $arguments += $FilePaths | Split-Path -Extension | Where-Object { $_ } | ForEach-Object { '-ext', $_ }
 
         if ($Full) {
             $arguments += '-j', '-G', '-a'
@@ -89,7 +85,7 @@ function Get-ImageMetadata {
             $arguments += '-r'
         }
         
-        $arguments = @($arguments; $TagNames | Get-TagNameArgument; '-c', '%+.6f', '--', $FilePath)
+        $arguments += @($TagNames | Get-TagNameArgument; '-c', '%+.6f', '--'; $FilePaths)
     
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
         $toolResults = &exiftool $arguments
@@ -129,7 +125,7 @@ function Set-ImageMetadata() {
     Param(
         [SupportsWildcards()]
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string]$FilePath,
+        [string[]]$FilePaths,
 
         [string[]] $SourceFiles = @(),
 
@@ -155,11 +151,7 @@ function Set-ImageMetadata() {
 
         $arguments += '-overwrite_original'
         $arguments += $SourceFiles | ForEach-Object { '-srcfile', $_ }
-
-        $extension = Split-Path -Extension $FilePath
-        if ($extension) {
-            $arguments += '-ext', $extension
-        }
+        $arguments += $FilePaths | Split-Path -Extension | Where-Object { $_ } | ForEach-Object { '-ext', $_ }
 
         $index = 0
         foreach ($tagName in $Tags.Keys) {
@@ -168,10 +160,10 @@ function Set-ImageMetadata() {
             $tagValue = ConvertTo-ImageValue -TagValue $Tags[$tagName]
             $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=`"$tagValue`""
         }
-        $arguments += '--', $FilePath
+        $arguments += @('--'; $FilePaths)
     
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
-        if ($PSCmdlet.ShouldProcess($FilePath)) {
+        if ($PSCmdlet.ShouldProcess($FilePaths)) {
             &exiftool $arguments
         }    
     }
