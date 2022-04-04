@@ -43,12 +43,12 @@
         'XMP-exif:DateTimeOriginal',
         'XMP-photoshop:DateCreated',
         'XMP-tiff:DateTime',
-        'FileModifyDate'],
+        'File:FileModifyDate'],
     Digitized => [
         'EXIF:CreateDate', # aka DateTimeDigitized in the EXIF spec
         'EXIF:OffsetTimeDigitized', # offset for CreateDate
         'XMP-xmp:CreateDate',
-        'XMP-exif:DateTimeDigitized'], # replaced by CreateDate in the spec but still used by digiKam
+        'XMP-exif:DateTimeDigitized'], # replaced by XMP-xmp:CreateDate in the spec but still used by digiKam
     Modified => [
         'XMP-xmp:MetadataDate'
     ],
@@ -62,6 +62,28 @@
     # XMP tags may be added to existing namespaces:
     'Image::ExifTool::XMP::xmpMM' => {
         PreservedCreateDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+    },
+    # Composite tags are added to the Composite table:
+    'Image::ExifTool::Composite' => {
+        # Composite tags have values that are derived from the values of
+        # other tags.  The Require/Desire elements below specify constituent
+        # tags that must/may exist, and the keys of these hashes are used as
+        # indices in the @val array of the ValueConv expression to access the
+        # numerical (-n) values of these tags.  Print-converted values are
+        # accessed via the @prt array.  All Require'd tags must exist for
+        # the Composite tag to be evaluated.  If no Require'd tags are
+        # specified, then at least one of the Desire'd tags must exist.  See
+        # the Composite table in Image::ExifTool::Exif for more examples,
+        # and lib/Image/ExifTool/README for all of the details.
+        TakenDate => {
+            Groups => { 2 => 'Time' },
+            Desire => {
+                0 => 'EXIF:ModifyDate', # video files are expected not to have EXIF, fallback on the file modification date
+                1 => 'File:FileModifyDate'
+            },
+            ValueConv => '$val[0] // $val[1]',
+        },
+        # **** ADD ADDITIONAL COMPOSITE TAG DEFINITIONS HERE ****
     },
 );
 
