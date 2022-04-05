@@ -67,7 +67,6 @@ function Get-ImageMetadata {
     Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file
     .NOTES
     - You can show the actual ExifTool command with the -Verbose switch
-    - Recursion is available as a switch. The option will have no effect if the path is not a directory
     #>
     [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Simple')]
     [OutputType([string[]], ParameterSetName = 'Simple')]
