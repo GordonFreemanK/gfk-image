@@ -41,7 +41,7 @@ function Get-ImageMetadata {
         - 0 (default) will result in the group name being 'XMP'
         - 1 will result in the group name being 'XMP-xmp'
         - 0,1 will result in the group name being 'XMP:XMP-xmp'
-        This will influence how deduplication work for tag results (and in full mode, it will influence the group names)
+        This will influence how deduplication work for tag results
         For instance if a file contains a value for EXIF:CreateDate, XMP-xmp:CreateDate and XMP-exif:CreateDate
         there would be two results for @(0) and 3 results for @(1) or @(0,1)
         Note: the default is empty, which is equivalent to @(0)
