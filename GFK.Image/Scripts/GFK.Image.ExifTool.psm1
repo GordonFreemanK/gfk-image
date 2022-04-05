@@ -28,12 +28,14 @@ function Get-ImageMetadata {
     .PARAMETER TagNames
         List of tags as defined in ExifTool (https://www.exiftool.org/TagNames/index.html) or custom tags as defined in the configuration
         Do not prefix with '-'!
+    .PARAMETER Simple
+        Optional, sets the mode to simple (see examples for more details)
     .PARAMETER Full
-        See example
+        Optional, sets the mode to full (see examples for more details)
     .PARAMETER Groups
-        This is an advanced parameter for controlling how metadata groups should be named
-        These values will be concatenated and passed to the ExifTool -G (simple mode) or -g (full mode) parameter
-        See https://www.exiftool.org/exiftool_pod.html#Input-output-text-formatting for the -G/-g parameter
+        This is an advanced parameter for controlling how metadata groups should be named in the full mode
+        These values will be concatenated and passed to the ExifTool -g parameter
+        See https://www.exiftool.org/exiftool_pod.html#Input-output-text-formatting for the -g parameter
         See https://www.exiftool.org/ExifTool.html#GetGroup for groups definitions
         Example: if the requested tag is XMP:CreateDate
         - 0 (default) will result in the group name being 'XMP'
@@ -41,8 +43,8 @@ function Get-ImageMetadata {
         - 0,1 will result in the group name being 'XMP:XMP-xmp'
         This will influence how deduplication work for tag results (and in full mode, it will influence the group names)
         For instance if a file contains a value for EXIF:CreateDate, XMP-xmp:CreateDate and XMP-exif:CreateDate
-        there would be one result for @(), two results for @(0) and 3 results for @(1) or @(0,1)
-        Note: the default is @(0), overriding to empty @() will only work in simple mode as groups are needed for the full mode
+        there would be two results for @(0) and 3 results for @(1) or @(0,1)
+        Note: the default is empty, which is equivalent to @(0)
     .PARAMETER Recurse
     Recurse in subdirectories. The option will have no effect if the path is not a directory
     .PARAMETER ConfigurationPath
@@ -51,24 +53,24 @@ function Get-ImageMetadata {
     There are two modes (parameter sets) in which this command can run:
 
     PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist, CreateDate
-    The command returns one string per tag (including those not found in the file, as empty strings) as an array, except if:
-    - the path resolves to more than one file
-    - one of the tags used is a shortcut tag
-    Additionnally, tag values that are just a single caret '-' will be returned as empty strings
+    The command returns one string per tag per file as an array except if one of the tags used resolves to multiple tags
     Choose this if you want the fastest mode to use with fully defined single files and without shortcut tags
+    Note: when using this for multiple files or multiple tags, since the tag names are not in the output, it is recommended to fully
+    qualify tag names and not use shortcut tags as if multiple matches occur it will not be obvious which tags they belong to
+    For instance CreateDate will return two rows if both EXIF:CreateDate and XMP:CreateDate are set, therefore it is preferable to specify
+    EXIF:CreateDate
 
     PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist, CreateDate -Full
     In full mode, the command returns one ImageMetadata object per file found (each contains the file path and a Tags property)
-    Tags not found on the file will not be  in the output at all (even as empty strings)
-    The Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags found
+    The Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags
     There will be no file or tag collisions in this mode
     Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file
     .NOTES
     - You can show the actual ExifTool command with the -Verbose switch
     - Recursion is available as a switch. The option will have no effect if the path is not a directory
     #>
-    [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Basic')]
-    [OutputType([string[]], ParameterSetName = 'Basic')]
+    [CmdletBinding(PositionalBinding = $false, DefaultParameterSetName = 'Simple')]
+    [OutputType([string[]], ParameterSetName = 'Simple')]
     [OutputType([ImageMetadata[]], ParameterSetName = 'Full')]
     Param(
         [SupportsWildcards()]
@@ -80,10 +82,14 @@ function Get-ImageMetadata {
         [Parameter(Mandatory)]
         [string[]] $TagNames,
 
+        [Parameter(ParameterSetName = 'Simple')]
+        [switch] $Simple,
+
         [Parameter(ParameterSetName = 'Full')]
         [switch] $Full,
 
-        [uint[]] $Groups = @(0),
+        [Parameter(ParameterSetName = 'Full')]
+        [uint[]] $Groups,
 
         [switch] $Recurse,
 
@@ -121,14 +127,11 @@ function Get-ImageMetadata {
         # Add tags
         $arguments += $TagNames | Get-TagNameArgument
 
-        if ($Groups -or $PsCmdlet.ParameterSetName -eq 'Full') {
-            $joinedGroups = $Groups -join ':'
-            if ($PsCmdlet.ParameterSetName -eq 'Full') {
-                $arguments += "-g$joinedGroups"
-            }
-            else {
-                $arguments += "-G$joinedGroups"
-            }
+        if ($PsCmdlet.ParameterSetName -eq 'Full') {
+            $arguments += "-g$($Groups -join ':')"
+        }
+        else {
+            $arguments += '-G'
         }
 
         # Extract all tags including composite and unknown, format results by file and group as json with signed GPS coordinates
