@@ -12,7 +12,7 @@
 RootModule = 'GFK.Image.dll'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.0.13'
 
 # Supported PSEditions
 CompatiblePSEditions = @('Core')
