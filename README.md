@@ -82,7 +82,7 @@ $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 $taken = Get-ImageMetadata `
     -FilePaths $sourcePath `
     -TagNames Composite:CreateDate
-$takenDateTime = ConvertFrom-ImageDateTime -DateTime $taken
+$takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
 
 # Metadata read using source files. This will get the values from an xmp sidecar if it exists
 $latitude, $longitude = Get-ImageMetadata `
@@ -159,7 +159,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '2022-01-19 15:16:17' -Latitude -3.075833 
 
 - `Get-ImageMetadata`: gets metadata tags or shortcut tags
 - `Set-ImageMetadata`: sets metadata tags or shortcut tags
-- `ConvertFrom-ImageDateTime`: a utility to convert dates from ExifTool format to [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) objects
+- `ConvertFrom-TagDateTime`: a utility to convert dates from ExifTool format to [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) objects
 
 *Usage:*
 ```powershell
@@ -176,7 +176,7 @@ PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> '{0:r}' -f (ConvertFrom-ImageDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
+PS C:\> '{0:r}' -f (ConvertFrom-TagDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
 Wed, 19 Jan 2022 15:16:17 GMT+3
 ```
 
@@ -241,7 +241,7 @@ After this PowerShell module is installed, the file can be found at `$exifToolCo
 - use it with ExifTool with the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options)
 - use it with `Get-ImageMetadata` and `Set-ImageMetadata` with the `-ConfigurationPath` switch
 - add `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running ExifTool-related commands
-- run `cp $exifToolConfigurationPath ~` to copy it to your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it**
+- run `cp (Join-Path $exifToolConfigurationPath *) ~` to copy it to your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it**
 
 # 3. Offset calculation methods
 
@@ -334,7 +334,7 @@ As described above.
 
 ```powershell
 Import-Module GFK.Image
-Import-Module platyPS -Scope CurrentUser
+Import-Module platyPS -Scope Local
 Update-MarkdownHelp docs
 ```
 
