@@ -136,8 +136,8 @@ function Get-ImageMetadata {
         # Extract all tags including composite and unknown, format results by file and group as json with signed GPS coordinates
         $arguments += '-a', '-f', '-u', '-j', '-c', '%+.6f'
 
-        # Terminate argument list and add file paths
-        $arguments += @('--'; $FilePaths)
+        # Ignore minor errors, terminate argument list and add file paths
+        $arguments += @('-m', '--'; $FilePaths)
     
         # -Verbose support
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
@@ -248,8 +248,8 @@ function Set-ImageMetadata() {
             $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=`"$tagValue`""
         }
 
-        # Terminate argument list and add file paths
-        $arguments += @('--'; $FilePaths)
+        # Ignore minor errors, terminate argument list and add file paths
+        $arguments += @('-m', '--'; $FilePaths)
     
         # -Verbose support
         Write-Verbose "exiftool $(($arguments | Foreach-Object { "'$($_ -replace "'","''")'" }) -join ' ')"
