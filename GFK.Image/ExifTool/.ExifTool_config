@@ -61,8 +61,6 @@
     # XMP tags may be added to existing namespaces:
     'Image::ExifTool::XMP::xmpMM' => {
         PreservedCreateDate => { Writable => 'date', Groups => { 2 => 'Time' } },
-    },
-    'Image::ExifTool::XMP::xmpMM' => {
         PreservedFileModifyDate => { Writable => 'date', Groups => { 2 => 'Time' } },
     },
 );

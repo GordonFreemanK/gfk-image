@@ -78,17 +78,12 @@ $author = (ls Tags:/Author).Value
 # Temporarily set the ExifTool configuration file path to the one included in the module
 $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 
-# Metadata read using composite tag defined in the ExifTool configuration
-$taken = Get-ImageMetadata `
-    -FilePaths $sourcePath `
-    -TagNames Composite:CreateDate
-$takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
-
 # Metadata read using source files. This will get the values from an xmp sidecar if it exists
-$latitude, $longitude = Get-ImageMetadata `
+$latitude, $longitude,$taken = Get-ImageMetadata `
     -FilePaths $sourcePath `
     -SourceFiles '%d%f.xmp','@' `
-    -TagNames XMP:GPSLatitude,XMP:GPSLongitude
+    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,ModifyDate
+$takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
 
 # Calculate offset for location and time
 $takenDateTimeOffset = Get-DateTimeOffset `
