@@ -60,7 +60,9 @@
 %Image::ExifTool::UserDefined = (
     # XMP tags may be added to existing namespaces:
     'Image::ExifTool::XMP::xmpMM' => {
+        PreservedModifyDate => { Writable => 'date', Groups => { 2 => 'Time' } },
         PreservedCreateDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+        PreservedDateTimeOriginal => { Writable => 'date', Groups => { 2 => 'Time' } },
         PreservedFileModifyDate => { Writable => 'date', Groups => { 2 => 'Time' } },
     },
 );
