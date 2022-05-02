@@ -346,7 +346,7 @@ function ConvertTo-TagValue {
         }
     
         if ($Value -is [array]) {
-            return $Value -join ';'
+            return $Value -join ', '
         }
     
         return [string] $Value    
