@@ -82,7 +82,7 @@ $Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
 $latitude, $longitude,$taken = Get-ImageMetadata `
     -FilePaths $sourcePath `
     -SourceFiles '%d%f.xmp','@' `
-    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,ModifyDate
+    -TagNames Composite:GPSLatitude,Composite:GPSLongitude,XMP:ModifyDate
 $takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
 
 # Calculate offset for location and time
