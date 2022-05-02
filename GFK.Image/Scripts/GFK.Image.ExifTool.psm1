@@ -289,8 +289,8 @@ function ConvertFrom-TagDateTime {
         if ($PsCmdlet.ParameterSetName -EQ 'TwoFields') {
             $DateTime = "$Date $Time"
         }
-        $formats = 'yyyy:MM:dd HH:mm:ss', 'yyyy:MM:dd HH:mm:sszzz'
-        return [datetime]::ParseExact($DateTime, [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)    
+        $formats = @('yyyy:MM:dd HH:mm:ss')
+        return [datetime]::ParseExact($DateTime.Substring(0,19), [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)    
     }
 }
 
