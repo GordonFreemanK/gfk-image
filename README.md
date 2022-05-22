@@ -76,13 +76,14 @@ New-PSDigiKamDrive -Tags $Env:TAGSPATH
 $author = (ls Tags:/Author).Value
 
 # Temporarily set the ExifTool configuration file path to the one included in the module
-$Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
+$Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image -ListAvailable)[0].ModuleBase ExifTool
 
 # Metadata read using source files. This will get the values from an xmp sidecar if it exists
-$latitude, $longitude,$taken = Get-ImageMetadata `
+$position,$taken = Get-ImageMetadata `
     -FilePaths $sourcePath `
     -SourceFiles '%d%f.xmp','@' `
-    -TagNames Composite:GPSLatitude,Composite:GPSLongitude,XMP:ModifyDate
+    -TagNames Composite:GPSPosition,XMP:ModifyDate
+$latitude,$longitude = $position.Split(',')
 $takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
 
 # Calculate offset for location and time
@@ -97,18 +98,24 @@ $takenDateTimeOffset = Get-DateTimeOffset `
 # This means any failure after this line will interrupt the process and be logged, but not be considered a failure by digiKam
 cp $sourcePath $destinationPath
 
-# Metadata write using shortcut tags defined in the temporary ExifTool configuration
 # We should only write to destination, but the implementation of the Batch Queue Manager does not take the xmp sidecar in account
-# By also writing to source we ensure that the sidecar gets updated
-Set-ImageMetadata `
-    -FilePaths $sourcePath,$destinationPath `
-    -SourceFiles '%d%f.xmp','@' `
-    -Tags @{
-  Author = $author;
-  Modified = Get-Date;
-  Taken = $takenDateTimeOffset;
-  Digitized = $takenDateTimeOffset;
+# If there is a sidecar we only write to that sidecar
+$xmpPath = [System.IO.Path]::ChangeExtension($sourcePath, 'xmp')
+if (Test-Path $xmpPath) {
+    $writePath = $xmpPath
+} else {
+    $writePath = $destinationPath
 }
+
+# Metadata write using shortcut tags defined in the temporary ExifTool configuration
+Set-ImageMetadata `
+    -FilePaths $writePath `
+    -Tags @{
+      Author = $author;
+      Modified = Get-Date;
+      Taken = $takenDateTimeOffset;
+      Digitized = $takenDateTimeOffset;
+    }
 ```
 
 ## e. Expected results
