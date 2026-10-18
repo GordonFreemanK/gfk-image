@@ -1,4 +1,4 @@
-﻿name: main
+name: main
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: yarn
