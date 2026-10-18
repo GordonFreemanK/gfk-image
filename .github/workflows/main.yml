@@ -32,11 +32,11 @@ jobs:
           cache: yarn
       - name: Test
         run: dotnet test -c Release
-      - name: Publish GFK.Image locally
-        run: dotnet publish GFK.Image -c Release -o pub/GFK.Image
-      - name: Publish GFK.Image.cmd locally
-        run: dotnet publish GFK.Image.cmd -c Release -o pub/GFK.Image/cmd
-      - name: Test GFK.Image manifest
+      - name: Publish module locally
+        run: |
+          dotnet publish GFK.Image/GFK.Image.csproj -o pub/GFK.Image -c Release
+          dotnet publish GFK.Image.cmd/GFK.Image.cmd.csproj -o pub/GFK.Image -c Release
+      - name: Test module manifest
         shell: pwsh
         run: Test-ModuleManifest pub/GFK.Image/GFK.Image.psd1
       - name: GitHub release

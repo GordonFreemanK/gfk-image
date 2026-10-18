@@ -42,16 +42,29 @@
         'XMP-xmp:ModifyDate',
         'XMP-exif:DateTimeOriginal',
         'XMP-photoshop:DateCreated',
-        'XMP-tiff:DateTime',
-        'FileModifyDate'],
+        'XMP-tiff:DateTime'],
     Digitized => [
         'EXIF:CreateDate', # aka DateTimeDigitized in the EXIF spec
         'EXIF:OffsetTimeDigitized', # offset for CreateDate
         'XMP-xmp:CreateDate',
-        'XMP-exif:DateTimeDigitized'], # replaced by CreateDate in the spec but still used by digiKam
+        'XMP-exif:DateTimeDigitized'], # replaced by XMP-xmp:CreateDate in the spec but still used by digiKam
     Modified => [
         'XMP-xmp:MetadataDate'
     ],
+);
+
+# NOTE: All tag names used in the following tables are case sensitive.
+
+# The %Image::ExifTool::UserDefined hash defines new tags to be added
+# to existing tables.
+%Image::ExifTool::UserDefined = (
+    # XMP tags may be added to existing namespaces:
+    'Image::ExifTool::XMP::xmpMM' => {
+        PreservedModifyDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+        PreservedCreateDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+        PreservedDateTimeOriginal => { Writable => 'date', Groups => { 2 => 'Time' } },
+        PreservedFileModifyDate => { Writable => 'date', Groups => { 2 => 'Time' } },
+    },
 );
 
 #------------------------------------------------------------------------------

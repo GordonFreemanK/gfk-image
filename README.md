@@ -76,13 +76,17 @@ New-PSDigiKamDrive -Tags $Env:TAGSPATH
 $author = (ls Tags:/Author).Value
 
 # Temporarily set the ExifTool configuration file path to the one included in the module
-$Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image).ModuleBase ExifTool
+$Env:EXIFTOOL_HOME = Join-Path (Get-Module GFK.Image -ListAvailable)[0].ModuleBase ExifTool
 
-# Example metadata read
-$latitude, $longitude, $taken = Get-ImageMetadata `
-    -FilePath $sourcePath `
-    -TagNames XMP:GPSLatitude,XMP:GPSLongitude,EXIF:DateTimeOriginal
-$takenDateTime = ConvertFrom-ImageDateTime -DateTime $taken
+# Metadata read using source files. This will get the values from an xmp sidecar if it exists
+$position,$taken = Get-ImageMetadata `
+    -FilePaths $sourcePath `
+    -SourceFiles '%d%f.xmp','@' `
+    -TagNames Composite:GPSPosition,XMP:ModifyDate
+$latitude,$longitude = $position.Split(',')
+$takenDateTime = ConvertFrom-TagDateTime -DateTime $taken
+
+# Calculate offset for location and time
 $takenDateTimeOffset = Get-DateTimeOffset `
     -DateTime $takenDateTime `
     -Latitude $latitude `
@@ -94,13 +98,23 @@ $takenDateTimeOffset = Get-DateTimeOffset `
 # This means any failure after this line will interrupt the process and be logged, but not be considered a failure by digiKam
 cp $sourcePath $destinationPath
 
-# Example metadata write using shortcut tags defined in the temporary ExifTool configuration
+# We should only write to destination, but the implementation of the Batch Queue Manager does not take the xmp sidecar in account
+# If there is a sidecar we only write to that sidecar
+$xmpPath = [System.IO.Path]::ChangeExtension($sourcePath, 'xmp')
+if (Test-Path $xmpPath) {
+    $writePath = $xmpPath
+} else {
+    $writePath = $destinationPath
+}
+
+# Metadata write using shortcut tags defined in the temporary ExifTool configuration
 Set-ImageMetadata `
-    -FilePath $destinationPath `
+    -FilePaths $writePath `
     -Tags @{
-        Author = $author;
-        Modified = Get-Date;
-        Taken = $takenDateTimeOffset
+      Author = $author;
+      Modified = Get-Date;
+      Taken = $takenDateTimeOffset;
+      Digitized = $takenDateTimeOffset;
     }
 ```
 
@@ -147,7 +161,7 @@ PS C:\> (Get-DateTimeOffset -DateTime '2022-01-19 15:16:17' -Latitude -3.075833 
 
 - `Get-ImageMetadata`: gets metadata tags or shortcut tags
 - `Set-ImageMetadata`: sets metadata tags or shortcut tags
-- `ConvertFrom-ImageDateTime`: a utility to convert dates from ExifTool format to [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) objects
+- `ConvertFrom-TagDateTime`: a utility to convert dates from ExifTool format to [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) objects
 
 *Usage:*
 ```powershell
@@ -159,17 +173,17 @@ PS C:\> $artist,$createdDate = Get-ImageMetadata -FilePath $filePath -TagNames A
 PS C:\> $artist,$createdDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full -Grouped
+PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full -Groups 0
     1 image files read
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> '{0:r}' -f (ConvertFrom-ImageDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
+PS C:\> '{0:r}' -f (ConvertFrom-TagDateTime -DateTime $allMetadata[0].Tags.XMP.CreatedDate)
 Wed, 19 Jan 2022 15:16:17 GMT+3
 ```
 
 *Notes:*
-- `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names, tag names and optionally tag groups (EXIF, IPTC, XMP). More details are available with `Get-Help Get-ImageMetadata`
+- `Get-ImageMetadata` can either output tag values without names as a list of strings, or a more complex object containing file names and tags organized by groups (EXIF, IPTC, XMP, File, etc). More details are available with `Get-Help Get-ImageMetadata`
 - `Get-ImageMetadata` and `Set-ImageMetadata` will echo the exiftool command if using the `-Verbose` switch
 - There are multiple types of date/time tags in EXIF/IPTC/XMP. All these types can be set from a [DateTime](https://docs.microsoft.com/en-us/dotnet/api/system.datetime) or [DateTimeOffset](https://docs.microsoft.com/en-us/dotnet/api/system.datetimeoffset) value. `Set-ImageMetadata` serializes it to the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) (e.g. `2022-01-15T15:28:36+01:00`) and ExifTool automatically stores the relevant part in any of these fields:
   - EXIF uses one tag for date+time and one for offset (e.g. `EXIF:DateTimeOriginal` and `EXIF:OffsetTimeOriginal`)
@@ -229,7 +243,7 @@ After this PowerShell module is installed, the file can be found at `$exifToolCo
 - use it with ExifTool with the [-config option](https://exiftool.org/exiftool_pod.html#Advanced-options)
 - use it with `Get-ImageMetadata` and `Set-ImageMetadata` with the `-ConfigurationPath` switch
 - add `$Env:EXIFTOOL_HOME = $exifToolConfigurationPath` in your PowerShell session or scripts before running ExifTool-related commands
-- run `cp $exifToolConfigurationPath ~` to copy it to your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it**
+- run `cp (Join-Path $exifToolConfigurationPath *) ~` to copy it to your home folder, after which **any instance of ExifTool including versions embedded in other applications will be using it**
 
 # 3. Offset calculation methods
 
@@ -299,9 +313,7 @@ Get-Module GFK.Image | Uninstall-Module
 ## d. Deploy the module to the user environment for testing
 
 ```powershell
-$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'
-dotnet publish GFK.Image -o $publishPath
-dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd)
+yarn deploy:user
 ```
 
 The module should now be available in any `pwsh` session. You may remove it with:
@@ -324,7 +336,7 @@ As described above.
 
 ```powershell
 Import-Module GFK.Image
-Import-Module platyPS -Scope CurrentUser
+Import-Module platyPS -Scope Local
 Update-MarkdownHelp docs
 ```
 
@@ -348,12 +360,7 @@ As described above.
 Get-Help Get-DateTimeOffset -ShowWindow
 ```
 
-# 6. Changelog
-
-## 1.0.0
-Initial draft (unlisted)
-
-# 7. Releases
+# 6. Releases
 
 Releases are created automatically when a qualifying change is squash-merged
 into `main`. Use Conventional Commit pull request titles so the release type can
