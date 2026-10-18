@@ -372,5 +372,7 @@ major or feature-level updates to `feat(deps)!:` or `feat(deps):` as appropriate
 before merging.
 
 The workflow creates a GitHub release and publishes the same version to the
-PowerShell Gallery. Publishing requires the `PSGALLERY_TOKEN` secret in the
-`main` GitHub Actions environment; GitHub provides the `GITHUB_TOKEN`.
+PowerShell Gallery. Publishing requires the `PSGALLERY_PUBLISH_TOKEN` secret in
+the `main` GitHub Actions environment. The workflow checks only that the token
+is present before publishing; it never logs the token or a fingerprint. GitHub
+provides the `GITHUB_TOKEN`.
