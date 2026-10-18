@@ -1,4 +1,4 @@
-﻿name: tests
+name: tests
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
