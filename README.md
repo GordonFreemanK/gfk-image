@@ -352,3 +352,19 @@ Get-Help Get-DateTimeOffset -ShowWindow
 
 ## 1.0.0
 Initial draft (unlisted)
+
+# 7. Releases
+
+Releases are created automatically when a qualifying change is squash-merged
+into `main`. Use Conventional Commit pull request titles so the release type can
+be determined:
+
+- `fix:` creates a patch release.
+- `feat:` creates a minor release.
+- A `!` suffix or `BREAKING CHANGE:` footer creates a major release.
+- Changes such as `chore:`, `ci:`, or `docs:` do not create a release unless
+  they include a breaking change.
+
+The workflow creates a GitHub release and publishes the same version to the
+PowerShell Gallery. Publishing requires the `PSGALLERY_TOKEN` repository
+Actions secret; GitHub provides the `GITHUB_TOKEN`.

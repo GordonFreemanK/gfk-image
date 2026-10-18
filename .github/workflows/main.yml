@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,7 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "lts/*"
+          node-version: "24"
+          cache: yarn
       - name: Test
         run: dotnet test -c Release
       - name: Publish GFK.Image locally
@@ -31,16 +41,7 @@ jobs:
       - name: GitHub release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: yarn && yarn run semantic-release
-      - name: PSGallery release
-        shell: pwsh
-        env:
           PSGALLERY_TOKEN: ${{secrets.PSGALLERY_TOKEN}}
         run: |
-          $moduleVersion = (Get-Module pub/GFK.Image -ListAvailable).Version
-          if ($moduleVersion -EQ '1.0.0') {
-            Write-Host 'Found default version 1.0.0 in module manifest: skipping publication'
-          } else {
-            Write-Host "Publishing GFK.Image version $moduleVersion"
-            Publish-Module -Path pub/GFK.Image -NuGetApiKey $env:PSGALLERY_TOKEN
-          }
+          yarn install --frozen-lockfile
+          yarn run semantic-release
