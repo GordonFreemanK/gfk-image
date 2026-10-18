@@ -1,0 +1,85 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: nuget
+    directory: /GFK.Image
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: nuget
+    directory: /GFK.Image.cmd
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: nuget
+    directory: /GFK.Image.UnitTests
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: nuget
+    directory: /GFK.Time.API.Client
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      non-breaking:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
