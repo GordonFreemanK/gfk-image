@@ -16,7 +16,7 @@ Written in C# / PowerShell, and tested on Windows.
 
 These tools must be installed and are free, open-source and available on Windows, Linux and macOS.
 
-- [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) (version 6.0 and above)  is the default modern shell on Windows systems, written in C# ([sources](https://github.com/powershell/powershell)).
+- [PowerShell](https://learn.microsoft.com/powershell/) 7.6 or later is required to run the module. It is written in C# ([sources](https://github.com/powershell/powershell)).
 
 - [digiKam](https://www.digikam.org/download/) is an image manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins, including the **User Shell Script** plugin.
 
@@ -359,3 +359,32 @@ As described above.
 ```powershell
 Get-Help Get-DateTimeOffset -ShowWindow
 ```
+
+# 6. Changelog
+
+## 1.0.0
+Initial draft (unlisted)
+
+# 7. Releases
+
+Releases are created automatically when a qualifying change is squash-merged
+into `main`. Use Conventional Commit pull request titles so the release type can
+be determined:
+
+- `fix:` creates a patch release.
+- `feat:` creates a minor release.
+- A `!` suffix or `BREAKING CHANGE:` footer creates a major release.
+- Changes such as `chore:`, `ci:`, or `docs:` do not create a release unless
+  they include a breaking change.
+
+Dependabot uses prefixes configured per ecosystem: runtime NuGet updates use
+`fix(deps):`, test-only NuGet updates use `chore(deps):`, and workflow/npm
+tooling updates use `ci(deps):`. These prefixes are static; review and adjust
+major or feature-level updates to `feat(deps)!:` or `feat(deps):` as appropriate
+before merging.
+
+The workflow creates a GitHub release and publishes the same version to the
+PowerShell Gallery. Publishing requires the `PSGALLERY_PUBLISH_TOKEN` secret in
+the `main` GitHub Actions environment. The workflow checks only that the token
+is present before publishing; it never logs the token or a fingerprint. GitHub
+provides the `GITHUB_TOKEN`.

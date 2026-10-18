@@ -33,7 +33,7 @@ Copyright = '(c) GordonFreemanK. All rights reserved.'
 Description = 'PowerShell scripts to manipulate photo metadata using ExifTool and an application to enable PowerShell in digiKam'
 
 # Minimum version of the PowerShell engine required by this module
-PowerShellVersion = '6.0'
+PowerShellVersion = '7.6'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -129,4 +129,3 @@ PrivateData = @{
 # DefaultCommandPrefix = ''
 
 }
-

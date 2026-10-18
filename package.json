@@ -12,11 +12,11 @@
     "docs:xml": "yarn docs:md; New-ExternalHelp docs -OutputPath ./GFK.Image/en-US -Force"
   },
   "devDependencies": {
-    "@semantic-release/commit-analyzer": "^9.0.2",
-    "@semantic-release/exec": "^6.0.3",
-    "@semantic-release/github": "^8.0.2",
-    "@semantic-release/release-notes-generator": "^10.0.3",
-    "semantic-release": "^19.0.2"
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "semantic-release": "^25.0.9"
   },
   "release": {
     "branches": [
@@ -29,8 +29,8 @@
       [
         "@semantic-release/exec",
         {
-          "shell": "pwsh",
-          "publishCmd": "Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}"
+          "prepareCmd": "pwsh -NoLogo -NoProfile -Command \"Update-ModuleManifest -Path 'pub/GFK.Image/GFK.Image.psd1' -ModuleVersion '${nextRelease.version}'\"",
+          "publishCmd": "pwsh -NoLogo -NoProfile -File '.github/scripts/publish-module.ps1'"
         }
       ]
     ]
