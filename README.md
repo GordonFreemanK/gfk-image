@@ -16,7 +16,7 @@ Written in C# / PowerShell, and tested on Windows.
 
 These tools must be installed and are free, open-source and available on Windows, Linux and macOS.
 
-- [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) (version 6.0 and above)  is the default modern shell on Windows systems, written in C# ([sources](https://github.com/powershell/powershell)).
+- [PowerShell](https://learn.microsoft.com/powershell/) 7.6 or later is required to run the module. It is written in C# ([sources](https://github.com/powershell/powershell)).
 
 - [digiKam](https://www.digikam.org/download/) is an image manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins, including the **User Shell Script** plugin.
 
