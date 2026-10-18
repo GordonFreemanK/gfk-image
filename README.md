@@ -360,12 +360,7 @@ As described above.
 Get-Help Get-DateTimeOffset -ShowWindow
 ```
 
-# 6. Changelog
-
-## 1.0.0
-Initial draft (unlisted)
-
-# 7. Releases
+# 6. Releases
 
 Releases are created automatically when a qualifying change is squash-merged
 into `main`. Use Conventional Commit pull request titles so the release type can
