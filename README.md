@@ -373,4 +373,6 @@ before merging.
 
 The workflow creates a GitHub release and publishes the same version to the
 PowerShell Gallery. Publishing requires the `PSGALLERY_PUBLISH_TOKEN` secret in
-the `main` GitHub Actions environment. GitHub provides the `GITHUB_TOKEN`.
+the `main` GitHub Actions environment. The workflow checks only that the token
+is present before publishing; it never logs the token or a fingerprint. GitHub
+provides the `GITHUB_TOKEN`.
