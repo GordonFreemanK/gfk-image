@@ -365,6 +365,12 @@ be determined:
 - Changes such as `chore:`, `ci:`, or `docs:` do not create a release unless
   they include a breaking change.
 
+Dependabot uses prefixes configured per ecosystem: runtime NuGet updates use
+`fix(deps):`, test-only NuGet updates use `chore(deps):`, and workflow/npm
+tooling updates use `ci(deps):`. These prefixes are static; review and adjust
+major or feature-level updates to `feat(deps)!:` or `feat(deps):` as appropriate
+before merging.
+
 The workflow creates a GitHub release and publishes the same version to the
-PowerShell Gallery. Publishing requires the `PSGALLERY_TOKEN` repository
-Actions secret; GitHub provides the `GITHUB_TOKEN`.
+PowerShell Gallery. Publishing requires the `PSGALLERY_TOKEN` secret in the
+`main` GitHub Actions environment; GitHub provides the `GITHUB_TOKEN`.
