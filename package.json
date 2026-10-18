@@ -6,11 +6,11 @@
     "deploy:user": "$publishPath = Join-Path ([System.Environment]::GetFolderPath('MyDocuments')) 'PowerShell' 'modules' 'GFK.Image'; dotnet publish GFK.Image -o $publishPath --nologo; dotnet publish GFK.Image.cmd -o (Join-Path $publishPath cmd) --nologo"
   },
   "devDependencies": {
-    "@semantic-release/commit-analyzer": "^9.0.2",
-    "@semantic-release/exec": "^6.0.3",
-    "@semantic-release/github": "^8.0.2",
-    "@semantic-release/release-notes-generator": "^10.0.3",
-    "semantic-release": "^19.0.3"
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/release-notes-generator": "^14.1.1",
+    "semantic-release": "^25.0.9"
   },
   "release": {
     "branches": [
@@ -23,7 +23,8 @@
       [
         "@semantic-release/exec",
         {
-          "publishCmd": "pwsh -command \". Update-ModuleManifest pub/GFK.Image/GFK.Image.psd1 -ModuleVersion ${nextRelease.version}\""
+          "prepareCmd": "pwsh -NoLogo -NoProfile -Command \"Update-ModuleManifest -Path 'pub/GFK.Image/GFK.Image.psd1' -ModuleVersion '${nextRelease.version}'\"",
+          "publishCmd": "pwsh -NoLogo -NoProfile -Command \"Publish-Module -Path 'pub/GFK.Image' -NuGetApiKey $env:PSGALLERY_TOKEN -ErrorAction Stop\""
         }
       ]
     ]
