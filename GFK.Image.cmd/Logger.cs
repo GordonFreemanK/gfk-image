@@ -14,18 +14,38 @@ public class Logger
         _path = path;
     }
 
-    public async Task WriteAsync(string message)
+    public Task WriteAsync(string message)
     {
-        if (message != string.Empty)
+        if (message == string.Empty)
+            return Task.CompletedTask;
+
+        using var mutex = new Mutex(false, typeof(Logger).FullName);
+        var ownsMutex = false;
+
+        try
         {
-            using var mutex = new Mutex(false, typeof(Logger).FullName);
+            try
+            {
+                ownsMutex = mutex.WaitOne(TimeSpan.FromMinutes(1));
+            }
+            catch (AbandonedMutexException)
+            {
+                ownsMutex = true;
+            }
 
-            mutex.WaitOne(TimeSpan.FromMinutes(1));
-            
-            await using var log = new StreamWriter(_path, true);
+            if (!ownsMutex)
+                throw new TimeoutException("Timed out waiting to write to the log.");
 
-            await log.WriteLineAsync($"{DateTime.UtcNow:s}");
-            await log.WriteLineAsync(message);
+            using var log = new StreamWriter(_path, true);
+            log.WriteLine($"{DateTime.UtcNow:s}");
+            log.WriteLine(message);
         }
+        finally
+        {
+            if (ownsMutex)
+                mutex.ReleaseMutex();
+        }
+
+        return Task.CompletedTask;
     }
 }

@@ -173,7 +173,7 @@ PS C:\> $artist,$createdDate = Get-ImageMetadata -FilePath $filePath -TagNames A
 PS C:\> $artist,$createdDate
 Gordon Freeman;Adrian Shephard
 2022:01:19 15:16:17+03:00
-PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full
+PS C:\> $allMetadata = Get-ImageMetadata -FilePath $filePath -TagNames All -Full -Groups 0
     1 image files read
 PS C:\> $allMetadata[0].Tags.EXIF.Artist,$allMetadata[0].Tags.XMP.CreatedDate
 Gordon Freeman;Adrian Shephard

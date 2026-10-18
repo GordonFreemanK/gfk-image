@@ -33,18 +33,18 @@ function Get-ImageMetadata {
     .PARAMETER Full
         Optional, sets the mode to full (see examples for more details)
     .PARAMETER Groups
-        This is an advanced parameter for controlling how metadata groups should be named in the full mode
+        Enables grouping in full mode and controls how metadata groups should be named
         These values will be concatenated and passed to the ExifTool -g parameter
         See https://www.exiftool.org/exiftool_pod.html#Input-output-text-formatting for the -g parameter
         See https://www.exiftool.org/ExifTool.html#GetGroup for groups definitions
         Example: if the requested tag is XMP:CreateDate
-        - 0 (default) will result in the group name being 'XMP'
+        - 0 will result in the group name being 'XMP'
         - 1 will result in the group name being 'XMP-xmp'
         - 0,1 will result in the group name being 'XMP:XMP-xmp'
         This will influence how deduplication work for tag results
         For instance if a file contains a value for EXIF:CreateDate, XMP-xmp:CreateDate and XMP-exif:CreateDate
         there would be two results for @(0) and 3 results for @(1) or @(0,1)
-        Note: the default is empty, which is equivalent to @(0)
+        When grouping is enabled without specifying groups, ExifTool defaults to group family 0.
     .PARAMETER Recurse
     Recurse in subdirectories. The option will have no effect if the path is not a directory
     .PARAMETER ConfigurationPath
@@ -60,9 +60,9 @@ function Get-ImageMetadata {
     For instance CreateDate will return two rows if both EXIF:CreateDate and XMP:CreateDate are set, therefore it is preferable to specify
     EXIF:CreateDate
 
-    PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist, CreateDate -Full
+    PS C:\> Get-ImageMetadata -FilePath 'C:\Users\Gordon Freeman\Pictures\Black Mesa Research Center.jpg' -TagName Artist, CreateDate -Full -Groups 0
     In full mode, the command returns one ImageMetadata object per file found (each contains the file path and a Tags property)
-    The Tags property of each ImageMetadata object contains the top level groups, each of which contains the properties for the tags
+    The Tags property contains flat tag properties by default. Use -Groups to return tags under their top-level groups.
     There will be no file or tag collisions in this mode
     Choose this if you want to handle multiple files and want an exhaustive report on the tags available on the file
     .NOTES
@@ -127,7 +127,9 @@ function Get-ImageMetadata {
         $arguments += $TagNames | Get-TagNameArgument
 
         if ($PsCmdlet.ParameterSetName -eq 'Full') {
-            $arguments += "-g$($Groups -join ':')"
+            if ($PSBoundParameters.ContainsKey('Groups')) {
+                $arguments += "-g$($Groups -join ':')"
+            }
         }
         else {
             $arguments += '-G'
@@ -289,8 +291,8 @@ function ConvertFrom-TagDateTime {
         if ($PsCmdlet.ParameterSetName -EQ 'TwoFields') {
             $DateTime = "$Date $Time"
         }
-        $formats = @('yyyy:MM:dd HH:mm:ss')
-        return [datetime]::ParseExact($DateTime.Substring(0,19), [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)    
+        $formats = @('yyyy:MM:dd HH:mm:ss', 'yyyy:MM:dd HH:mm:sszzz')
+        return [datetime]::ParseExact($DateTime, [string[]] $formats, [System.Globalization.CultureInfo]::InvariantCulture)
     }
 }
 
@@ -395,7 +397,7 @@ function ConvertTo-ValuesOnly {
         ForEach-Object {
             $value = $Tags.$($_)
             # ExifTool replaces missing values with '-', reverting this
-            if (($_ -split ':')[0] = 'Unknown') {
+            if (($_ -split ':')[0] -eq 'Unknown') {
                 return ($value | ConvertFrom-TagValue)
             }
             else {
