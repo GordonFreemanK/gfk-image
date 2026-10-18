@@ -42,7 +42,7 @@ jobs:
       - name: GitHub release
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          PSGALLERY_TOKEN: ${{secrets.PSGALLERY_TOKEN}}
+          PSGALLERY_TOKEN: ${{secrets.PSGALLERY_PUBLISH_TOKEN}}
         run: |
           yarn install --frozen-lockfile
           yarn run semantic-release
