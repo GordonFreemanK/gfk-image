@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
-using System.Threading.Tasks;
 using GFK.Image.cmd;
 
 var applicationDirectory = Path.Combine(
@@ -15,14 +13,7 @@ var logger = new Logger(logPath);
 
 try
 {
-    await logger.WriteAsync(
-        $"Invocation\n" +
-        $"Wrapper: {Environment.ProcessPath}\n" +
-        $"Working directory: {Environment.CurrentDirectory}\n" +
-        $"Arguments: {JsonSerializer.Serialize(args)}");
-
     var script = ScriptBuilder.GetScript(args);
-    await logger.WriteAsync($"Reconstructed PowerShell script:\n{script}");
 
     var processStartInfo = new ProcessStartInfo
     {
@@ -37,14 +28,9 @@ try
 
     process.Start();
 
-    var standardOutputTask = process.StandardOutput.ReadToEndAsync();
-    var standardErrorTask = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
 
-    await Task.WhenAll(standardOutputTask, standardErrorTask);
-    await logger.WriteAsync($"pwsh stdout:\n{standardOutputTask.Result}");
-    await logger.WriteAsync($"pwsh stderr:\n{standardErrorTask.Result}");
-    await logger.WriteAsync($"pwsh exit code: {process.ExitCode}");
+    await logger.WriteAsync(await process.StandardError.ReadToEndAsync());
 
     // By default PowerShell returns 0 for success and 1 for failure (can be overriden in code)
     // digiKam interprets -1 as a failure and anything else a success
@@ -53,6 +39,6 @@ try
 }
 catch (Exception e)
 {
-    await logger.WriteAsync($"Uncaught exception:\n{e}");
+    await logger.WriteAsync($"Uncaught exception: {e.Message}");
     return -1;
 }
