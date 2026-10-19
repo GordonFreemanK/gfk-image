@@ -1,18 +1,28 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using GFK.Image.cmd;
+
+string[] envNames = ["TITLE", "COMMENTS", "COLORLABEL", "PICKLABEL", "RATING", "TAGSPATH"];
 
 var applicationDirectory = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
     "GFK",
     "GFK.Image.cmd");
+
 Directory.CreateDirectory(applicationDirectory);
 var logPath = Path.Combine(applicationDirectory, "cmd.log");
 var logger = new Logger(logPath);
 
 try
 {
+    var digiKamEnvironment = envNames.ToDictionary(name => name, Environment.GetEnvironmentVariable);
+    await logger.WriteAsync(
+        $"Invocation arguments: {JsonSerializer.Serialize(args)}{Environment.NewLine}" +
+        $"digiKam environment: {JsonSerializer.Serialize(digiKamEnvironment)}{Environment.NewLine}");
+
     if (args.Length != 2 || !string.Equals(args[0], "/C", StringComparison.OrdinalIgnoreCase))
     {
         await logger.WriteAsync("Expected /C followed by a digiKam temporary script path, got: " + string.Join(" ", args));
