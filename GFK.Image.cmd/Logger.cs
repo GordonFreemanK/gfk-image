@@ -2,18 +2,12 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace GFK.Image.cmd;
 
-public class Logger
+public partial class Logger(string path)
 {
-    private readonly string _path;
-
-    public Logger(string path)
-    {
-        _path = path;
-    }
-
     public Task WriteAsync(string message)
     {
         if (message == string.Empty)
@@ -36,9 +30,9 @@ public class Logger
             if (!ownsMutex)
                 throw new TimeoutException("Timed out waiting to write to the log.");
 
-            using var log = new StreamWriter(_path, true);
+            using var log = new StreamWriter(path, true);
             log.WriteLine($"{DateTime.UtcNow:s}");
-            log.WriteLine(message);
+            log.WriteLine(AnsiEscapeSequence().Replace(message, string.Empty));
         }
         finally
         {
@@ -48,4 +42,7 @@ public class Logger
 
         return Task.CompletedTask;
     }
+
+    [GeneratedRegex(@"\x1B\[[0-?]*[ -/]*[@-~]")]
+    private static partial Regex AnsiEscapeSequence();
 }
