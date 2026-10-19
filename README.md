@@ -92,6 +92,20 @@ $takenDateTimeOffset = Get-DateTimeOffset `
     -Latitude $latitude `
     -Longitude $longitude
 
+# Write RAW metadata only to an existing XMP sidecar
+$xmpPath = [System.IO.Path]::ChangeExtension($sourcePath, 'xmp')
+$hasSidecar = Test-Path -LiteralPath $xmpPath -PathType Leaf
+$rawExtensions = @(
+    '.3fr', '.ari', '.arw', '.bay', '.cap', '.cr2', '.cr3', '.crw',
+    '.dcs', '.dcr', '.dng', '.drf', '.eip', '.erf', '.fff', '.gpr',
+    '.iiq', '.k25', '.kdc', '.mef', '.mos', '.mrw', '.nef', '.nrw',
+    '.obm', '.orf', '.pef', '.ptx', '.pxn', '.r3d', '.raf', '.raw',
+    '.rwl', '.rw2', '.rwz', '.sr2', '.srf', '.srw', '.x3f'
+)
+if ([System.IO.Path]::GetExtension($sourcePath) -in $rawExtensions -and -not $hasSidecar) {
+    throw "Refusing to process RAW file '$sourcePath' without an existing XMP sidecar. Write its metadata to a sidecar in digiKam first."
+}
+
 # $sourcePath is the original file and $destinationPath is the file to be modified
 # This command must be invoked before starting modifications on $destinationPath
 # After this line whatever happens digiKam considers the script a success and logs 'Item processed successfully (overwritten)'
@@ -100,8 +114,7 @@ cp $sourcePath $destinationPath
 
 # We should only write to destination, but the implementation of the Batch Queue Manager does not take the xmp sidecar in account
 # If there is a sidecar we only write to that sidecar
-$xmpPath = [System.IO.Path]::ChangeExtension($sourcePath, 'xmp')
-if (Test-Path $xmpPath) {
+if ($hasSidecar) {
     $writePath = $xmpPath
 } else {
     $writePath = $destinationPath
