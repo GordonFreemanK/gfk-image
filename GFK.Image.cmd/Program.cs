@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using GFK.Image.cmd;
 
 string[] envNames = ["TITLE", "COMMENTS", "COLORLABEL", "PICKLABEL", "RATING", "TAGSPATH"];
@@ -18,10 +17,8 @@ var logger = new Logger(logPath);
 
 try
 {
-    var digiKamEnvironment = envNames.ToDictionary(name => name, Environment.GetEnvironmentVariable);
-    await logger.WriteAsync(
-        $"Invocation arguments: {JsonSerializer.Serialize(args)}{Environment.NewLine}" +
-        $"digiKam environment: {JsonSerializer.Serialize(digiKamEnvironment)}{Environment.NewLine}");
+    await logger.WriteAsync($"Invocation arguments: {string.Join(" ", args)}");
+    await logger.WriteAsync($"digiKam environment: {string.Join(", ", envNames.Select(name => $"{name}={Environment.GetEnvironmentVariable(name)}"))}");
 
     if (args.Length != 2 || !string.Equals(args[0], "/C", StringComparison.OrdinalIgnoreCase))
     {
