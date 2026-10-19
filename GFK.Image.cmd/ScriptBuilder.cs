@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 
 namespace GFK.Image.cmd;
 
@@ -8,27 +8,24 @@ public static class ScriptBuilder
 {
     public static string GetScript(IEnumerable<string> commandArguments)
     {
-        var script = new StringBuilder();
-
-        var newLine = true;
-        foreach (var commandArgument in commandArguments)
+        using var argumentEnumerator = commandArguments.GetEnumerator();
+        if (!argumentEnumerator.MoveNext() ||
+            !string.Equals(argumentEnumerator.Current, "/C", StringComparison.OrdinalIgnoreCase) ||
+            !argumentEnumerator.MoveNext())
         {
-            if (string.Equals(commandArgument, "/C", StringComparison.OrdinalIgnoreCase) && script.Length == 0)
-                continue;
-
-            if (string.Equals(commandArgument, "&", StringComparison.OrdinalIgnoreCase))
-            {
-                script.AppendLine();
-                newLine = true;
-            }
-            else
-            {
-                if (!newLine) script.Append(' ');
-                script.Append(commandArgument);
-                newLine = false;
-            }
+            throw new ArgumentException(
+                "Expected /C followed by a digiKam temporary script path.",
+                nameof(commandArguments));
         }
 
-        return script.ToString();
+        var scriptPath = argumentEnumerator.Current;
+        if (argumentEnumerator.MoveNext())
+        {
+            throw new ArgumentException(
+                "Expected exactly one digiKam temporary script path.",
+                nameof(commandArguments));
+        }
+
+        return File.ReadAllText(scriptPath);
     }
 }
