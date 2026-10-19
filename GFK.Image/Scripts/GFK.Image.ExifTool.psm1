@@ -247,7 +247,7 @@ function Set-ImageMetadata() {
             $tagNameArgument = Get-TagNameArgument -TagName $tagName
             $paramName = "Param$(($index++))"
             $tagValue = ConvertTo-TagValue -Value $Tags[$tagName]
-            $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=`"$tagValue`""
+            $arguments += "$tagNameArgument<`$$paramName", '-userParam', "$paramName=$tagValue"
         }
 
         # Ignore minor errors, terminate argument list and add file paths
