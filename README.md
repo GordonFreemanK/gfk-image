@@ -67,10 +67,10 @@ Install-PSDigiKam
 # Errors are reported in digiKam as 'User Script: Script process crashed'
 $ErrorActionPreference = 'Stop'
 
-# Double double quotes here are intentional (one of the set gets replaced by digiKam)
+# digiKam replaces each placeholder with a double-quoted path
 # File paths containing '$' or '`' characters will fail
-$sourcePath = ""$INPUT""
-$destinationPath = ""$OUTPUT""
+$sourcePath = $INPUT
+$destinationPath = $OUTPUT
 
 # Create a Tags: drive to navigate digiKam tags
 New-PSDigiKamDrive -Tags $Env:TAGSPATH

@@ -13,7 +13,13 @@ var logger = new Logger(logPath);
 
 try
 {
-    var script = ScriptBuilder.GetScript(args);
+    if (args.Length != 2 || !string.Equals(args[0], "/C", StringComparison.OrdinalIgnoreCase))
+    {
+        await logger.WriteAsync("Expected /C followed by a digiKam temporary script path, got: " + string.Join(" ", args));
+        return -1;
+    }
+
+    var script = File.ReadAllText(args[1]);
 
     var processStartInfo = new ProcessStartInfo
     {
