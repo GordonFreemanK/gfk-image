@@ -5,18 +5,11 @@ using GFK.Time.API;
 
 namespace GFK.Image.DateTimeOffsetBuilder;
 
-internal class TimeApiDateTimeOffsetFactory : IDateTimeOffsetFactory
+internal class TimeApiDateTimeOffsetFactory(Uri uri) : IDateTimeOffsetFactory
 {
-    private readonly Uri _uri;
-
-    public TimeApiDateTimeOffsetFactory(Uri uri)
-    {
-        _uri = uri;
-    }
-        
     public async Task<DateTimeOffset> Build(DateTime dateTime, float latitude, float longitude)
     {
-        using var httpClient = new HttpClient { BaseAddress = _uri };
+        using var httpClient = new HttpClient { BaseAddress = uri };
 
         var timeApiClient = new TimeApiClient(httpClient);
 
@@ -26,7 +19,7 @@ internal class TimeApiDateTimeOffsetFactory : IDateTimeOffsetFactory
 
         var convertRequest = new ConvertRequest(
             dateTime.ToString("yyyy-MM-dd HH:mm:ss"),
-            null,
+            "earlier",
             currentTime.TimeZone,
             "UTC");
         var conversion = await timeApiClient.ConvertTimeZoneAsync(convertRequest);

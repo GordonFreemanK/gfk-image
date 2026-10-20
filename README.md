@@ -18,7 +18,7 @@ These tools must be installed and are free, open-source and available on Windows
 
 - [PowerShell](https://learn.microsoft.com/powershell/) 7.6 or later is required to run the module. It is written in C# ([sources](https://github.com/powershell/powershell)).
 
-- [digiKam](https://www.digikam.org/download/) is an image manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins, including the **User Shell Script** plugin.
+- [digiKam](https://www.digikam.org/download/) is an image manager written in C++ ([sources](https://invent.kde.org/graphics/digikam), [mirror](https://github.com/KDE/digikam)) for visually organizing, viewing and editing image collections using file operations, image transformations and metadata editing. It features [Batch Queue Manager](https://userbase.kde.org/Digikam/Batch_Process) which allows defining and batch-processing groups of images using configurable plugins, including the **User Shell Script** plugin. Due to a change in the way that plugin works, this module is only compatible with **digiKam versions 8 and above**.
 
 - [ExifTool](https://exiftool.org/) is a command-line utility written in Perl ([sources](https://github.com/exiftool/exiftool)) to losslessly (without modifying the image itself) edit image metadata (aka **EXIF/IPTC/XMP tags**), and is in fact used by digiKam as well as many other image management applications to manage metadata.
 
@@ -42,6 +42,9 @@ ExifTool can be installed by following [the official instructions](https://exift
 ```
 
 ## b. Install PowerShell in digiKam
+
+The Windows wrapper requires **digiKam 8.0.0 or later**. digiKam 8.0.0 is the first release whose BQM User Script plugin writes the script to a temporary `.cmd` file and invokes `cmd.exe /C <script-path>`. This behavior was introduced in [upstream commit 833ebbb6](https://invent.kde.org/graphics/digikam/-/commit/833ebbb6ec5896e860a24a1189bd9b681c3bae84). The wrapper reads that file and executes its contents with PowerShell. Earlier digiKam versions use a different invocation format and are not supported.
+
 ```powershell
 Install-PSDigiKam
 ```
@@ -60,16 +63,14 @@ Install-PSDigiKam
   - Run the Batch Queue Manager
 
 ```powershell
-# Important! Do not use isolated ampersand characters anywhere in this script as they will break the digiKam PowerShell integration
-
 # This will ensure that the script stops on error
 # Errors are reported in digiKam as 'User Script: Script process crashed'
 $ErrorActionPreference = 'Stop'
 
-# Double double quotes here are intentional (one of the set gets replaced by digiKam)
+# digiKam replaces each placeholder with a double-quoted path
 # File paths containing '$' or '`' characters will fail
-$sourcePath = ""$INPUT""
-$destinationPath = ""$OUTPUT""
+$sourcePath = $INPUT
+$destinationPath = $OUTPUT
 
 # Create a Tags: drive to navigate digiKam tags
 New-PSDigiKamDrive -Tags $Env:TAGSPATH
@@ -229,17 +230,15 @@ The G-Man
 
 ## b. Injecting `pwsh.exe` into digiKam
 
-The [digiKam User Shell Script plugin code](https://github.com/KDE/digikam/blob/master/core/dplugins/bqm/custom/userscript/userscript.cpp) runs the user-defined script by splitting the script into its component lines, serializing them using the [& operator](https://bashitout.com/2013/05/18/Ampersands-on-the-command-line.html) and passing the result to `sh` on Linux and [cmd](https://en.wikipedia.org/wiki/Cmd.exe) on Windows.
+On Windows, digiKam writes the User Shell Script to a temporary `.cmd` file and invokes `cmd.exe /C <script-path>`. The wrapper reads that file and passes its contents to `pwsh.exe` (PowerShell Core).
 
-In order to avoid `cmd.exe` altogether, we inject a standalone executable, also called `cmd.exe`, but which is really a PowerShell bootstrapper,  in the digiKam application path where it will take precedence over the actual Windows command prompt executable.
-This executable rebuilds the original user-defined script then passes it for execution to `pwsh.exe` (PowerShell Core).
+To avoid having Windows CMD interpret the script, we inject a standalone PowerShell bootstrapper named `cmd.exe` into the digiKam application directory, where it is selected instead of the system command prompt. The bootstrapper reads digiKam's temporary script file and runs its contents with `pwsh.exe`.
 
 We are now able to use PowerShell code in the User Shell Script plugin, and save it as part of a Batch Queue Manager workflow.
 
 **Notes:**
 - The digiKam plugin does not log but the fake cmd.exe logs any failure to `${Env:LocalAppData}\GFK\GFK.Image.cmd\cmd.log`
 - Loading PowerShell is a relatively CPU-intensive task. **Consider using multi-threading** by selecting `Queue Settings > Behaviour > Work on all processor cores` in Batch Queue Manager, unless your scripts use a non-thread-safe resource, or if I/O is the bottleneck (e.g. operations relying on a slow network connection)
-- **Avoid any isolated `&` as they will be lost in translation and replaced by a new line**
 - **Disable digiKam metadata writing for the fields modified by these scripts** (unselect the relevant sections in `Settings > Configure digiKam... > Metadata > Behaviour > Write This Information to the Metadata`), or they could be overwritten after the batch script runs
 
 ## d. ExifTool configuration
